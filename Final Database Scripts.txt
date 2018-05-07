@@ -1,0 +1,219 @@
+CREATE DATABASE ups_db 
+DEFAULT CHARACTER SET utf8 
+COLLATE utf8_general_ci;
+
+CREATE TABLE `users` (   
+`user_id` int(11) NOT NULL AUTO_INCREMENT,   
+`username` varchar(150) NOT NULL,   
+`password` varchar(150) NOT NULL,   
+`admin` tinyint(1) NOT NULL DEFAULT '0',   
+PRIMARY KEY (`user_id`) );
+
+INSERT INTO `users` 
+(`user_id`, `username`, `password`, `admin`) VALUES 
+(NULL,'admin',MD5('admin'),1);
+
+CREATE TABLE `locations` (
+  
+`location_id` int(11) NOT NULL AUTO_INCREMENT,
+  
+`location_name` varchar(150) NOT NULL,
+  
+PRIMARY KEY (`location_id`),
+  
+UNIQUE KEY `location_name_UNIQUE` (`location_name`)
+);
+
+INSERT INTO `locations`
+
+(`location_id`,
+`location_name`)
+ VALUES
+
+(1,'Warehouse'),(2, 'Multilayer'),(3, 'Printing'),(4, 'Slitting')
+,(5,'Macchi');
+
+CREATE TABLE `machines` (   
+`machine_id` int(11) NOT NULL AUTO_INCREMENT,   
+`machine_name` varchar(150) NOT NULL,   
+`location_id` int(11) NOT NULL,   
+`size` tinyint(1) DEFAULT NULL,   
+PRIMARY KEY (`machine_id`),   
+KEY `location_id` (`location_id`),   
+CONSTRAINT `machines_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `locations` (`location_id`) );
+
+INSERT INTO `machines`
+
+(`machine_id`,
+`machine_name`,
+`location_id`,
+`size`)
+ VALUES
+
+(1,'Warehouse',1,NULL),(2,'Rajoo',2,NULL),(3,'Roto',3,2),(4,'Flexo 1',3,1),(5,'Flexo 2',3,1);
+
+CREATE TABLE `materials` (
+  
+`material_id` int(11) NOT NULL AUTO_INCREMENT,
+  
+`material_name` varchar(150) NOT NULL,
+  
+`material_grade` varchar(150) DEFAULT NULL,
+  
+`kgs_bag` double(10,2) NOT NULL DEFAULT '0.00',
+  
+`location_id` int(11) DEFAULT NULL,
+  
+`color` tinyint(1) NOT NULL DEFAULT '0',
+  
+PRIMARY KEY (`material_id`),
+  
+UNIQUE KEY `unique_material` (`material_name`,`material_grade`),
+  
+KEY `materials_ibfk_1_idx` (`location_id`),
+  
+CONSTRAINT `materials_ibfk_1` FOREIGN KEY (`location_id`) REFERENCES `locations` (`location_id`)
+);
+
+
+CREATE TABLE `stock_materials` (
+  
+`stock_material_id` int(11) NOT NULL AUTO_INCREMENT,
+  
+`material_id` int(11) NOT NULL,
+  
+`machine_id` int(11) NOT NULL,
+  
+`bags` double(10,2) NOT NULL,
+  
+PRIMARY KEY (`stock_material_id`),
+  
+UNIQUE KEY `unique_formula` (`material_id`,`machine_id`),
+  
+KEY `stock_materials_ibfk_2_idx` (`machine_id`),
+  
+CONSTRAINT `stock_materials_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `materials` (`material_id`),
+  
+CONSTRAINT `stock_materials_ibfk_2` FOREIGN KEY (`machine_id`) REFERENCES `machines` (`machine_id`)
+);
+
+CREATE TABLE `stock_materials_transfers` (
+  `stock_materials_transfers_id` int(11) NOT NULL AUTO_INCREMENT,
+  `machine_from` int(11) NOT NULL,
+  `machine_to` int(11) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `date_required` datetime NOT NULL,
+  `bags_required` int(11) NOT NULL,
+  `bags_approved` int(11) DEFAULT NULL,
+  `bags_issued` int(11) DEFAULT NULL,
+  `bags_receipt` int(11) DEFAULT NULL,
+  `user_id_required` int(11) NOT NULL,
+  `user_id_approved` int(11) DEFAULT NULL,
+  `user_id_issued` int(11) DEFAULT NULL,
+  `user_id_receipt` int(11) DEFAULT NULL,
+  `status_transfer` tinyint(1) NOT NULL DEFAULT '0',
+  `remarks_approved` varchar(255) DEFAULT NULL,
+  `remarks_issued` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`stock_materials_transfers_id`),
+  KEY `material_id` (`material_id`),
+  KEY `user_id_required` (`user_id_required`),
+  KEY `user_id_approved` (`user_id_approved`),
+  KEY `user_id_issued` (`user_id_issued`),
+  KEY `user_id_receipt` (`user_id_receipt`),
+  KEY `stock_materials_transfers_ibfk_3_idx` (`machine_to`),
+  KEY `stock_materials_transfers_ibfk_2_idx` (`machine_from`),
+  CONSTRAINT `stock_materials_transfers_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `materials` (`material_id`),
+  CONSTRAINT `stock_materials_transfers_ibfk_2` FOREIGN KEY (`machine_from`) REFERENCES `machines` (`machine_id`),
+  CONSTRAINT `stock_materials_transfers_ibfk_3` FOREIGN KEY (`machine_to`) REFERENCES `machines` (`machine_id`),
+  CONSTRAINT `stock_materials_transfers_ibfk_4` FOREIGN KEY (`user_id_required`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `stock_materials_transfers_ibfk_5` FOREIGN KEY (`user_id_approved`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `stock_materials_transfers_ibfk_6` FOREIGN KEY (`user_id_issued`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `stock_materials_transfers_ibfk_7` FOREIGN KEY (`user_id_receipt`) REFERENCES `users` (`user_id`)
+);
+
+CREATE TABLE `stock_balance` 
+(
+  `stock_balance_id` int(11) NOT NULL AUTO_INCREMENT,
+  
+`date_balance` datetime NOT NULL,
+  
+`machine_id` int(11) NOT NULL,
+  
+`material_id` int(11) NOT NULL,
+  
+`oldbags` int(11) NOT NULL,
+  
+`newbags` int(11) NOT NULL,
+  
+`difference` int(11) NOT NULL,
+  
+`user_id` int(11) NOT NULL,
+  
+`remarks` varchar(255) DEFAULT NULL,
+  
+PRIMARY KEY (`stock_balance_id`),
+  
+KEY `machine_id` (`machine_id`),
+  
+KEY `material_id` (`material_id`),
+  
+KEY `user_id` (`user_id`),
+  
+CONSTRAINT `stock_balance_ibfk_1` FOREIGN KEY (`machine_id`) REFERENCES `machines` (`machine_id`),
+  
+CONSTRAINT `stock_balance_ibfk_2` FOREIGN KEY (`material_id`) REFERENCES `materials` (`material_id`),
+  
+CONSTRAINT `stock_balance_ibfk_3` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+);
+
+CREATE TABLE `raw_materials_imports` (
+  `raw_materials_imports_id` int(11) NOT NULL AUTO_INCREMENT,
+  `rmi_no` varchar(25) NOT NULL,
+  `material_id` int(11) NOT NULL,
+  `pi_no` varchar(25) NOT NULL,
+  `pi_date` date NOT NULL,
+  `supplier` varchar(255) NOT NULL,
+  `manufacturer` varchar(255) DEFAULT NULL,
+  `qty` int(11) NOT NULL,
+  `amount` double(10,2) NOT NULL,
+  `exp_date_shipment` date DEFAULT NULL,
+  `remarks_order` varchar(255) DEFAULT NULL,
+  `user_order` int(11) NOT NULL,
+  `bill_no` varchar(25) DEFAULT NULL,
+  `date_shipment` date DEFAULT NULL,
+  `invoice_no` varchar(25) DEFAULT NULL,
+  `delay_sent` int(11) DEFAULT NULL,
+  `terms` int(11) DEFAULT NULL,
+  `exp_date_arrival` date DEFAULT NULL,
+  `bill_due_date` date DEFAULT NULL,
+  `remarks_shipped` varchar(255) DEFAULT NULL,
+  `user_shipped` int(11) DEFAULT NULL,
+  `date_cleared` date DEFAULT NULL,
+  `delay_arrived` int(11) DEFAULT NULL,
+  `declaration_no` varchar(255) DEFAULT NULL,
+  `damaged_qty` int(11) DEFAULT NULL,
+  `duty` double(10,2) DEFAULT NULL,
+  `clearing` double(10,2) DEFAULT NULL,
+  `unloading` double(10,2) DEFAULT NULL,
+  `cost_kg` double(10,2) DEFAULT NULL,
+  `remarks_cleared` varchar(255) DEFAULT NULL,
+  `user_cleared` int(11) DEFAULT NULL,
+  `bank_letter_date` date DEFAULT NULL,
+  `paid_date` date DEFAULT NULL,
+  `delay_payment` int(11) DEFAULT NULL,
+  `remarks_paid` varchar(255) DEFAULT NULL,
+  `user_paid` int(11) DEFAULT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`raw_materials_imports_id`),
+  UNIQUE KEY `rmi_no` (`rmi_no`),
+  KEY `material_id` (`material_id`),
+  KEY `user_order` (`user_order`),
+  KEY `user_shipped` (`user_shipped`),
+  KEY `user_cleared` (`user_cleared`),
+  KEY `user_paid` (`user_paid`),
+  CONSTRAINT `raw_materials_imports_ibfk_1` FOREIGN KEY (`material_id`) REFERENCES `materials` (`material_id`),
+  CONSTRAINT `raw_materials_imports_ibfk_2` FOREIGN KEY (`user_order`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `raw_materials_imports_ibfk_3` FOREIGN KEY (`user_shipped`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `raw_materials_imports_ibfk_4` FOREIGN KEY (`user_cleared`) REFERENCES `users` (`user_id`),
+  CONSTRAINT `raw_materials_imports_ibfk_5` FOREIGN KEY (`user_paid`) REFERENCES `users` (`user_id`)
+);
