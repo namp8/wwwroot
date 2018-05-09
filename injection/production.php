@@ -233,7 +233,7 @@ $injection->giveProduction(2);
 							<div class="row">
 								<div class="col-md-6 form-group">
 									<label for="shift">Type <span class="text-danger">*</span></label><br />
-									<input type="hidden" class="form-control" id="type" name="type" value="1" required>
+									<input type="hidden" class="form-control" id="type" name="type" value="-1" required>
 									<div class="dropdown">
 										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_type" style="height:30px;">Transparent&nbsp&nbsp<span class="caret"></span></button>
 										<ul class="dropdown-menu">

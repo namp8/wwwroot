@@ -7,8 +7,8 @@
     include_once "../../content.php";
 
 
-    include_once "../../inc/class.sacks.inc.php";
-    $sacks = new Sacks($db);
+    include_once "../../inc/class.general.inc.php";
+    $general = new General($db);
 
 ?>
     <ol class="breadcrumb">
@@ -30,7 +30,7 @@
     if(!empty($_POST['reason']))
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
-        if($sacks->createFall()){
+        if($general->createFall()){
 
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
@@ -74,7 +74,7 @@
                         </thead>
                         <tbody>
 <?php
-     $sacks->giveShortFall(7);
+     $general->giveShortFall(7);
 ?>
                         </tbody>
                     </table>

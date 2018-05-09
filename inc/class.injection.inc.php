@@ -385,7 +385,7 @@ GROUP BY stock_material_id;";
 				return false;
 		   }
 			$consumed = $consumed - $waste;
-			$sql = "INSERT INTO `injection_production`(`injection_production_id`,`date_production`,`shift`,`machine_id`,`material_id`,`type_id`,`cavities`,`produced_pcs`,`waste_pcs`,`good_pcs`,`net_weight`,`user_id`,`status_production`,`used_weight`,`date_change`) VALUES (NULL,'". $date."',". $shift .",". $machine .",". $product .",". $type .", ". $cavities .",". $production .",". $wastepcs .",". $good .",". $consumed .",". $_SESSION['Userid'] .",0,0.00,NULL); 
+			$sql = "INSERT INTO `injection_production`(`injection_production_id`,`date_production`,`shift`,`machine_id`,`material_id`,`type_id`,`cavities`,`produced_pcs`,`waste_pcs`,`good_pcs`,`net_weight`,`user_id`,`status_production`,`used_weight`) VALUES (NULL,'". $date."',". $shift .",". $machine .",". $product .",". $type .", ". $cavities .",". $production .",". $wastepcs .",". $good .",". $consumed .",". $_SESSION['Userid'] .",0,0.00); 
 			INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`) VALUES (NULL,'". $date."', ". $shift .",". $machine .", ". $waste .", ". $_SESSION['Userid'] .");
                 ". $update; 
 			try
@@ -489,6 +489,103 @@ LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id
         
     }
 	
+	 /**
+     * Loads the table of all the rolls in the multilayer section
+     * This function outputs <tr> tags with the rolls
+     */
+    public function giveProductionInfo()
+    {
+        $a=array();
+        $sql = "SELECT 
+    materials.material_name as product,
+    color.material_name as type,
+    SUM(`injection_production`.`good_pcs`) as pcs
+FROM `injection_production`
+JOIN materials ON materials.material_id = injection_production.material_id
+LEFT JOIN materials color ON color.material_id = type_id
+WHERE status_production = 0
+GROUP BY `injection_production`.material_id, type_id;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $PRODUCT = $row['product'];
+                $TYPE = $row['type'];
+				if(empty($row['type']))
+				{
+					$TYPE = 'Transparent';
+				}
+                $PCS = $row['pcs'];
+                
+                echo '<tr>
+                        <td>'. $PRODUCT .'</td>
+                        <td>'. $TYPE .'</td>
+                        <td class="text-right">'. number_format($PCS,0,'.',',') .'</td>
+                    </tr>';
+                
+                $countArray=array("y" => $PCS, "label" => $PRODUCT . ' - ' . $TYPE);
+                array_push($a,$countArray);
+            }
+            $stmt->closeCursor();
+            $x=array();
+            array_push($x,$a);
+            return $x;
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
+	 public function giveProductionStock()
+    {
+        $sql = "SELECT  `injection_production`.`date_production`,
+    materials.material_name as product,
+    color.material_name as type,
+    `injection_production`.`good_pcs` as pcs
+FROM `injection_production`
+JOIN materials ON materials.material_id = injection_production.material_id
+LEFT JOIN materials color ON color.material_id = type_id
+WHERE status_production = 0;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $PRODUCT = $row['product'];
+                $TYPE = $row['type'];
+				if(empty($row['type']))
+				{
+					$TYPE = 'Transparent';
+				}
+                $PCS = $row['pcs'];
+                
+                echo '<tr>
+                        <td>'. $row['date_production'] .'</td>
+                        <td>'. $PRODUCT .'</td>
+                        <td>'. $TYPE .'</td>
+                        <td class="text-right">'. number_format($PCS,0,'.',',') .'</td>
+                    </tr>';
+                }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
 	public function giveWaste()
     {
 		$sql = "SELECT 
@@ -548,6 +645,1401 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift`, `waste`.machine_id;";
             $shiftname = "NIGHT";
         }
         return $shiftname;
+    }
+	
+	
+    public function reportEfficiency()
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Machine</th>';
+        echo '<th>Machine Capacity</th>';
+        echo '<th>Orders Target</th>';
+        echo '<th>Actual Production</th>';
+        echo '<th>% Eff</th>';
+        echo '<th>Waste in Kgs</th>';
+        echo '<th>Target Waste %</th>';
+        echo '<th>Waste %</th>';
+        echo '</tr></thead>
+			<tfoot><tr  class="active">
+			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			</tr></tfoot><tbody>'; 
+        
+        $a=array();
+        $b1=array();
+        $b2=array();
+        $b3=array();
+        $b4=array();
+        $b5=array();
+        $b6=array();
+        $b7=array();
+        $b8=array();
+        $c=array();
+        $d1=array();
+        $d2=array();
+        $d3=array();
+        $d4=array();
+        $d5=array();
+        $d6=array();
+        $d7=array();
+        $d8=array();
+        $e=array();
+		
+		        
+        $newDateString = date("Y-m-d");
+        $newDateString2 = date("Y-m-d");
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of this month');
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of this month');
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+			
+            $sql = "SELECT 
+    DATE_FORMAT(`date_roll`, '%b/%Y') AS date, DATE_FORMAT(`date_roll`, '%m/%Y') as date2, machine_name, sacks_rolls.machine_id,
+    ROUND(SUM(net_weight), 2) AS actual,
+    waste.wastekgs,
+    COUNT(DISTINCT (DATE_FORMAT(`date_roll`, '%d/%m/%Y'))) AS days,
+    target, target_waste, capacity
+FROM
+    sacks_rolls
+LEFT JOIN machines ON sacks_rolls.machine_id = machines.machine_id
+LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`date_waste`, '%m/%Y') AS date,
+            SUM(waste) AS wastekgs, machine_id
+    FROM
+        `waste`
+	NATURAL JOIN machines
+    WHERE location_id = 7 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%m/%Y'), machine_id
+    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_roll`, '%m/%Y') AND waste.machine_id = sacks_rolls.machine_id
+	LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`target_orders`.`date`, '%m/%Y') AS date,
+            SUM(target_order) AS target, machine_id
+    FROM
+        `target_orders`
+   	NATURAL JOIN machines
+    WHERE location_id = 7 
+        AND date BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`target_orders`.`date`, '%m/%Y'), machine_id
+    ORDER BY `target_orders`.`date`) targets ON targets.date = DATE_FORMAT(`date_roll`, '%m/%Y') AND targets.machine_id = sacks_rolls.machine_id
+	LEFT JOIN
+	(
+		SELECT AVG(`settings`.value_setting) AS target_waste, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`
+        FROM `settings`
+        WHERE `settings`.machine_id = 7 AND `settings`.name_setting = 'waste'
+		GROUP BY DATE_FORMAT(`settings`.from, '%m/%Y')
+    )
+    waste_target ON waste_target.`from` <= DATE_FORMAT(`date_roll`, '%m/%Y') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`date_roll`, '%m/%Y'))
+	LEFT JOIN
+	(
+		SELECT AVG(`settings`.value_setting) AS capacity, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`, `settings`.machine_id
+        FROM `settings`
+		NATURAL JOIN machines
+    	WHERE location_id = 7 
+		GROUP BY DATE_FORMAT(`settings`.from, '%m/%Y'), `settings`.machine_id
+    )
+    capacity ON  capacity.machine_id = sacks_rolls.machine_id AND capacity.`from` <= DATE_FORMAT(`date_roll`, '%m/%Y') AND (capacity.`to` IS NULL OR capacity.`to` > DATE_FORMAT(`date_roll`, '%m/%Y'))
+WHERE
+    date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(`date_roll`, '%b/%Y'), sacks_rolls.machine_id 
+ORDER BY `date_roll`, sacks_rolls.machine_id  ;";
+            
+            
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of January ' . $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of December ' . $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+              $sql = "SELECT 
+    DATE_FORMAT(`date_roll`, '%Y') AS date, machine_name, sacks_rolls.machine_id,
+    ROUND(SUM(net_weight), 2) AS actual,
+    waste.wastekgs,
+    COUNT(DISTINCT (DATE_FORMAT(`date_roll`, '%d/%m/%Y'))) AS days,
+    target, target_waste, capacity
+FROM
+    sacks_rolls
+LEFT JOIN machines ON sacks_rolls.machine_id = machines.machine_id
+LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`date_waste`, '%Y') AS date,
+            SUM(waste) AS wastekgs, machine_id
+    FROM
+        `waste`
+	NATURAL JOIN machines
+    WHERE location_id = 7 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%Y'), machine_id
+    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_roll`, '%Y') AND waste.machine_id = sacks_rolls.machine_id
+	LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`target_orders`.`date`, '%Y') AS date,
+            SUM(target_order) AS target, machine_id
+    FROM
+        `target_orders`
+   	NATURAL JOIN machines
+    WHERE location_id = 7 
+        AND date BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`target_orders`.`date`, '%Y'), machine_id
+    ORDER BY `target_orders`.`date`) targets ON targets.date = DATE_FORMAT(`date_roll`, '%Y') AND targets.machine_id = sacks_rolls.machine_id
+	LEFT JOIN
+	(
+		SELECT AVG(`settings`.value_setting) AS target_waste, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`
+        FROM `settings`
+        WHERE `settings`.machine_id = 8 AND `settings`.name_setting = 'waste'
+		GROUP BY DATE_FORMAT(`settings`.from, '%Y')
+    )
+    waste_target ON waste_target.`from` <= DATE_FORMAT(`date_roll`, '%Y') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`date_roll`, '%Y'))
+	LEFT JOIN
+	(
+		SELECT AVG(`settings`.value_setting) AS capacity, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`, `settings`.machine_id
+        FROM `settings`
+		NATURAL JOIN machines
+    	WHERE location_id = 7 
+		GROUP BY DATE_FORMAT(`settings`.from, '%Y'), `settings`.machine_id
+    )
+    capacity ON  capacity.machine_id = sacks_rolls.machine_id AND capacity.`from` <= DATE_FORMAT(`date_roll`, '%Y') AND (capacity.`to` IS NULL OR capacity.`to` > DATE_FORMAT(`date_roll`, '%Y'))
+WHERE
+    date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(`date_roll`, '%Y'), sacks_rolls.machine_id 
+ORDER BY `date_roll`, sacks_rolls.machine_id ;";
+            
+        }
+        else
+        {
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = "SELECT 
+    DATE_FORMAT(`date_roll`, '%d/%m/%Y') AS date, machine_name, sacks_rolls.machine_id,
+    ROUND(SUM(net_weight), 2) AS actual,
+    waste.wastekgs,
+    COUNT(DISTINCT (DATE_FORMAT(`date_roll`, '%d/%m/%Y'))) AS days,
+    target, target_waste, capacity
+FROM
+    sacks_rolls
+LEFT JOIN machines ON sacks_rolls.machine_id = machines.machine_id
+LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`date_waste`, '%Y/%m/%d') AS date,
+            SUM(waste) AS wastekgs, machine_id
+    FROM
+        `waste`
+	NATURAL JOIN machines
+    WHERE location_id = 7 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%Y/%m/%d'), machine_id
+    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND waste.machine_id = sacks_rolls.machine_id
+	LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`target_orders`.`date`, '%Y/%m/%d') AS date,
+            SUM(target_order) AS target, machine_id
+    FROM
+        `target_orders`
+   	NATURAL JOIN machines
+    WHERE location_id = 7 
+        AND date BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`target_orders`.`date`, '%Y/%m/%d'), machine_id
+    ORDER BY `target_orders`.`date`) targets ON targets.date = DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND targets.machine_id = sacks_rolls.machine_id
+	LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS target_waste, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 8 AND `settings`.name_setting = 'waste'
+    )
+    waste_target ON waste_target.`from` <= DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`date_roll`, '%Y/%m/%d'))
+	LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS capacity, `settings`.to, `settings`.from, `settings`.machine_id
+        FROM `settings`
+		NATURAL JOIN machines
+    	WHERE location_id = 7 
+    )
+    capacity ON  capacity.machine_id = sacks_rolls.machine_id AND capacity.`from` <= DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND (capacity.`to` IS NULL OR capacity.`to` > DATE_FORMAT(`date_roll`, '%Y/%m/%d'))
+WHERE
+    date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(`date_roll`, '%d/%m/%Y'), sacks_rolls.machine_id 
+ORDER BY `date_roll`, sacks_rolls.machine_id ;";
+            
+        }
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $CAPACITYROW = $row['capacity'] * $row['days'];
+				$TARGET = $row['target'];
+				$TARGETWASTE = $row['target_waste'];
+                $WASTEKG = $row['wastekgs'];
+                if(is_null($row['wastekgs']))
+                {
+                    $WASTEKG = 0;
+                }
+                $ACTUAL = $row['actual'] + $WASTEKG;
+                if(is_null($row['actual']))
+                {
+                    $ACTUAL = 0 + $WASTEKG;
+                    $WASTEEFF = 0;
+                }
+                else
+                {
+                    $WASTEEFF  = round($WASTEKG* 100 / $ACTUAL , 2);
+                }
+				if(is_null($row['target']) and !is_null($row['capacity']))
+                {
+                    $TARGET = $CAPACITYROW;
+					$EFF = round($ACTUAL *100/ $CAPACITYROW, 2);
+                }
+				else if(is_null($row['capacity']))
+                {
+                    $TARGET = $CAPACITYROW;
+					$EFF = 100;
+                }
+                else
+                {
+					$EFF = round($ACTUAL *100/ $TARGET, 2);
+                }
+                echo '<tr>
+                        <td class="text-right">'. $row['date'] .'</td>
+                        <td class="text-right">'. $row['machine_name'] .'</td>
+                        <td class="text-right">'. number_format($CAPACITYROW,2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($TARGET,2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($ACTUAL,2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($EFF,2,'.',',') .'</th>
+                        <td class="text-right">'. number_format($WASTEKG,2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($TARGETWASTE,2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($WASTEEFF,2,'.',',') .'</th>
+                    </tr>';
+                $entrie0 = array( $row['date'], $CAPACITYROW);
+                $entrie = array( $row['date'], $TARGET);
+                $entrie1 = array( $row['date'], $ACTUAL);
+                $entrie2 = array( $row['date'], $TARGETWASTE);
+                $entrie3 = array( $row['date'], $WASTEEFF);
+                if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+                {
+                    $entrie0 = array( $row['date2'], $CAPACITYROW);
+					$entrie = array( $row['date2'], $TARGET);
+                    $entrie1 = array( $row['date2'],$ACTUAL);
+                    $entrie2 = array( $row['date2'], $TARGETWASTE);
+                    $entrie3 = array( $row['date2'], $WASTEEFF);
+                }
+                array_push($a,$entrie);
+				if($row['machine_id'] == 13)
+				{
+                	array_push($b1,$entrie1);
+				}
+				else if($row['machine_id'] == 14)
+				{
+                	array_push($b2,$entrie1);
+				}
+				else if($row['machine_id'] == 15)
+				{
+                	array_push($b3,$entrie1);
+				}
+				else if($row['machine_id'] == 16)
+				{
+                	array_push($b4,$entrie1);
+				}
+				else if($row['machine_id'] == 17)
+				{
+                	array_push($b5,$entrie1);
+				}
+				else if($row['machine_id'] == 18)
+				{
+                	array_push($b6,$entrie1);
+				}
+				else if($row['machine_id'] == 19)
+				{
+                	array_push($b7,$entrie1);
+				}
+				else if($row['machine_id'] == 20)
+				{
+                	array_push($b8,$entrie1);
+				}
+                array_push($c,$entrie2);
+				if($row['machine_id'] == 13)
+				{
+                	array_push($d1,$entrie3);
+				}
+				else if($row['machine_id'] == 14)
+				{
+                	array_push($d2,$entrie3);
+				}
+				else if($row['machine_id'] == 15)
+				{
+                	array_push($d3,$entrie3);
+				}
+				else if($row['machine_id'] == 16)
+				{
+                	array_push($d4,$entrie3);
+				}
+				else if($row['machine_id'] == 17)
+				{
+                	array_push($d5,$entrie3);
+				}
+				else if($row['machine_id'] == 18)
+				{
+                	array_push($d6,$entrie3);
+				}
+				else if($row['machine_id'] == 19)
+				{
+                	array_push($d7,$entrie3);
+				}
+				else if($row['machine_id'] == 20)
+				{
+                	array_push($d8,$entrie3);
+				}
+                array_push($e,$entrie0);
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>";
+        }
+         echo '</tbody>';
+        echo '<script>document.getElementById("chartContainer").style= "height:200px;";</script>';
+        echo '<script>document.getElementById("chartContainer2").style= "height:200px;";</script>';
+         echo '<script> 
+            var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: { 
+                text: "Production Target Achievement"
+            },
+            exportFileName: "Production Target Achievement",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "KGS" },
+            toolTip: {
+                shared: true
+            },
+            legend:{
+                itemclick : function(e){
+				
+					if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+						e.dataSeries.visible = false;
+					} else {
+						e.dataSeries.visible = true;
+					}
+					chart.render();
+				}
+            },';
+        if(!empty($_POST['searchBy']) and  $_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 1",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b1 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b1 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b1 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+        echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 2",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b2 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b2 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b2 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 3",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b3 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b3 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b3 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 4",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b4 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b4 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b4 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 5",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b5 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b5 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b5 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 6",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b6 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b6 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b6 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 7",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b7 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b7 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b7 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 8",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b8 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b8 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b8 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        echo'] }]});
+        chart.render();
+        </script>'; 
+        echo '<script> 
+            var chart1 = new CanvasJS.Chart("chartContainer2", {
+            theme: "light2",
+            title: { 
+                text: "Waste Target Achievement"
+            },
+            exportFileName: "Waste Target Achievement",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Waste %" },
+            toolTip: {
+                shared: true
+            },
+			legend:{
+                itemclick : function(e){
+				
+					if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+						e.dataSeries.visible = false;
+					} else {
+						e.dataSeries.visible = true;
+					}
+					chart1.render();
+				}
+            },';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "line",
+		showInLegend: true,
+		name: "Target",
+		lineDashType: "dash",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($c as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1] .'},';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($c as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($c as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 1 ",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.00 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d1 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d1 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d1 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		 echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 2",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d2 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d2 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d2 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 3",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d3 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d3 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d3 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 4",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d4 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d4 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d4 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 5",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d5 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d5 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d5 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 6",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d6 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d6 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d6 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 7",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d7 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d7 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d7 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Extruder - 8",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.0 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d8 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d8 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d8 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        echo'] }]});
+        chart1.render(); 
+        </script>'; 
     }
     
 }
