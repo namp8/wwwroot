@@ -78,10 +78,20 @@
 				<table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
 				<thead>
 					<tr class="active">
-							<th>Product Type</th>
+							<th>Product Name</th>
+							<th>Type</th>
 							<th>Material</th>
+							<th>Percentage</th>
 						</tr>
 					</thead>
+					<tfoot>
+						<tr class="active">
+							<th></th>
+							<th></th>
+							<th style="text-align:right">Total</th>
+							<th style="text-align:right"></th>
+						</tr>
+					</tfoot>
 					<tbody>
 <?php
     $injection->giveFormula();
@@ -105,15 +115,29 @@
           <div class="modal-body">
             <input type="hidden" class="form-control" id="action" name="action" value=0>
             <div class="form-group">
-                <label >Product Type <span class="text-danger">*</span></label><br />
-                <input type="hidden" class="form-control" id="type" name="type" required>
+                <label >Product Name <span class="text-danger">*</span></label><br />
+                <input type="hidden" class="form-control" id="product" name="product" required>
+                <div class="dropdown">
+                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_product">&nbsp&nbsp<span class="caret"></span></button>
+                    <ul class="dropdown-menu" id="dropdown_product">
+                        <li><input type="text" placeholder="Search product name.." class="searchDropdown" id="searchProduct" onkeyup="filterProducts()"></li>
+                        <?php
+    $injection->productTypeDropdown();
+?>
+                    </ul>
+                </div>
+            </div>
+            <div class="form-group">
+                <label >Type <span class="text-danger">*</span></label><br />
+                <input type="hidden" class="form-control" id="type" name="type" value="0" required>
                 <div class="dropdown">
                     <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_type">&nbsp&nbsp<span class="caret"></span></button>
                     <ul class="dropdown-menu" id="dropdown_type">
                         <li><input type="text" placeholder="Search product type.." class="searchDropdown" id="searchType" onkeyup="filterTypes()"></li>
-                        <?php
-    $injection->productTypeDropdown();
-?>
+                		<li><a id="Transparent" onclick="selectType(0,'Transparent')">Transparent</a></li>
+                		<li><a id="Color" onclick="selectType(1,'Color')">Color</a></li>
+                		<li><a id="Top" onclick="selectType(2,'Top')">Top</a></li>
+                		<li><a id="Bottom" onclick="selectType(3,'Bottom')">Bottom</a></li>
                     </ul>
                 </div>
             </div>
@@ -124,12 +148,16 @@
                     <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_material">&nbsp&nbsp<span class="caret"></span></button>
                     <ul class="dropdown-menu" id="dropdown_material">
                         <li><input type="text" placeholder="Search material.." class="searchDropdown" id="searchMaterial" onkeyup="filterMaterials()"></li>
+               			<li><a id="Master Batch" onclick="selectMaterial(-1,'Master Batch','')"><b>Master Batch</b></a></li> 
                         <?php
     $injection->materialsDropdown();
 ?>
                     </ul>
                 </div>
             </div>
+            <div class="form-group" >
+                <label for="percentage">Percentage <span class="text-danger">*</span></label>
+				<input type="number" class="form-control" step="0.1" min="0.1" id="percentage" name="percentage"></div>
 			 <div class="form-group">
                     <label >Remarks <span class="text-danger">*</span></label>
                     <textarea type="text" class="form-control" rows="3" id="remarks" name="remarks" required></textarea>
@@ -185,9 +213,9 @@
             }
         }
 		
-		function selectType(name) {
+		function selectType(id, name) {
             document.getElementById("btn_type").innerHTML = name +  " &nbsp&nbsp<span class='caret'></span> ";
-            document.getElementById("type").value = name;
+            document.getElementById("type").value = id;
         }
 
         function filterTypes() {
@@ -204,12 +232,62 @@
                 }
             }
         }
+		
+		function selectProduct(name) {
+            document.getElementById("btn_product").innerHTML = name +  " &nbsp&nbsp<span class='caret'></span> ";
+            document.getElementById("product").value = name;
+        }
+
+        function filterProducts() {
+            var input, filter, ul, li, a, i;
+            input = document.getElementById("searchProduct");
+            filter = input.value.toUpperCase();
+            div = document.getElementById("dropdown_product");
+            a = div.getElementsByTagName("a");
+            for (i = 0; i < a.length; i++) {
+                if (a[i].id.toUpperCase().startsWith(filter)) {
+                    a[i].style.display = "";
+                } else {
+                    a[i].style.display = "none";
+                }
+            }
+        }
 
 		
 		$(document).ready(function() {
 			$("#dataTable").DataTable({
 				"order": [],
-				"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]]
+				"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]],
+				"footerCallback": function(row, data, start, end, display) {
+					var api = this.api(),
+						data;
+
+					// Remove the formatting to get integer data for summation
+					var intVal = function(i) {
+						return typeof i === 'string' ?
+							i.replace(/[\$,]/g, '') * 1 :
+							typeof i === 'number' ?
+							i : 0;
+					};
+
+					
+					pageTotal3 = api
+						.column(3, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					$(api.column(3).footer()).html(
+						'' + pageTotal3.toLocaleString(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})
+					);
+				
+					
+				}
 			});
 		});
     </script>

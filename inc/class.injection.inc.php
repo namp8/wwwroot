@@ -81,7 +81,7 @@ ORDER BY `materials`.`material_grade`;";
             {
                 
                 $GRADE = $row['material_grade'];
-                echo  '<li><a id="'. $GRADE .'" onclick="selectType(\''. $GRADE .'\')">'. $GRADE .'</a></li>'; 
+                echo  '<li><a id="'. $GRADE .'" onclick="selectProduct(\''. $GRADE .'\')">'. $GRADE .'</a></li>'; 
             }
             $stmt->closeCursor();
         }
@@ -173,11 +173,12 @@ ORDER BY `materials`.`material_grade`;";
 	public function giveFormula()
     {
         $sql = "SELECT `injection_formulas`.`injection_formula`,
-    `injection_formulas`.`material_grade` AS product,
+    `injection_formulas`.`material_grade` AS product, `injection_formulas`.type as type, percentage ,
     material_name, materials.material_grade
 FROM `injection_formulas`
-JOIN `materials` ON  `materials`.material_id = `injection_formulas`.material_id
-WHERE `actual` = 1;";
+LEFT JOIN `materials` ON  `materials`.material_id = `injection_formulas`.material_id
+WHERE `actual` = 1
+ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
 		
 		if($stmt = $this->_db->prepare($sql))
         {
@@ -185,9 +186,32 @@ WHERE `actual` = 1;";
 			 $total = 0;
             while($row = $stmt->fetch())
             {
+				if($row['type'] == 0)
+				{
+					$type = 'Transparent';
+				}
+				else if($row['type'] == 1)
+				{
+					$type = 'Color';
+				}
+				else if($row['type'] == 2)
+				{
+					$type = 'Top';
+				}
+				else if($row['type'] == 3)
+				{
+					$type = 'Bottom';
+				}
+				$MATERIAL = '<b>Master Batch</b>';
+				if(!empty($row['material_name']))
+				{
+					$MATERIAL = '<b>'. $row['material_name'] .'</b>  -  '. $row['material_grade']; 
+				}
 				echo '<tr>
                         <td>'. $row['product'] .'</td>
-                        <td><b>'. $row['material_name'] .'</b>  -  '. $row['material_grade'] .'</td>
+                        <td>'. $type .'</td>
+                        <td>'. $MATERIAL .'</td>
+                        <td class="text-right">'. number_format($row['percentage'],1,'.',',')  .'</td>
                     </tr>';
 				
             }
@@ -203,7 +227,11 @@ WHERE `actual` = 1;";
 	
 	public function createFormula()
     {
-        $type = $material = $remarks= "";
+        $product = $type = $material = $remarks= "";
+		
+        $product = trim($_POST["product"]);
+        $product = stripslashes($product);
+        $product = htmlspecialchars($product);
 		
         $type = trim($_POST["type"]);
         $type = stripslashes($type);
@@ -213,28 +241,35 @@ WHERE `actual` = 1;";
         $material = stripslashes($material);
         $material = htmlspecialchars($material);
 		
+		if($material == -1)
+		{
+			$material = "NULL";
+		}
+		
+        $percentage = trim($_POST["percentage"]);
+        $percentage = stripslashes($percentage);
+        $percentage = htmlspecialchars($percentage);
+		
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
         
-        $sql = "INSERT INTO `injection_formulas`(`injection_formula`,`material_grade`,`material_id`,`from`,`to`,`actual`,`remarks`)
-		VALUES(NULL,:type,:material,CURRENT_DATE(),NULL,1, :remarks);";
+        $sql = "INSERT INTO `injection_formulas`(`injection_formula`,`material_grade`,`material_id`,`type`,
+`percentage`,`from`,`to`,`actual`,`remarks`) VALUES
+(NULL,'". $product."',". $material.",". $type.", ". $percentage.", CURRENT_DATE(),NULL,1, '". $remarks."');";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
             $stmt = $this->_db->prepare($sql);
-            $stmt->bindParam(":type", $type, PDO::PARAM_STR);
-            $stmt->bindParam(":material", $material, PDO::PARAM_INT);
-            $stmt->bindParam(":remarks", $remarks, PDO::PARAM_STR);
             $stmt->execute();
             $stmt->closeCursor();
             
-            echo '<strong>SUCCESS!</strong> The material was successfully added to the formula for the product tyep: <strong>'. $type .' </strong>';
+            echo '<strong>SUCCESS!</strong> The material was successfully added to the formula for the product name: <strong>'. $product .' </strong>';
             return TRUE;
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
               echo '<strong>ERROR</strong> The material is already in the formula.<br>';
             } else {
-              echo '<strong>ERROR</strong> Could not insert the material into the database. Please try again.<br>'. $e->getMessage();
+              echo '<strong>ERROR</strong> Could not insert the formula into the database. Please try again.<br>'. $e->getMessage();
             }
             
             return FALSE;
