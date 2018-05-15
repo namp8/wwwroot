@@ -116,6 +116,32 @@ ORDER BY `materials`.`material_grade`;";
             echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
         }
     }
+	
+	 public function colorsDropdown()
+    {
+        $sql = "SELECT `materials`.`material_id`,
+                `materials`.`material_name`,
+                `materials`.`material_grade`
+                FROM `materials`
+				WHERE `injection` = 1 AND `master_batch` = 1
+                ORDER BY `materials`.`material_name`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['material_id'];
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectType(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
     
 	/**
      * Loads the dropdown of all the materials
@@ -316,7 +342,7 @@ ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
     public function createProduction()
     {
               
-       $machine = $shift = $product = $type = $cavities = $production = $waste = $wastepcs = $good = $consumed =  "";
+       $machine = $shift = $product = $type = $color = $cavities = $production = $waste = $wastepcs = $good = $consumed =  "";
 		
         $machine = trim($_POST["machine"]);
         $machine = stripslashes($machine);
@@ -333,10 +359,12 @@ ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
 		$type = trim($_POST["type"]);
         $type = stripslashes($type);
         $type = htmlspecialchars($type);
+		$color = 1;
 		
 		if($type == -1)
 		{
 			$type = 'NULL';
+			$color = 0;
 		}
 		
 		$cavities = trim($_POST["cavities"]);
@@ -377,52 +405,62 @@ ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
         }
 		
 		
+		
         $update = "";
-		$sql = "SELECT stock_material_id, `stock_materials`.`bags`, kgs_bag, material_name, material_grade
+		$sql = "SELECT stock_material_id, `stock_materials`.`bags`, kgs_bag, material_name, material_grade, percentage
 FROM `stock_materials`
-JOIN (SELECT `injection_formulas`.`material_id`
+JOIN (SELECT `injection_formulas`.`material_id`, percentage
 FROM `injection_formulas`
-WHERE `material_grade` = (SELECT material_grade FROM materials WHERE material_id = ". $product .") AND actual = 1) rawmaterials
+WHERE `material_grade` = (SELECT material_grade FROM materials WHERE material_id = ". $product .") AND type =  ". $color ." AND actual = 1) rawmaterials
 ON  rawmaterials.material_id = `stock_materials`.material_id
 JOIN materials ON materials.material_id = `stock_materials`.material_id
 WHERE `machine_id` = 6
+
+UNION ALL
+
+SELECT stock_material_id, `stock_materials`.`bags`, kgs_bag, material_name, material_grade, (SELECT percentage
+FROM `injection_formulas`
+WHERE `material_grade` = (SELECT material_grade FROM materials WHERE material_id = 128) AND type =  ". $color ." AND actual = 1 AND material_id is NULL) AS percentage
+FROM `stock_materials`
+JOIN materials ON materials.material_id = `stock_materials`.material_id
+WHERE `machine_id` = 6 AND `stock_materials`.material_id = ". $type ."
+
 GROUP BY stock_material_id;";
 		
         if($stmt = $this->_db->prepare($sql))
          {
             $stmt->execute();
-			$total = $consumed;
             while($row = $stmt->fetch())
             {
 				if(!is_null($row['stock_material_id']))
 				{
 					$kgsStock = $row['bags'] * $row['kgs_bag'];
+					$total = ($consumed + $waste) * $row['percentage'] / 100;
+					$BAGSNEEDED = $total / $row['kgs_bag'];
+					$BAGSNEEDED = number_format($BAGSNEEDED ,4,'.','');
 					if($kgsStock >= $total)
 					{
-						$BAGSNEEDED = $total / $row['kgs_bag'];
-						$BAGSNEEDED = number_format($BAGSNEEDED ,4,'.','');
-						$total = 0;
 						$newbags = $row['bags']-$BAGSNEEDED;
 						$update = $update . "UPDATE  `stock_materials` SET `bags` = ".$newbags." WHERE `stock_material_id` = ". $row['stock_material_id']. "; ";
             			$stmt->closeCursor();
 					}
 					else
 					{
-						$total = $total - $kgsStock;
-						$update = $update . "UPDATE  `stock_materials` SET `bags` = 0 WHERE `stock_material_id` = ". $row['stock_material_id']. "; ";
+						echo '<strong>ERROR</strong> The production was not added to the production. Because there is not enought material <strong>'. $row['material_name'] .' - '. $row['material_grade'] .'</strong> in stock. <br> There are <strong>'. $row['bags'] .'</strong> bags in stock, and you need <strong>'. $BAGSNEEDED .'</strong> bags.';
+						return false;
 					}
 					
 				}
+				else
+				{
+					echo '<strong>ERROR</strong> The production was not added to the production. Because there is not enought raw material in stock. <br>  Please try again receiving the raw material.';
+					return false;
+				}
             }
-			if($total > 0)
-		   {
-				echo '<strong>ERROR</strong> The production was not added to the production. Because there is not enought raw material in stock. <br>  Please try again receiving the raw material.';
-				return false;
-		   }
-			$consumed = $consumed - $waste;
 			$sql = "INSERT INTO `injection_production`(`injection_production_id`,`date_production`,`shift`,`machine_id`,`material_id`,`type_id`,`cavities`,`produced_pcs`,`waste_pcs`,`good_pcs`,`net_weight`,`user_id`,`status_production`,`used_weight`) VALUES (NULL,'". $date."',". $shift .",". $machine .",". $product .",". $type .", ". $cavities .",". $production .",". $wastepcs .",". $good .",". $consumed .",". $_SESSION['Userid'] .",0,0.00); 
 			INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`) VALUES (NULL,'". $date."', ". $shift .",". $machine .", ". $waste .", ". $_SESSION['Userid'] .");
                 ". $update; 
+			
 			try
 			{   
 				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );

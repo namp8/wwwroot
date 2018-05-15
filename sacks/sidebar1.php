@@ -48,8 +48,8 @@
 							<li><a href="cutting/settings.php"><i class="fa fa-cogs" aria-hidden="true"></i><span>&nbsp Settings</span></a></li>
 							<li><a href="cutting/reports.php"><i class="fa fa-bar-chart" aria-hidden="true"></i><span>&nbsp Reports</span></a></li>
                             <li class="divider"></li><center>Consumables</center>
-							<li><a class="two" href="packing/request.php"><i class="fa fa-reply " aria-hidden="true" ></i><span>&nbsp Request</span></a></li>
-							<li><a class="two" href="packing/receive.php"><i class="fa fa-share" aria-hidden="true"></i><span>&nbsp Receive</span></a></li>
+							<li><a class="two" href="cutting/request.php"><i class="fa fa-reply " aria-hidden="true" ></i><span>&nbsp Request</span></a></li>
+							<li><a class="two" href="cutting/receive.php"><i class="fa fa-share" aria-hidden="true"></i><span>&nbsp Receive</span></a></li>
 							<li class="divider"></li><center>Rolls on Floor</center>
 							<li><a class="two" href="extruder/rolls_stock.php"><i class="fa fa-cubes " aria-hidden="true" ></i><span>&nbsp Rolls on floor</span></a></li>
                             

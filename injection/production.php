@@ -238,6 +238,9 @@ $injection->giveProduction(2);
 										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_type" style="height:30px;">Transparent&nbsp&nbsp<span class="caret"></span></button>
 										<ul class="dropdown-menu">
 											<li><a onclick="selectType(-1,'Transparent')">Transparent</a></li>
+											<?php
+						$injection->colorsDropdown();
+					?>
 										</ul>
 									</div>
 								</div>
@@ -259,21 +262,21 @@ $injection->giveProduction(2);
 							<div class="row">
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-danger">Produced Waste in Kgs <span class="text-danger">*</span></label>
-									<input type="text" class="form-control input-sm" name="waste" value="0"  step="0.001" min="1" required>
+									<input type="numer" class="form-control input-sm" name="waste" id="waste" value="0"  step="0.001" min="1"  onkeyup="calculateTotal()"  required>
 								</div>
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-danger">Produced Waste in Pcs<span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="wastepcs" id="wastepcs"  value="0"  step="1" min="1" required onkeyup="calculateGood()" >
+									<input type="number" class="form-control input-sm" name="wastepcs" id="wastepcs"  value="0"  step="1" min="1" required  onkeyup="calculateGood()" >
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-success">Total Raw material used in kgs<span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="consumed" value="0"  step="0.001" min="1" required>
+									<input type="number" class="form-control input-sm" name="consumed" id="consumed" value="0"  step="0.01" min="1" required readonly>
 								</div>
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-success">Good production in Pcs <span class="text-danger">*</span></label>
-									<input type="text" class="form-control input-sm" name="good" id="good"  value="0"  step="1" min="1" required readonly>
+									<input type="number" class="form-control input-sm" name="good" id="good"  value="0"  step="1" min="1" required readonly>
 								</div>
 							</div>
 						</div>
@@ -327,14 +330,44 @@ $injection->giveProduction(2);
 				function calculateProducedPcs() {
 					var shots= document.getElementById('shots').value;
 					var cavities= document.getElementById('cavities').value;
-					document.getElementById('pcs').value = shots * cavities;
-					calculateGood();
+					if(shots != null && cavities!= null)
+					{
+						document.getElementById('pcs').value = shots * cavities;
+						calculateGood();
+					}
+					else
+					{
+						document.getElementById('pcs').value = 0;
+					}
 				}
 				
 				function calculateGood() {
 					var pcs= document.getElementById('pcs').value;
 					var waste= document.getElementById('wastepcs').value;
-					document.getElementById('good').value = pcs - waste;
+					if(pcs != null && waste!= null)
+					{
+						document.getElementById('good').value = pcs - waste;
+						calculateTotal();
+					}
+					else
+					{
+						document.getElementById('good').value = 0;
+					}
+				}
+				
+				function calculateTotal() {
+					var waste= document.getElementById('waste').value;
+					var wastepcs= document.getElementById('wastepcs').value;
+					if(waste != null && wastepcs!= null)
+					{
+						var weight = waste / wastepcs;
+						var consumed = weight * document.getElementById('good').value;
+						document.getElementById('consumed').value = consumed.toFixed(2);
+					}
+					else
+					{
+						document.getElementById('consumed').value  = 0;
+					}
 				}
 				
 				function selectMaterial(id, name, grade) {
