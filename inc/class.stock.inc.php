@@ -2450,7 +2450,20 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
      */
     public function stockIssuesFrom($from)
     {
-        $sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
+//        $sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
+//                    material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
+//                    `stock_materials_transfers`.`bags_required`, `stock_materials_transfers`.`bags_approved`,`stock_materials_transfers`.`bags_issued`, `stock_materials_transfers`.`remarks_approved`,`stock_materials_transfers`.`remarks_issued`,
+//                    u_required.username AS urequired , u_approved.username AS uapproved ,u_issued.username AS uissued, `stock_materials_transfers`.`status_transfer`
+//                FROM stock_materials_transfers 
+//    			LEFT JOIN materials ON materials.material_id = `stock_materials_transfers`.material_id
+//                INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
+//                INNER JOIN users u_approved ON stock_materials_transfers.user_id_approved = u_approved.user_id
+//                LEFT JOIN users u_issued ON stock_materials_transfers.user_id_issued = u_issued.user_id
+//                INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
+//                INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id
+//                WHERE machine_from  = ". $from ." AND (MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE()) OR status_transfer = 1) 
+//				ORDER BY status_transfer, `date_required` DESC;";
+		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, `stock_materials_transfers`.`bags_approved`,`stock_materials_transfers`.`bags_issued`, `stock_materials_transfers`.`remarks_approved`,`stock_materials_transfers`.`remarks_issued`,
                     u_required.username AS urequired , u_approved.username AS uapproved ,u_issued.username AS uissued, `stock_materials_transfers`.`status_transfer`
@@ -2461,7 +2474,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                 LEFT JOIN users u_issued ON stock_materials_transfers.user_id_issued = u_issued.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id
-                WHERE machine_from  = ". $from ." AND (MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE()) OR status_transfer = 1) 
+                WHERE machine_from  = ". $from ." 
 				ORDER BY status_transfer, `date_required` DESC;";
 		
         if($stmt = $this->_db->prepare($sql))

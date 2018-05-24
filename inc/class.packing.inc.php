@@ -1193,7 +1193,20 @@ ORDER BY `waste`.date_waste DESC, `waste`.`shift` DESC, `waste`.machine_id;";
      */
     public function giveShortFall()
     {
-        $sql = "SELECT machine_name,
+//        $sql = "SELECT machine_name,
+//    `shortfalls`.`date_fall`,
+//    `shortfalls`.`downtime` AS time_t,
+//    `shortfalls`.`reason`,
+//    `shortfalls`.`action_plan`
+//FROM
+//    `shortfalls`
+//NATURAL JOIN `machines`
+//WHERE
+//    location_id = 8 
+//        AND MONTH(date_fall) = MONTH(CURRENT_DATE())
+//        AND YEAR(date_fall) = YEAR(CURRENT_DATE())
+//ORDER BY date_fall;";
+		$sql = "SELECT machine_name,
     `shortfalls`.`date_fall`,
     `shortfalls`.`downtime` AS time_t,
     `shortfalls`.`reason`,
@@ -1203,8 +1216,6 @@ FROM
 NATURAL JOIN `machines`
 WHERE
     location_id = 8 
-        AND MONTH(date_fall) = MONTH(CURRENT_DATE())
-        AND YEAR(date_fall) = YEAR(CURRENT_DATE())
 ORDER BY date_fall;";
         if($stmt = $this->_db->prepare($sql))
         {

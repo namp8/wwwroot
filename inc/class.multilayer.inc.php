@@ -106,9 +106,13 @@ class Multilayer
      */
     public function giveShortFall()
     {
-        $sql = "SELECT `shortfalls`.`date_fall`, `shortfalls`.`downtime` AS time_t, `shortfalls`.`reason`,`shortfalls`.`action_plan`
+//        $sql = "SELECT `shortfalls`.`date_fall`, `shortfalls`.`downtime` AS time_t, `shortfalls`.`reason`,`shortfalls`.`action_plan`
+//                FROM  `shortfalls` 
+//                WHERE machine_id = 2 AND MONTH(date_fall) = MONTH(CURRENT_DATE()) AND YEAR(date_fall) = YEAR(CURRENT_DATE()) ORDER BY date_fall ;";
+		 $sql = "SELECT `shortfalls`.`date_fall`, `shortfalls`.`downtime` AS time_t, `shortfalls`.`reason`,`shortfalls`.`action_plan`
                 FROM  `shortfalls` 
-                WHERE machine_id = 2 AND MONTH(date_fall) = MONTH(CURRENT_DATE()) AND YEAR(date_fall) = YEAR(CURRENT_DATE()) ORDER BY date_fall ;";
+                WHERE machine_id = 2 
+				ORDER BY date_fall ;";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();
@@ -1706,9 +1710,13 @@ WHERE outer_l.material_id IS NULL AND middle_l.material_id IS NULL ORDER BY mate
      */
     public function giveWaste()
     {
-        $sql = "SELECT `date_waste`,`waste`.`shift`,`waste`.`waste`,username
+//        $sql = "SELECT `date_waste`,`waste`.`shift`,`waste`.`waste`,username
+//                FROM  `waste` NATURAL JOIN users
+//                WHERE machine_id=2 AND MONTH(date_waste) = MONTH(CURRENT_DATE()) AND YEAR(date_waste) = YEAR(CURRENT_DATE()) ORDER BY date_waste DESC;";
+		 $sql = "SELECT `date_waste`,`waste`.`shift`,`waste`.`waste`,username
                 FROM  `waste` NATURAL JOIN users
-                WHERE machine_id=2 AND MONTH(date_waste) = MONTH(CURRENT_DATE()) AND YEAR(date_waste) = YEAR(CURRENT_DATE()) ORDER BY date_waste DESC;";
+                WHERE machine_id=2 
+				ORDER BY date_waste DESC;";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();

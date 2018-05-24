@@ -68,65 +68,123 @@
 					<div class="col-lg-6 form-group">
                         <label for="date">680 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="680cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone680('680cone')" data-toggle="modal" data-target="#modal1">Edit 680 cone</button>
+                        <button class="btn btn-default" onclick="cone('680cone')" data-toggle="modal" data-target="#modal1">Edit 680 cone</button>
                     </div>
                     <div class="col-lg-6 form-group">
                         <label for="date">1010 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="1010cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone1010('1010cone')" data-toggle="modal" data-target="#modal1">Edit 1010 cone</button>
+                        <button class="btn btn-default" onclick="cone('1010cone')" data-toggle="modal" data-target="#modal1">Edit 1010 cone</button>
 					</div>				
 				<h2>Shrink Film</h2>
 					<div class="col-lg-2 form-group">
+                        <label for="date">300 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="300cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('300cone')" data-toggle="modal" data-target="#modal1">Edit 300 cone</button>
+                    </div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">330 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="330cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('330cone')" data-toggle="modal" data-target="#modal1">Edit 330 cone</button>
+                    </div>
+					<div class="col-lg-2 form-group">
                         <label for="date">340 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="340cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone340('340cone')" data-toggle="modal" data-target="#modal1">Edit 340 cone</button>
+                        <button class="btn btn-default" onclick="cone('340cone')" data-toggle="modal" data-target="#modal1">Edit 340 cone</button>
                     </div>
                     <div class="col-lg-2 form-group">
                         <label for="date">350 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="350cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone350('350cone')" data-toggle="modal" data-target="#modal1">Edit 350 cone</button>
+                        <button class="btn btn-default" onclick="cone('350cone')" data-toggle="modal" data-target="#modal1">Edit 350 cone</button>
+					</div>
+				
+                    <div class="col-lg-2 form-group">
+                        <label for="date">355 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="355cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('355cone')" data-toggle="modal" data-target="#modal1">Edit 355 cone</button>
 					</div>
 					<div class="col-lg-2 form-group">
                         <label for="date">360 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="360cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone360('360cone')" data-toggle="modal" data-target="#modal1">Edit 360 cone</button>
+                        <button class="btn btn-default" onclick="cone('360cone')" data-toggle="modal" data-target="#modal1">Edit 360 cone</button>
                     </div>
                     <div class="col-lg-2 form-group">
                         <label for="date">370 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="370cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone370('370cone')" data-toggle="modal" data-target="#modal1">Edit 370 cone</button>
+                        <button class="btn btn-default" onclick="cone('370cone')" data-toggle="modal" data-target="#modal1">Edit 370 cone</button>
 					</div>
 				
                     <div class="col-lg-2 form-group">
                         <label for="date">380 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="380cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone380('380cone')" data-toggle="modal" data-target="#modal1">Edit 380 cone</button>
+                        <button class="btn btn-default" onclick="cone('380cone')" data-toggle="modal" data-target="#modal1">Edit 380 cone</button>
+					</div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">400 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="400cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('400cone')" data-toggle="modal" data-target="#modal1">Edit 400 cone</button>
 					</div>
 					<div class="col-lg-2 form-group">
                         <label for="date">420 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="420cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone420('420cone')" data-toggle="modal" data-target="#modal1">Edit 420 cone</button>
+                        <button class="btn btn-default" onclick="cone('420cone')" data-toggle="modal" data-target="#modal1">Edit 420 cone</button>
 					</div>
+				<div class="col-lg-2 form-group">
+                        <label for="date">440 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="440cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('440cone')" data-toggle="modal" data-target="#modal1">Edit 440 cone</button>
+                    </div>
 				<div class="col-lg-2 form-group">
                         <label for="date">445 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="445cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone445('445cone')" data-toggle="modal" data-target="#modal1">Edit 445 cone</button>
+                        <button class="btn btn-default" onclick="cone('445cone')" data-toggle="modal" data-target="#modal1">Edit 445 cone</button>
+                    </div>
+				
+				<div class="col-lg-2 form-group">
+                        <label for="date">450 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="450cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('450cone')" data-toggle="modal" data-target="#modal1">Edit 450 cone</button>
                     </div>
                     <div class="col-lg-2 form-group">
                         <label for="date">500 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="500cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone500('500cone')" data-toggle="modal" data-target="#modal1">Edit 500 cone</button>
+                        <button class="btn btn-default" onclick="cone('500cone')" data-toggle="modal" data-target="#modal1">Edit 500 cone</button>
 					</div>
 				
                     <div class="col-lg-2 form-group">
                         <label for="date">532 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="532cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone532('532cone')" data-toggle="modal" data-target="#modal1">Edit 532 cone</button>
+                        <button class="btn btn-default" onclick="cone('532cone')" data-toggle="modal" data-target="#modal1">Edit 532 cone</button>
+					</div>
+				
+					<div class="col-lg-2 form-group">
+                        <label for="date">600 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="600cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('600cone')" data-toggle="modal" data-target="#modal1">Edit 600 cone</button>
 					</div>
 					<div class="col-lg-2 form-group">
                         <label for="date">665 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="665cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone665('665cone')" data-toggle="modal" data-target="#modal1">Edit 665 cone</button>
+                        <button class="btn btn-default" onclick="cone('665cone')" data-toggle="modal" data-target="#modal1">Edit 665 cone</button>
+					</div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">680 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="680cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('680cone')" data-toggle="modal" data-target="#modal1">Edit 680 cone</button>
+					</div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">730 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="730cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('730cone')" data-toggle="modal" data-target="#modal1">Edit 730 cone</button>
+					</div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">770 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="770cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('770cone')" data-toggle="modal" data-target="#modal1">Edit 770 cone</button>
+					</div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">870 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="870cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('870cone')" data-toggle="modal" data-target="#modal1">Edit 870 cone</button>
 					</div>
             </div>
         </div>
@@ -178,77 +236,11 @@
             document.getElementById("titleModal").innerHTML = "Edit Target for Waste";
             document.getElementById("labelModal").innerHTML = "New target for waste (in %)";
         }
-        function cone680(name)
-        {
-            document.getElementById("action").value = name;     
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for rolls 680";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 680 mm (in kgs)";
-        }
-        function cone1010(name)
-        {
-            document.getElementById("action").value = name;    
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for roll 1010";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 1010 mm (in kgs)";
-        }
-		function cone340(name)
-        {
-            document.getElementById("action").value = name;     
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for rolls 340";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 340 mm (in kgs)";
-        }
-        function cone350(name)
-        {
-            document.getElementById("action").value = name;     
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for roll 350";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 350 mm (in kgs)";
-        }
-		function cone360(name)
-        {
-            document.getElementById("action").value = name;    
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for rolls 360";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 360 mm (in kgs)";
-        }
-        function cone370(name)
+        function cone(name)
         {
             document.getElementById("action").value = name;       
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for roll 370";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 370 mm (in kgs)";
-        }
-		function cone380(name)
-        {
-            document.getElementById("action").value = name;      
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for rolls 380";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 380 mm (in kgs)";
-        }
-        function cone420(name)
-        {
-            document.getElementById("action").value = name;       
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for roll 420";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 420 mm (in kgs)";
-        }
-		function cone445(name)
-        {
-            document.getElementById("action").value = name;    
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for rolls 445";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 445 mm (in kgs)";
-        }
-        function cone500(name)
-        {
-            document.getElementById("action").value = name;       
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for roll 500";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 500 mm (in kgs)";
-        }
-		function cone532(name)
-        {
-            document.getElementById("action").value = name;      
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for rolls 532";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 532 mm (in kgs)";
-        }
-        function cone665(name)
-        {
-            document.getElementById("action").value = name;       
-            document.getElementById("titleModal").innerHTML = "Edit cone weight for roll 665";
-            document.getElementById("labelModal").innerHTML = "New cone weight for 665 mm (in kgs)";
+            document.getElementById("titleModal").innerHTML = "Edit weight for roll "  + name;
+            document.getElementById("labelModal").innerHTML = "New weight for "+ name +" mm (in kgs)";
         }
     </script>
 

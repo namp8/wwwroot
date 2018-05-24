@@ -38,9 +38,24 @@
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
         }
     }
+	else if(!empty($_POST['approveAll']))
+    {
+        echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
+        if(!$stock->receiveAll(5)){
+
+            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
+        }
+        else
+        {
+            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-info show");</script>';
+        }
+    }
 ?>
     </div>
 
+	<form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+ 		<input type="submit" id="approveAll" name="approveAll" class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" value="Receive All">
+     </form>
 
         <div class="panel panel-info">
             <div class="panel-heading"> Historic Receipts </div>
