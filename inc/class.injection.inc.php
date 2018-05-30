@@ -196,6 +196,47 @@ ORDER BY `materials`.`material_grade`;";
         }
     }
 	
+	public function giveSettings()
+    {
+        $sql = "SELECT material_name, material_grade,
+    `injection_sacks_formulas`.`cycle`,
+    `injection_sacks_formulas`.`cavities`,
+    `injection_sacks_formulas`.`target`,
+    `injection_sacks_formulas`.`unit_weight`,
+    `injection_sacks_formulas`.`pcs_sack`,
+    `injection_sacks_formulas`.`sack_weight`
+FROM `injection_sacks_formulas`
+JOIN `materials` ON  `materials`.material_id = `injection_sacks_formulas`.`material_id`
+WHERE `actual` = 1
+ORDER BY material_grade;";
+		
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				echo '<tr>
+                        <td>'. $row['material_name'] .'</td>
+                        <td class="text-right">'. number_format($row['cycle'],1,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['cavities'],0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['target'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['unit_weight'],1,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['pcs_sack'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['sack_weight'],1,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['percentage'],1,'.',',')  .'</td>
+                    </tr>';
+				
+            }
+            $stmt->closeCursor();
+            
+            
+        }
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+    }
+	
 	public function giveFormula()
     {
         $sql = "SELECT `injection_formulas`.`injection_formula`,
@@ -302,10 +343,18 @@ ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
         } 
 
     }
-	
-	public function deleteFormula()
+	/**
+     * Checks and update a formula
+     *
+     * @return boolean  true if can update false if not
+     */
+    public function updateFormula()
     {
-        $type = $material = $remarks= "";
+        $product = $type = $material = $remarks= "";
+		
+        $product = trim($_POST["product"]);
+        $product = stripslashes($product);
+        $product = htmlspecialchars($product);
 		
         $type = trim($_POST["type"]);
         $type = stripslashes($type);
@@ -315,12 +364,66 @@ ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
         $material = stripslashes($material);
         $material = htmlspecialchars($material);
 		
+		if($material == -1)
+		{
+			$material = "NULL";
+		}
+		
+        $percentage = trim($_POST["percentage"]);
+        $percentage = stripslashes($percentage);
+        $percentage = htmlspecialchars($percentage);
+		
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
         
         $sql = "UPDATE  `injection_formulas`
                 SET `to` = CURRENT_DATE, `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
-                WHERE `material_id` = '".$material ."' AND `material_grade` = '".$type ."' AND `actual` = 1;";
+                WHERE `material_id` = ".$material ." AND `material_grade` = '".$product ."' AND `type` = '". $type."'AND `actual` = 1;
+				INSERT INTO `injection_formulas`(`injection_formula`,`material_grade`,`material_id`,`type`,
+`percentage`,`from`,`to`,`actual`,`remarks`) VALUES
+(NULL,'". $product."',". $material.",". $type.", ". $percentage.", CURRENT_DATE(),NULL,1, '". $remarks."');";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The material was successfully updated.';
+            return TRUE;
+        } catch (PDOException $e) {
+            echo '<strong>ERROR</strong> Could not update the material into the database. Please try again.<br>'. $e->getMessage(); 
+            return FALSE;
+        } 
+
+    }
+	
+	public function deleteFormula()
+    {
+        $product = $type = $material = $remarks= "";
+		
+        $product = trim($_POST["product"]);
+        $product = stripslashes($product);
+        $product = htmlspecialchars($product);
+		
+        $type = trim($_POST["type"]);
+        $type = stripslashes($type);
+        $type = htmlspecialchars($type);
+		
+        $material = trim($_POST["material"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+		
+		if($material == -1)
+		{
+			$material = "NULL";
+		}
+		
+        $remarks = stripslashes($_POST["remarks"]);
+        $remarks = htmlspecialchars($remarks);
+		
+        $sql = "UPDATE  `injection_formulas`
+                SET `to` = CURRENT_DATE, `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+                WHERE `material_id` = ".$material ." AND `material_grade` = '".$product ."' AND `type` = '". $type."'AND `actual` = 1;";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );

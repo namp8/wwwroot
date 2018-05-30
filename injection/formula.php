@@ -42,6 +42,18 @@
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
         }
     }
+    if(!empty($_POST['action']) and $_POST['action'] ==2)
+    {
+        echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
+        if($injection->updateFormula()){
+
+            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
+        }
+        else
+        {
+            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
+        }
+    }
     if(!empty($_POST['action']) and $_POST['action'] ==3)
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
@@ -64,8 +76,9 @@
         <div class="dropdown" >
             <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Edit Formula&nbsp&nbsp <i class="fa fa-caret-down" style="display: inline;"></i></button>
             <ul class="dropdown-menu dropdown-menu-right">
-                <li><a onclick="add()" data-toggle="modal" data-target="#modal1">Add material</a></li>
-                <li><a onclick="deleteFormula()" data-toggle="modal" data-target="#modal1">Delete material</a></li>
+                <li><a onclick="add()" data-toggle="modal" data-target="#modal1">Add formula</a></li>
+                <li><a onclick="update()" data-toggle="modal" data-target="#modal1">Update formula</a></li>
+                <li><a onclick="deleteFormula()" data-toggle="modal" data-target="#modal1">Delete formula</a></li>
             </ul>
          </div>
     </div>
@@ -155,7 +168,7 @@
                     </ul>
                 </div>
             </div>
-            <div class="form-group" >
+            <div class="form-group" id="percentageform">
                 <label for="percentage">Percentage <span class="text-danger">*</span></label>
 				<input type="number" class="form-control" step="0.1" min="0.1" id="percentage" name="percentage"></div>
 			 <div class="form-group">
@@ -177,19 +190,25 @@
             document.getElementById("action").value = 1;
             document.getElementById("buttonForm").innerHTML = "Add";
             document.getElementById("buttonForm").setAttribute("class","btn btn-info");    
-            document.getElementById("panelTitle").innerHTML = "Add material";
-            document.getElementById("kgForm").style.display = "";
-            document.getElementById("bagsForm").style.display = "";
+            document.getElementById("panelTitle").innerHTML = "Add formula";
+            document.getElementById("percentageform").style.display = "";
         }
 
+
+        function update() {
+            document.getElementById("action").value = 2;
+            document.getElementById("buttonForm").innerHTML = "Update";
+            document.getElementById("buttonForm").setAttribute("class","btn btn-info");    
+            document.getElementById("panelTitle").innerHTML = "Update formula";
+            document.getElementById("percentageform").style.display = "";
+        }
 
         function deleteFormula() {
             document.getElementById("action").value = 3;
             document.getElementById("buttonForm").innerHTML = "Delete";
             document.getElementById("buttonForm").setAttribute("class","btn btn-danger");  
-            document.getElementById("panelTitle").innerHTML = "Delete material";
-            document.getElementById("kgForm").style.display = "none";
-            document.getElementById("bagsForm").style.display = "none";
+            document.getElementById("panelTitle").innerHTML = "Delete formula";
+            document.getElementById("percentageform").style.display = "none";
         }
 
 

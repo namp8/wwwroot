@@ -44,6 +44,18 @@
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
         }
     }
+	else if(!empty($_POST['approveAll']))
+    {
+        echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
+        if(!$stock->receiveAll(32)){
+
+            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
+        }
+        else
+        {
+            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-info show");</script>';
+        }
+    }
 ?>
     </div>
 

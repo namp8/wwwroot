@@ -28,7 +28,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
 		<?php
-    if(!empty($_POST['shift']) )
+    if(!empty($_POST['shift']) and !empty($_POST['product']))
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
         if($injection->createProduction()){
@@ -262,17 +262,17 @@ $injection->giveProduction(2);
 							<div class="row">
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-danger">Produced Waste in Kgs <span class="text-danger">*</span></label>
-									<input type="numer" class="form-control input-sm" name="waste" id="waste" value="0"  step="0.001" min="1"  onkeyup="calculateTotal()"  required>
+									<input type="numer" class="form-control input-sm" name="waste" id="waste" value="0"  step="0.001" min="0"  onkeyup="calculateTotal()"  required>
 								</div>
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-danger">Produced Waste in Pcs<span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="wastepcs" id="wastepcs"  value="0"  step="1" min="1" required  onkeyup="calculateGood()" >
+									<input type="number" class="form-control input-sm" name="wastepcs" id="wastepcs"  value="0"  step="1" min="0" required  onkeyup="calculateGood()" >
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-success">Total Raw material used in kgs<span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="consumed" id="consumed" value="0"  step="0.01" min="1" required readonly>
+									<input type="number" class="form-control input-sm" name="consumed" id="consumed" value="0"  step="0.01" min="1" required >
 								</div>
 								<div class="col-md-6 form-group">
 									<label for="size" class="text-success">Good production in Pcs <span class="text-danger">*</span></label>
