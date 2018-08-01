@@ -10,6 +10,8 @@
     include_once "../../inc/class.sacks.inc.php";
     $sacks = new Sacks($db);
 
+	include_once "../../inc/class.users.inc.php";
+    $users = new Users($db);
 ?>
 	<ol class="breadcrumb">
 		<li class="breadcrumb-item">
@@ -209,7 +211,7 @@
 										</span>
 									</div>
 								</div>
-								<div class="col-md-3 form-group">
+								<div class="col-md-4 form-group">
 									<label for="shift">Shift <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="shift" name="shift" value="1" required>
 									<div class="dropdown">
@@ -220,10 +222,40 @@
 										</ul>
 									</div>
 								</div>
-								<div class="col-md-5 form-group">
+								<div class="col-md-4 form-group">
 									<label for="size">Machine <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="machine" name="machine" value="1" required>
 									<input type="text" class="form-control" step="1" min="1" id="machineName"  value="" disabled>
+								</div>
+							</div>
+							<div class="row">
+								
+								<div class="col-md-6 form-group">
+									<label for="shift">Operator 1 <span class="text-danger">*</span></label><br />
+									<input type="hidden" class="form-control" id="employee1" name="employee1" required>
+									<div class="btn-group">
+										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee1">&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu" role="menu" id="dropdown_employee1">
+											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee1" onkeyup="filterEmployee1()" width="100%"></li>
+											<?php
+	$sacks->operators1Dropdown();
+?>
+										</ul>
+									</div>
+								</div>
+								
+								<div class="col-md-6 form-group">
+									<label for="shift">Operator 2 </label><br />
+									<input type="hidden" class="form-control" id="employee2" name="employee2" >
+									<div class="btn-group">
+										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee2">&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu" role="menu" id="dropdown_employee2">
+											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee2" onkeyup="filterEmployee2()" width="100%"></li>
+											<?php
+	$sacks->operators2Dropdown();
+?>
+										</ul>
+									</div>
 								</div>
 							</div>
 							<div class="panel panel-info">
@@ -321,19 +353,49 @@
     
 ?>
 			<script>
+				function selectEmployee1(id, name) {
+					document.getElementById("btn_employee1").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("employee1").value = id;
+				}
+				
+				function selectEmployee2(id, name) {
+					document.getElementById("btn_employee2").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("employee2").value = id;
+				}
+
+				function filterEmployee1() {
+					var input, filter, ul, li, a, i;
+					input = document.getElementById("searchEmployee1");
+					filter = input.value.toUpperCase();
+					div = document.getElementById("dropdown_employee1");
+					a = div.getElementsByTagName("a");
+					for (i = 0; i < a.length; i++) {
+						if (a[i].id.toUpperCase().startsWith(filter)) {
+							a[i].style.display = "";
+						} else {
+							a[i].style.display = "none";
+						}
+					}
+				}
+				
+				function filterEmployee2() {
+					var input, filter, ul, li, a, i;
+					input = document.getElementById("searchEmployee2");
+					filter = input.value.toUpperCase();
+					div = document.getElementById("dropdown_employee2");
+					a = div.getElementsByTagName("a");
+					for (i = 0; i < a.length; i++) {
+						if (a[i].id.toUpperCase().startsWith(filter)) {
+							a[i].style.display = "";
+						} else {
+							a[i].style.display = "none";
+						}
+					}
+				}
+				
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("shift").value = id;
-					if (id == 1) {
-						var d = new Date();
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					} else {
-						var d = new Date();
-						d.setDate(d.getDate() - 1);
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					}
 
 				}
 				
@@ -356,22 +418,30 @@
 				$(function() {
 					// #datePicker
 					$('#datetimepicker').datetimepicker({
-						format: 'DD/MM/YYYY'
+						format: 'DD/MM/YYYY',
+						defaultDate: moment()
 					});
 
-					$('#timepicker').datetimepicker({
-						format: 'HH:mm'
-					});
-					$('#timepicker2').datetimepicker({
-						format: 'HH:mm'
-					});
 
 					$('#datetimepicker').data("DateTimePicker").maxDate(new Date());
 
 					$('#datetimepicker2').datetimepicker({
-						format: 'DD/MM/YYYY'
+						format: 'DD/MM/YYYY',
+						defaultDate: moment()
 					});
-
+<?php 
+						   if(!$users->admin())
+						   {	
+							   echo "if(moment().weekday()==1)
+								{
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-2, 'days').millisecond(0).second(0).minute(0).hour(0));
+								}
+								else
+								{
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-1, 'days').millisecond(0).second(0).minute(0).hour(0));
+								}";
+						   }
+					?>	
 					$('#datetimepicker2').data("DateTimePicker").maxDate(new Date());
 
 					var d = new Date();

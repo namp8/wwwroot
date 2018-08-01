@@ -137,7 +137,7 @@ $materials->consumablesStockDropdown(1);
                 </div>
 			  	<div class="form-group">
                     <label for="difference">Variance<span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="1" id="difference" name="difference" readonly="readonly">
+                    <input type="number" class="form-control" min="0.001" id="difference" name="difference" readonly="readonly">
                 </div>
                 <div class="form-group">
                     <label for="remarks">Remarks</label>
@@ -271,7 +271,7 @@ $materials->consumablesStockDropdown(1);
 
                 var dd = {
                     content: [{
-                            text: 'List of materials in Warehouse stock',
+                            text: 'List of consumables in Warehouse stock',
                             style: 'header'
                         },
                         {
@@ -333,7 +333,7 @@ $materials->consumablesStockDropdown(1);
                     }};
 
                     pdfMake.createPdf(dd).open();
-                    pdfMake.createPdf(dd).download("List of materials in Warehouse stock "+new Date().toLocaleString() +'.pdf');
+                    pdfMake.createPdf(dd).download("List of consumables in Warehouse stock "+new Date().toLocaleString() +'.pdf');
                 }  
         </script>
     <?php

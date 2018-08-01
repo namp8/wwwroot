@@ -67,7 +67,7 @@
                         <li><a onclick="selectReport(4)">Cutting - Raw Material Consumption Report</a></li>
                         <li><a onclick="selectReport(5)">Cutting - Short Fall and Downtime Report</a></li>
                         <li><a onclick="selectReport(6)">Cutting - Rolls on Floor Details</a></li>
-                        <li><a onclick="selectReport(7)">Cutting - Cutting Sacks on Floor Details</a></li>
+                        <li><a onclick="selectReport(7)">Cutting - Cut Goods not packed Details</a></li>
                     </ul>
                 </div>
             </div>

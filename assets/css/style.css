@@ -40,6 +40,9 @@
 .btn-link.disabled {
     color: #777;
 }
+.btn-link.danger {
+    color:  #a94442;
+}
 
 .breadcrumb-item + .breadcrumb-item::before {
     display: inline-block;

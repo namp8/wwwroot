@@ -68,6 +68,8 @@ class Materials
         }
     }
 	
+	
+	
 	 public function consumablesDropdown()
     {
         $sql = "SELECT `materials`.`material_id`,
@@ -161,7 +163,84 @@ class Materials
         $sql = "SELECT `materials`.`material_id`,`materials`.`material_name`,`materials`.`material_grade`,`stock_materials`.`bags`
 				FROM `stock_materials`
 				NATURAL JOIN materials
-				WHERE machine_id = ". $machine ." AND `consumables` = 0
+				WHERE machine_id = ". $machine ." AND `material` = 1
+                ORDER BY `materials`.`material_name`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['material_id'];
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGS = $row['bags'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\',\''. $BAGS .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	
+	public function sparePartsStockDropdown($machine)
+    {
+        $sql = "SELECT `materials`.`material_id`,`materials`.`material_name`,`materials`.`material_grade`,`stock_materials`.`bags`
+				FROM `stock_materials`
+				NATURAL JOIN materials
+				WHERE machine_id = ". $machine ." AND `spare_parts` = 1
+                ORDER BY `materials`.`material_name`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['material_id'];
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGS = $row['bags'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\',\''. $BAGS .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	
+	public function inksStockDropdown($machine)
+    {
+        $sql = "SELECT `materials`.`material_id`,`materials`.`material_name`,`materials`.`material_grade`,`stock_materials`.`bags`
+				FROM `stock_materials`
+				NATURAL JOIN materials
+				WHERE machine_id = ". $machine ." AND `color` = 1
+                ORDER BY `materials`.`material_name`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['material_id'];
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGS = $row['bags'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\',\''. $BAGS .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	public function masterbatchStockDropdown($machine)
+    {
+        $sql = "SELECT `materials`.`material_id`,`materials`.`material_name`,`materials`.`material_grade`,`stock_materials`.`bags`
+				FROM `stock_materials`
+				NATURAL JOIN materials
+				WHERE machine_id = ". $machine ." AND `master_batch` = 1
                 ORDER BY `materials`.`material_name`;";
         if($stmt = $this->_db->prepare($sql))
         {

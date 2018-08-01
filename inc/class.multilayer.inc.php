@@ -2545,10 +2545,10 @@ WHERE outer_l.material_id IS NULL AND middle_l.material_id IS NULL ORDER BY mate
             $answer = $answer. " ". explode(":", $TOTAL)[1] . " minutes. ";
 		}
 		
-        echo '</tbody><tfoot><tr  class="active">
+		echo '</tbody><tfoot><tr  class="active">
+			<th style="text-align:right"></th>
 			<th style="text-align:right">Total</th>
-			<th style="text-align:right">'.$TOTAL.'</th>
-			<th style="text-align:right">'.$answer.'</th>
+			<th style="text-align:right"></th>
 			<th></th></tr></tfoot>';
         echo '<script>document.getElementById("divChart1").setAttribute("class","col-md-12");</script>';
         echo '<script>document.getElementById("chartContainer").style= "height:200px;width:100%";</script>';

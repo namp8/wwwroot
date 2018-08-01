@@ -74,6 +74,8 @@ if(!$stock->access(3))
                                 <th>Date</th>
                                 <th>From</th>
                                 <th>Material</th>
+                                <th>Bags Required</th>
+                                <th>Requested By</th>
                                 <th>Bags Issued</th>
                                 <th>Issued By</th>
                                 <th>Bags Received</th>
@@ -86,6 +88,8 @@ if(!$stock->access(3))
 								<th></th>
 								<th></th>
 								<th></th>
+								<th>Total Required</th>
+								<th style="text-align:right"></th>
 								<th>Total Issued</th>
 								<th style="text-align:right"></th>
 								<th>Total Received</th>
@@ -96,7 +100,7 @@ if(!$stock->access(3))
 						</tfoot>
                         <tbody>
 <?php  
-    $stock->stockReceiptsWarehouse(9);
+    $stock->stockReceipts(9);
 ?>
                         </tbody>
                     </table>
@@ -291,6 +295,17 @@ if(!$stock->access(3))
 						}, 0);
 					$(api.column(6).footer()).html(
 						'' + pageTotal6.toLocaleString()
+					);
+					pageTotal8 = api
+						.column(8, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					$(api.column(8).footer()).html(
+						'' + pageTotal8.toLocaleString()
 					);
 				}
             } );

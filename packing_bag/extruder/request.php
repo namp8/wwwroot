@@ -11,6 +11,8 @@
 	
 	include_once "../../inc/class.packing.inc.php";
     $packing = new Packing($db);
+	include_once "../../inc/class.users.inc.php";
+    $users = new Users($db);
 ?>
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -99,7 +101,12 @@
 <div class="form-group">
                 <label for="date">Date <span class="text-danger">*</span></label>
                 <div class='input-group date' id='datetimepicker'>
-                    <input type='text' class="form-control" id="date" name="date" required/>
+                    <input type='text' class="form-control" id="date" name="date" required <?php 
+						   if(!$users->admin())
+						   {	
+							   echo 'readonly';
+						   }
+						   ?>/>
                     <span class="input-group-addon">
                         <span class="fa fa-calendar"></span>
                     </span>
@@ -167,7 +174,8 @@
     <script>
         $(document).ready(function() {
                 $('#datetimepicker').datetimepicker({         
-                        format: 'DD/MM/YYYY'
+                        format: 'DD/MM/YYYY',
+						defaultDate: moment()
                     });
                 
                 $('#datetimepicker').data("DateTimePicker").maxDate(new Date());

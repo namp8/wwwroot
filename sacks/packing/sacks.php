@@ -10,6 +10,8 @@
     include_once "../../inc/class.sacks.inc.php";
     $sacks = new Sacks($db);
 
+	include_once "../../inc/class.users.inc.php";
+    $users = new Users($db);
 ?>
 	<ol class="breadcrumb">
 		<li class="breadcrumb-item">
@@ -227,7 +229,7 @@
 								<div class="col-md-4 form-group">
 									<label for="date">Date <span class="text-danger">*</span></label>
 									<div class='input-group date' id='datetimepicker2'>
-										<input type='text' class="form-control" id="date" name="date" required/>
+										<input type='text' class="form-control" id="date" name="date" required  />
 										<span class="input-group-addon">
                         <span class="fa fa-calendar"></span>
 										</span>
@@ -342,16 +344,6 @@
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("shift").value = id;
-					if (id == 1) {
-						var d = new Date();
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					} else {
-						var d = new Date();
-						d.setDate(d.getDate() - 1);
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					}
 
 				}
 				
@@ -374,22 +366,30 @@
 				$(function() {
 					// #datePicker
 					$('#datetimepicker').datetimepicker({
-						format: 'DD/MM/YYYY'
+						format: 'DD/MM/YYYY',
+						defaultDate: moment()
 					});
 
-					$('#timepicker').datetimepicker({
-						format: 'HH:mm'
-					});
-					$('#timepicker2').datetimepicker({
-						format: 'HH:mm'
-					});
 
 					$('#datetimepicker').data("DateTimePicker").maxDate(new Date());
 
 					$('#datetimepicker2').datetimepicker({
-						format: 'DD/MM/YYYY'
+						format: 'DD/MM/YYYY',
+						defaultDate: moment()
 					});
-
+<?php 
+						   if(!$users->admin())
+						   {	
+							   echo "if(moment().weekday()==1)
+								{
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-2, 'days').millisecond(0).second(0).minute(0).hour(0));
+								}
+								else
+								{
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-1, 'days').millisecond(0).second(0).minute(0).hour(0));
+								}";
+						   }
+					?>	
 					$('#datetimepicker2').data("DateTimePicker").maxDate(new Date());
 
 					var d = new Date();

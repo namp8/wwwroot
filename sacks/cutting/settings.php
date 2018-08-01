@@ -46,9 +46,14 @@
     <div class="panel panel-info">
         <div class="panel-heading"> Settings </div>
         <div class="panel-body">
+			
             <div class="text-center" >
+				<p>Net sack weight = Gross sack weight - sack weight - label weight</p>
+				<p>Label weight = (Gross sack weight - sack weight)*(One Label weight / One Packet weight)</p>
+				<br>
+				<br>
 				<div class="row">
-                    <div class="col-lg-3 col-lg-offset-3 form-group">
+                    <div class="col-lg-3 form-group">
                         <label for="date">Target waste:</label>
                         <input type='text'  class="form-control text-center" id="waste" disabled/><br />
                         <button class="btn btn-default" onclick="targetWaste('waste')" data-toggle="modal" data-target="#modal1">Edit Target waste</button>
@@ -56,7 +61,17 @@
                     <div class="col-lg-3 form-group">
                         <label for="date">Sack weight:</label>
                         <input type='text'  class="form-control text-center" id="sack" disabled /><br />
-                        <button  class="btn btn-default" onclick="sack('sack')" data-toggle="modal" data-target="#modal1">Edit cone</button>
+                        <button  class="btn btn-default" onclick="sack('sack')" data-toggle="modal" data-target="#modal1">Edit sack</button>
+                    </div>
+					<div class="col-lg-3 form-group">
+                        <label for="date">One Label weight:</label>
+                        <input type='text'  class="form-control text-center" id="label" disabled /><br />
+                        <button  class="btn btn-default" onclick="label('label')" data-toggle="modal" data-target="#modal1">Edit label</button>
+                    </div>
+					<div class="col-lg-3 form-group">
+                        <label for="date">One Packet weight:</label>
+                        <input type='text'  class="form-control text-center" id="packet" disabled /><br />
+                        <button  class="btn btn-default" onclick="packet('packet')" data-toggle="modal" data-target="#modal1">Edit packet</button>
                     </div></div>
 				<div class="row">
                     <div class="col-lg-2  form-group">
@@ -111,7 +126,6 @@
                    
             </div>
         </div>
-    </div>
  <?php
     $sacks->giveSettings(10);
 ?>
@@ -147,11 +161,23 @@
             document.getElementById("titleModal").innerHTML = "Edit Target for Waste";
             document.getElementById("labelModal").innerHTML = "New target for waste (in %)";
         }
-        function cone(name)
+        function sack(name)
         {
             document.getElementById("action").value = name;     
             document.getElementById("titleModal").innerHTML = "Edit sack weight ";
             document.getElementById("labelModal").innerHTML = "New sack weight (in kgs)";
+        }
+        function label(name)
+        {
+            document.getElementById("action").value = name;     
+            document.getElementById("titleModal").innerHTML = "Edit label weight ";
+            document.getElementById("labelModal").innerHTML = "New label weight (in kgs)";
+        }
+        function packet(name)
+        {
+            document.getElementById("action").value = name;     
+            document.getElementById("titleModal").innerHTML = "Edit packet weight ";
+            document.getElementById("labelModal").innerHTML = "New packet weight (in kgs)";
         }
 		function target1(name)
         {

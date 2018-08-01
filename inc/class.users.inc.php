@@ -82,35 +82,10 @@ class Users
 	
 	/**
      * Access to other pages
-	 * 6 = settings
      */
-	public function access($page)
+	public function access($search)
 	{
-		$search = "";
-		if($page == 1 )
-		{
-			$search = "`warehouse_purchases`";
-		}
-		else if($page == 2 )
-		{
-			$search = "`warehouse_approve`";
-		}
-		else if($page == 3 )
-		{
-			$search = "`warehouse_issue`";
-		}
-		else if($page == 4 )
-		{
-			$search = "`warehouse_stock`";
-		}
-		else if($page == 5 )
-		{
-			$search = "`warehouse_reports`";
-		}
-		else if($page == 6 )
-		{
-			$search = "`settings`";
-		}
+		
 		
 		$sql = "SELECT ". $search ." as search
 				FROM `users`
@@ -133,7 +108,34 @@ class Users
         }
         else
         {
-            echo 'Something went wrong.';  
+            return false; 
+        }
+	}
+	
+	public function admin()
+	{
+		$sql = "SELECT admin
+				FROM `users`
+				WHERE user_id = ". $_SESSION['Userid'];
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                if($row['admin'] == 1)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            return false;  
         }
 	}
     

@@ -292,8 +292,9 @@ class Stock
 		
         //CHECK THE ACTUAL BAGS IN STOCK MATERIAL 
         $sql = "SELECT stock_material_id, bags, material_name, material_grade
-                FROM stock_materials NATURAL JOIN materials 
-                WHERE material_id = ". $material ." AND
+                FROM stock_materials 
+				JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id = ". $material ." AND
                 machine_id  = 1 ;";
         try
         {   
@@ -397,8 +398,9 @@ class Stock
 		
         //CHECK THE ACTUAL BAGS IN STOCK MATERIAL 
         $sql = "SELECT stock_material_id, bags, material_name, material_grade
-                FROM stock_materials NATURAL JOIN materials 
-                WHERE material_id = ". $material ." AND
+                FROM stock_materials 
+				JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id = ". $material ." AND
                 machine_id  = 1 ;";
         try
         {   
@@ -493,8 +495,9 @@ class Stock
 		
         //CHECK THE ACTUAL BAGS IN STOCK MATERIAL 
         $sql = 'SELECT stock_material_id, bags, material_name, material_grade, material_id
-FROM stock_materials NATURAL JOIN materials 
-WHERE material_name = "UPVC PIPE 3 inch x 6 m" AND machine_id  = 1 ;';
+FROM stock_materials 
+JOIN materials ON materials.material_id = stock_materials.material_id
+WHERE material_name = "UPVC PIPES" AND machine_id  = 1 ;';
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -535,8 +538,9 @@ WHERE material_name = "UPVC PIPE 3 inch x 6 m" AND machine_id  = 1 ;';
 						
 						//CHECK THE ACTUAL CONES IN STOCK MATERIAL 
 						$sql = "SELECT stock_material_id, bags, material_name, material_grade
-								FROM stock_materials NATURAL JOIN materials 
-								WHERE material_id = ". $material ." AND
+								FROM stock_materials 
+								JOIN materials ON materials.material_id = stock_materials.material_id
+								WHERE stock_materials.material_id = ". $material ." AND
 								machine_id  = 1 ;";
 						try
 						{   
@@ -677,8 +681,8 @@ WHERE material_name = "UPVC PIPE 3 inch x 6 m" AND machine_id  = 1 ;';
 					`rm_loans`.`remarks`,
 					`rm_loans`.`user_id`, username
 				FROM `rm_loans`
-				NATURAL JOIN materials
-				NATURAL JOIN users
+				JOIN materials ON materials.material_id = `rm_loans`.material_id
+				JOIN users ON users.user_id = `rm_loans`.user_id
 				WHERE date_arrived BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59' ";
         if($stmt = $this->_db->prepare($sql))
         {
@@ -769,8 +773,8 @@ WHERE material_name = "UPVC PIPE 3 inch x 6 m" AND machine_id  = 1 ;';
 				`local_purchases`.`user_id`, username,
 				`local_purchases`.`cost_kg`
 			FROM `local_purchases`
-			NATURAL JOIN materials
-			NATURAL JOIN users
+			JOIN materials ON materials.material_id = local_purchases.material_id
+			JOIN users ON users.user_id = local_purchases.user_id
 			WHERE date_arrived BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59' ;";
         if($stmt = $this->_db->prepare($sql))
         {
@@ -812,7 +816,7 @@ WHERE material_name = "UPVC PIPE 3 inch x 6 m" AND machine_id  = 1 ;';
     `transformations`.`qty_to`,username
 FROM `transformations`
 JOIN materials ON materials.material_id = material_to
-NATURAL JOIN users
+JOIN users ON users.user_id = transformations.user_id
 WHERE `pvc`=1 
 ORDER BY `date` DESC;";
         
@@ -854,8 +858,8 @@ ORDER BY `date` DESC;";
 					`rm_loans`.`remarks`,
 					`rm_loans`.`user_id`, username
 				FROM `rm_loans`
-				NATURAL JOIN materials
-				NATURAL JOIN users
+				JOIN materials ON materials.material_id = `rm_loans`.material_id
+				JOIN users ON users.user_id = `rm_loans`.user_id
 				WHERE MONTH(date_arrived) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_arrived) = YEAR(CURRENT_DATE())
 				ORDER BY date_arrived DESC;";
         
@@ -903,8 +907,8 @@ ORDER BY `date` DESC;";
 				`local_purchases`.`user_id`, username,
 				`local_purchases`.`cost_kg`
 			FROM `local_purchases`
-			NATURAL JOIN materials
-			NATURAL JOIN users
+			JOIN materials ON materials.material_id = local_purchases.material_id
+			JOIN users ON users.user_id = local_purchases.user_id
 			WHERE MONTH(date_arrived) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_arrived) = YEAR(CURRENT_DATE())
 			ORDER BY date_arrived DESC;";
         if($stmt = $this->_db->prepare($sql))
@@ -1596,7 +1600,140 @@ ORDER BY `date` DESC;";
     {
         $sql = "SELECT material_name, material_grade, bags, kgs_bag
                 FROM  `stock_materials` 
-    			INNER JOIN materials ON materials.material_id = `stock_materials`.material_id AND `consumables` = 0
+    			INNER JOIN materials ON materials.material_id = `stock_materials`.material_id AND `material` = 1
+                WHERE machine_id = ". $x .";";
+        $totalBags = $totalkgs = 0.00;
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGS = $row['bags'];
+                $kgs = $BAGS*$row['kgs_bag'];
+                $totalBags = $totalBags + $BAGS;
+                $totalkgs = $totalkgs + $kgs;
+                 
+                echo '<tr>
+                        <td>'. $NAME .'</td>
+                        <td>'. $GRADE .'</td>
+                        <td class="text-right">'. number_format($BAGS,2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($kgs,2,'.',',') .'</td>
+                    </tr>';
+                }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
+	public function stockSpareParts($x)
+    {
+        $sql = "SELECT material_name, material_grade, bags, recycle, sacks, cutting
+                FROM  `stock_materials` 
+    			INNER JOIN materials ON materials.material_id = `stock_materials`.material_id AND `spare_parts` = 1
+                WHERE machine_id = ". $x .";";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGS = $row['bags'];
+				$SECTION = '';
+				
+				if($row['recycle'] == 1)
+				{
+					$SECTION = 'Recycle';
+				}
+				else if($row['sacks'] == 1)
+				{
+					$SECTION = 'Extruder';
+				}
+                else if($row['cutting'] == 1)
+				{
+					$SECTION = 'Cutting';
+				}
+				else
+				{
+					$SECTION = 'General';
+				}
+                echo '<tr>
+                        <td>'. $SECTION .'</td>
+                        <td>'. $NAME .'</td>
+                        <td>'. $GRADE .'</td>
+                        <td class="text-right">'. number_format($BAGS,2,'.',',') .'</td>
+                    </tr>';
+                }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
+	 public function stockInksSolvents($x)
+    {
+        $sql = "SELECT material_name, material_grade, bags, kgs_bag
+                FROM  `stock_materials` 
+    			INNER JOIN materials ON materials.material_id = `stock_materials`.material_id AND `color` = 1
+                WHERE machine_id = ". $x .";";
+        $totalBags = $totalkgs = 0.00;
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGS = $row['bags'];
+                $kgs = $BAGS*$row['kgs_bag'];
+                $totalBags = $totalBags + $BAGS;
+                $totalkgs = $totalkgs + $kgs;
+                 
+                echo '<tr>
+                        <td>'. $NAME .'</td>
+                        <td>'. $GRADE .'</td>
+                        <td class="text-right">'. number_format($BAGS,2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($kgs,2,'.',',') .'</td>
+                    </tr>';
+                }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
+	 public function stockMasterbatch($x)
+    {
+        $sql = "SELECT material_name, material_grade, bags, kgs_bag
+                FROM  `stock_materials` 
+    			INNER JOIN materials ON materials.material_id = `stock_materials`.material_id AND `master_batch` = 1
                 WHERE machine_id = ". $x .";";
         $totalBags = $totalkgs = 0.00;
         if($stmt = $this->_db->prepare($sql))
@@ -1752,6 +1889,7 @@ ORDER BY `date` DESC;";
         }
     }
 	
+	
 	/**
      * Balance the stock materials in the location
      */
@@ -1863,8 +2001,8 @@ ORDER BY `date` DESC;";
 				//CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
 			$sql = "SELECT stock_material_id, bags, material_name, material_grade
 					FROM stock_materials
-					NATURAL JOIN materials
-					WHERE material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
+					JOIN materials ON materials.material_id = stock_materials.material_id
+					WHERE stock_materials.material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
 					machine_id IN (SELECT machine_from FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .");";
 			try
 			{   
@@ -1898,6 +2036,7 @@ ORDER BY `date` DESC;";
 							$stmt->execute();
 							$stmt->closeCursor();
 							echo '<strong>SUCCESS!</strong> The <strong>'. $bags .'</strong>  bags/drumps/pieces of the material:<b> '.$MATERIAL .' - '. $GRADE.' </b>were successfully approved for issue.';
+							 $this->send();
 							return TRUE;
 						} 
 						catch (PDOException $e) {
@@ -1923,15 +2062,14 @@ ORDER BY `date` DESC;";
 				return FALSE;
 			} 
 		}
-        
     }
 	
 	public function approveAll()
     {
         $sql = "SELECT `stock_materials_transfers`.`stock_materials_transfers_id`, material_name, material_grade, bags_required
 FROM `stock_materials_transfers`
-NATURAL JOIN materials
-WHERE status_transfer = 0;";
+JOIN materials ON materials.material_id = `stock_materials_transfers`.material_id
+WHERE status_transfer = 0 AND MONTH(date_required) >= MONTH(CURRENT_DATE()) AND YEAR(date_required) = YEAR(CURRENT_DATE());";
         try
         {   
 			
@@ -1948,8 +2086,8 @@ WHERE status_transfer = 0;";
 				
 				$sql = "SELECT stock_material_id, bags, material_name, material_grade
 						FROM stock_materials
-						NATURAL JOIN materials
-						WHERE material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
+						JOIN materials ON materials.material_id = stock_materials.material_id
+						WHERE stock_materials.material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
 						machine_id IN (SELECT machine_from FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .");";
 				if($stmt2 = $this->_db->prepare($sql))
 				{
@@ -2003,12 +2141,14 @@ WHERE status_transfer = 0;";
 				} 
             }
             $stmt->closeCursor(); 
+        $this->issueAll();
 			return TRUE;
         }
         catch (PDOException $e) {
             echo '<strong>ERROR</strong> Could not approve all the raw material request. Please try again.<br>'. $e->getMessage();
             return FALSE;
         } 
+		
     }
 	
 	
@@ -2017,8 +2157,8 @@ WHERE status_transfer = 0;";
     {
         $sql = "SELECT `stock_materials_transfers`.`stock_materials_transfers_id`, material_name, material_grade, bags_approved
 FROM `stock_materials_transfers`
-NATURAL JOIN materials
-WHERE status_transfer = 1;";
+JOIN materials ON materials.material_id = `stock_materials_transfers`.material_id
+WHERE status_transfer = 1 AND MONTH(date_required) >= MONTH(CURRENT_DATE()) AND YEAR(date_required) = YEAR(CURRENT_DATE());";
         try
         {   
 			
@@ -2036,8 +2176,8 @@ WHERE status_transfer = 1;";
 				//CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
 				$sql = "SELECT stock_material_id, bags, material_name, material_grade
 						FROM stock_materials 
-						NATURAL JOIN materials
-						WHERE material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
+						JOIN materials ON materials.material_id = stock_materials.material_id
+						WHERE stock_materials.material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
 						machine_id IN (SELECT machine_from FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .");";
 				if($stmt2 = $this->_db->prepare($sql))
 				{
@@ -2103,7 +2243,7 @@ WHERE status_transfer = 1;";
     {
         $sql = "SELECT `stock_materials_transfers`.`stock_materials_transfers_id`, material_name, material_grade, bags_issued
 FROM `stock_materials_transfers`
-NATURAL JOIN materials
+JOIN materials ON materials.material_id = stock_materials_transfers.material_id
 WHERE status_transfer = 2 AND machine_to = ". $machine .";";
         try
         {   
@@ -2121,8 +2261,8 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
 
 						//CHECK THE ACTUAL BAGS IN STOCK MATERIAL 
 				$sql = "SELECT stock_material_id, bags, material_name, material_grade, consumables
-						FROM stock_materials NATURAL JOIN materials 
-						WHERE material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
+						FROM stock_materials JOIN materials ON materials.material_id = stock_materials.material_id
+						WHERE stock_materials.material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
 						machine_id IN (SELECT machine_to FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .");";
 				try
 				{   
@@ -2241,7 +2381,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                 LEFT JOIN users u_approved ON stock_materials_transfers.user_id_approved = u_approved.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id
-                WHERE machine_from = 1 AND machine_to <> 1 AND (MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE()) OR status_transfer = 0) ORDER BY status_transfer, `date_required` DESC;";
+                WHERE machine_from = 1 AND machine_to <> 1 AND MONTH(date_required) >= MONTH(CURRENT_DATE()) AND YEAR(date_required) = YEAR(CURRENT_DATE()) ORDER BY status_transfer, `date_required` DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -2383,8 +2523,8 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
         //CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
         $sql = "SELECT stock_material_id, bags, material_name, material_grade
                 FROM stock_materials 
-				NATURAL JOIN materials
-                WHERE material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
+				JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
                 machine_id IN (SELECT machine_from FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .");";
         try
         {   
@@ -2572,7 +2712,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                 LEFT JOIN users u_issued ON stock_materials_transfers.user_id_issued = u_issued.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id
-                WHERE machine_from = 1 AND machine_to <> 1  AND (MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE()) OR status_transfer = 1)  
+                WHERE machine_from = 1 AND machine_to <> 1  AND MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE()) 
 				ORDER BY status_transfer, `date_required` DESC;";
 		
 		
@@ -3177,7 +3317,7 @@ ORDER BY material_name, material_grade;";
 					   ,GROUP_CONCAT(`stock_balance`.`remarks` SEPARATOR '') as remark
 					FROM `stock_balance`
     				LEFT JOIN materials ON materials.material_id = `stock_balance`.material_id
-					NATURAL JOIN users
+					JOIN users ON users.user_id = `stock_balance`.user_id
 					WHERE machine_id = ". $machine ." AND date_balance BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59' 
 					GROUP BY DATE_FORMAT(`date_balance`, '%m/%Y') , `stock_balance`.material_id
 					ORDER BY `date_balance` , `stock_balance`.material_id;";
@@ -3213,7 +3353,7 @@ ORDER BY material_name, material_grade;";
 					   ,GROUP_CONCAT(`stock_balance`.`remarks` SEPARATOR '') as remark
 					FROM `stock_balance`
     				LEFT JOIN materials ON materials.material_id = `stock_balance`.material_id
-					NATURAL JOIN users
+					JOIN users ON users.user_id = `stock_balance`.user_id
 					WHERE machine_id = ". $machine ." AND date_balance BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59' 
 					GROUP BY DATE_FORMAT(`date_balance`, '%Y') , `stock_balance`.material_id
 					ORDER BY `date_balance` , `stock_balance`.material_id;";
@@ -3249,7 +3389,7 @@ ORDER BY material_name, material_grade;";
 						oldbags, newbags,difference as diff,username as users,remarks as remark
 					FROM `stock_balance`
     				LEFT JOIN materials ON materials.material_id = `stock_balance`.material_id
-					NATURAL JOIN users
+					JOIN users ON users.user_id = `stock_balance`.user_id
 					WHERE machine_id = ". $machine ." AND date_balance BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59' 
 					ORDER BY `date_balance`;";
         }
@@ -3355,7 +3495,7 @@ ORDER BY material_name, material_grade;";
 				`local_purchases`.`cost_kg`
 			FROM `local_purchases`
     		LEFT JOIN materials ON materials.material_id = `local_purchases`.material_id
-			NATURAL JOIN users
+			JOIN users ON users.user_id = `local_purchases`.user_id
 			WHERE MONTH(date_arrived) = MONTH(CURRENT_DATE()) AND YEAR(date_arrived) = YEAR(CURRENT_DATE());";
         if($stmt = $this->_db->prepare($sql))
         {
@@ -3423,7 +3563,7 @@ ORDER BY material_name, material_grade;";
 		{
         	$sql = "SELECT `materials`.`material_id`
                 FROM `materials`
-				WHERE consumables = 1
+				WHERE consumables = 1 AND semifinished = 0
                 ORDER BY `materials`.`material_name`;";
 		}
 		
@@ -3587,7 +3727,7 @@ FROM
 								'%Y-%m-%d') AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
 						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
 					FROM
@@ -3625,6 +3765,7 @@ FROM
 							AND `rm_loans`.`material_id` IS NULL
 							AND `stock_materials_transfers`.`material_id` = ".$material."
 							AND `stock_materials_transfers`.machine_from = 1 
+							group by `stock_materials_transfers`.`date_required`
 					UNION ALL SELECT 
 						DATE_FORMAT(`stock_balance`.`date_balance`,
 								'%Y-%m-%d') AS datereport,
@@ -3803,7 +3944,7 @@ FROM
 			ORDER BY datereport
 			) movements GROUP BY DATE_FORMAT(datereport, '%m/%Y') ORDER BY datereport ) months, 
 			(SELECT @a:= 0) t) report
-NATURAL JOIN materials
+JOIN materials ON materials.material_id = report.material_id
 WHERE datereport BETWEEN '". $newDateString ."' AND '". $newDateString2 ."'
 ORDER BY report.datereport;";
 					
@@ -3955,12 +4096,13 @@ FROM
 							AND `local_purchases`.`material_id` IS NULL
 							AND `rm_loans`.`material_id` = ".$material." 
 					group by `rm_loans`.date_arrived, `rm_loans`.`material_id` 
+					
 					UNION ALL SELECT 
 						DATE_FORMAT(`stock_materials_transfers`.`date_required`,
 								'%Y-%m-%d') AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
 						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
 					FROM
@@ -3998,6 +4140,7 @@ FROM
 							AND `rm_loans`.`material_id` IS NULL
 							AND `stock_materials_transfers`.`material_id` = ".$material."
 							AND `stock_materials_transfers`.machine_from = 1 
+							group by `stock_materials_transfers`.`date_required`
 					UNION ALL SELECT 
 						DATE_FORMAT(`stock_balance`.`date_balance`,
 								'%Y-%m-%d') AS datereport,
@@ -4174,7 +4317,7 @@ FROM
 			ORDER BY datereport
 			) movements GROUP BY DATE_FORMAT(datereport, '%Y') ORDER BY datereport ) months, 
 			(SELECT @a:= 0) t) report
-NATURAL JOIN materials
+JOIN materials ON materials.material_id = report.material_id
 WHERE datereport BETWEEN '". $newDateString ."' AND '". $newDateString2 ."'
 ORDER BY report.datereport;";
 				}
@@ -4323,12 +4466,13 @@ FROM
 							AND `local_purchases`.`material_id` IS NULL
 							AND `rm_loans`.`material_id` = ".$material." 
 					group by `rm_loans`.date_arrived, `rm_loans`.`material_id` 
+					
 					UNION ALL SELECT 
 						DATE_FORMAT(`stock_materials_transfers`.`date_required`,
 								'%Y-%m-%d') AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
 						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
 					FROM
@@ -4366,6 +4510,7 @@ FROM
 							AND `rm_loans`.`material_id` IS NULL
 							AND `stock_materials_transfers`.`material_id` = ".$material."
 							AND `stock_materials_transfers`.machine_from = 1 
+							group by `stock_materials_transfers`.`date_required`
 					UNION ALL SELECT 
 						DATE_FORMAT(`stock_balance`.`date_balance`,
 								'%Y-%m-%d') AS datereport,
@@ -4543,7 +4688,7 @@ FROM
 			ORDER BY datereport
 			) movements GROUP BY DATE_FORMAT(datereport, '%Y-%m-%d') ORDER BY datereport ) months, 
 			(SELECT @a:= 0) t) report
-NATURAL JOIN materials
+JOIN materials ON materials.material_id = report.material_id
 WHERE datereport BETWEEN '". $newDateString ."' AND '". $newDateString2 ."'
 ORDER BY report.datereport;";
 
@@ -4571,7 +4716,35 @@ ORDER BY report.datereport;";
 							{
 								$DIFF = '<th class="text-right text-danger">'. number_format((float) $row2['difference'],0,'.',',') .'</th>';
 							}
-							echo '<tr>
+							if($x == 2)
+							{
+								$OPENING = $OPENING*25;
+								$IMPORT = $IMPORT*25;
+								$LOCAL = $LOCAL*25;
+								$OTHER = $OTHER*25;
+								$ISSUED = $ISSUED*25 ;
+								$CLOSING = $CLOSING*25;
+								if($row2['difference'] != 0)
+								{
+									$DIFFERENCE = $row2['difference']*25;
+									$DIFF = '<th class="text-right text-danger">'. number_format((float) $DIFFERENCE,0,'.',',') .'</th>';
+								}
+								echo '<tr>
+									<td class="text-right">'. $DATE .'</td>
+                        			<td>'. $MATERIAL .' - '. $GRADE .'</td>
+									<td class="text-right">'. number_format((float) $OPENING,2,'.',',') .'</td>
+									<td class="text-right">'. number_format((float) $IMPORT,2,'.',',') .'</td>
+									<td class="text-right">'. number_format((float) $LOCAL,2,'.',',') .'</td>
+									<td class="text-right">'. number_format((float) $OTHER,2,'.',',') .'</td>
+									<td class="text-right">'. number_format((float) $ISSUED,2,'.',',') .'</td>';
+								echo $DIFF;
+								echo '
+										<td class="text-right">'. number_format((float) $CLOSING,2,'.',',') .'</td>
+									</tr>';
+							}
+							else
+							{
+								echo '<tr>
 									<td class="text-right">'. $DATE .'</td>
                         			<td>'. $MATERIAL .' - '. $GRADE .'</td>
 									<td class="text-right">'. number_format((float) $OPENING,2,'.',',') .'</td>
@@ -4583,6 +4756,8 @@ ORDER BY report.datereport;";
 							echo '
 									<td class="text-right">'. number_format((float) $CLOSING,2,'.',',') .'</td>
 								</tr>';
+							}
+							
 						}
 						
 						$stmt2->closeCursor();
@@ -4609,19 +4784,20 @@ ORDER BY report.datereport;";
 	 /**
      * Loads the table of all the stock reques of the raw materials
      * This function outputs <tr> tags with stock transfer of raw materials
-     * $from is the machine_from. $to is the machine_to. I.e $from is Warehouse $to is Multilayer (Transfers from the warehouse to Multilayer)  WHERE MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())
+      $from is the machine_from. $to is the machine_to. I.e $from is Warehouse $to is Multilayer (Transfers from the warehouse to Multilayer)  WHERE MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())
      */
     public function stockConsumableRequest($to)
     {
 		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, u_required.username, `stock_materials_transfers`.`status_transfer`
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id
                 INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.location_id =  ". $to ."
 				WHERE `consumables` = 1  AND (( MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())) OR status_transfer = 0)
-                ORDER BY `date_required` DESC, status_transfer;";
+                ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -4687,12 +4863,13 @@ ORDER BY report.datereport;";
 		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, u_required.username, `stock_materials_transfers`.`status_transfer`
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id
                 INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.location_id =  ". $to ."
 				WHERE (( MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())) OR status_transfer = 0)
-                ORDER BY `date_required` DESC, status_transfer;";
+                ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -4753,12 +4930,13 @@ ORDER BY report.datereport;";
 		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, u_required.username, `stock_materials_transfers`.`status_transfer`
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id
                 INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.location_id =  ". $to ."
 				WHERE `material` = 1 AND (( MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())) OR status_transfer = 0)
-                ORDER BY `date_required` DESC, status_transfer;";
+                ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -4819,12 +4997,13 @@ ORDER BY report.datereport;";
 		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, u_required.username, `stock_materials_transfers`.`status_transfer`, kgs_bag
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id 
                 INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.location_id =  ". $to ."
 				WHERE `color` = 1 and (( MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())) OR status_transfer = 0)
-                ORDER BY `date_required` DESC, status_transfer;";
+                ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -4886,12 +5065,13 @@ ORDER BY report.datereport;";
 		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, u_required.username, `stock_materials_transfers`.`status_transfer`, kgs_bag
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id
                 INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.location_id =  ". $to ."
 				WHERE `master_batch` = 1 AND (( MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())) OR status_transfer = 0)
-                ORDER BY `date_required` DESC, status_transfer;";
+                ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -4952,12 +5132,13 @@ ORDER BY report.datereport;";
 		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, u_required.username, `stock_materials_transfers`.`status_transfer`
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id
                 INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.location_id =  ". $to ."
 				WHERE `consumables` = 1 AND (( MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())) OR status_transfer = 0)
-                ORDER BY `date_required` DESC, status_transfer;";
+                ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -5034,7 +5215,7 @@ ORDER BY report.datereport;";
         {
             $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
             $newDateString = $myDateTime->format('Y-m-d');
-            $date = "'".$newDateString ." 07:00:00'";
+            $date = "'".$newDateString ." ". date("H:i:s")."'";
         }
 		
 		
@@ -5098,8 +5279,8 @@ ORDER BY report.datereport;";
 		
 		//CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
         $sql = "SELECT stock_material_id, bags, material_name, material_grade
-                FROM stock_materials NATURAL JOIN materials 
-                WHERE material_id = ". $material ." AND
+                FROM stock_materials JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id = ". $material ." AND
                 machine_id = ". $from .";";
         try
         {   
@@ -5170,20 +5351,25 @@ ORDER BY report.datereport;";
      *
      * @return boolean  true if can insert  false if not
      */
-    public function sentReprocess($from)
+    public function sent()
     {
-        $bags = $to = "";
-        
+        $bags = $to = $from = $material = "";
         
         $bags = trim($_POST["bags"]);
         $bags = stripslashes($bags);
         $bags = htmlspecialchars($bags);
-		
-		$bags = $bags /20;
         
 		$to = trim($_POST["to"]);
         $to = stripslashes($to);
         $to = htmlspecialchars($to);
+		
+		$from = trim($_POST["from"]);
+        $from = stripslashes($from);
+        $from = htmlspecialchars($from);
+		
+		$material = trim($_POST["material2"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
 		
         $date = "NOW()";
         if(!empty($_POST['date']))
@@ -5198,9 +5384,10 @@ ORDER BY report.datereport;";
         $remarks = htmlspecialchars($remarks);
 		
 		//CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
-        $sql = "SELECT material_id
-                FROM materials 
-                WHERE material_name = 'REPROCESS';";
+        $sql = "SELECT stock_material_id, bags, material_name, material_grade
+                FROM stock_materials 
+				JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id = ". $material." AND machine_id = ". $from." ;";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -5208,34 +5395,44 @@ ORDER BY report.datereport;";
             $stmt->execute();
             if($row = $stmt->fetch())
             {
-                $material = $row['material_id'];
-                
+                $ID_SM = $row['stock_material_id'];
+                $BAGSTOCK = $row['bags'];
+                $MATERIAL = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                if($BAGSTOCK >= $bags)
+		
+                {
+                    $newbags = $BAGSTOCK - $bags;
                     //DECREASES THE BAGS FROM THE STOCK MATERIALS CHANGE THE STATUS TRANSFER, BGAS ISSUED, AND USER ISSUED
-                    $sql = 
-						"INSERT INTO  `stock_materials_transfers`(`stock_materials_transfers_id`,`machine_from`,`machine_to`,`material_id`,`date_required`,`bags_required`,`bags_approved`,`bags_issued`,`bags_receipt`,`user_id_required`,`user_id_approved`,`user_id_issued`,`user_id_receipt`,`status_transfer`,`remarks_approved`,`remarks_issued`)VALUES(NULL,:from, :to, :material,". $date .",:bags,:bags,:bags,NULL,:user,:user,:user,NULL,2,NULL,:remarks);";
+                    $sql = "UPDATE  `stock_materials`
+                            SET `bags` = ". $newbags ."
+                            WHERE `stock_material_id` = ". $ID_SM .";
+                            INSERT INTO  `stock_materials_transfers`(`stock_materials_transfers_id`,`machine_from`,`machine_to`,`material_id`,`date_required`,`bags_required`,`bags_approved`,`bags_issued`,`bags_receipt`,`user_id_required`,`user_id_approved`,`user_id_issued`,`user_id_receipt`,`status_transfer`,`remarks_approved`,`remarks_issued`)VALUES(NULL,". $from .",". $to .", ". $material.",". $date .",". $bags .",". $bags .",". $bags .",NULL,".  $_SESSION['Userid'] .",".  $_SESSION['Userid'] .",".  $_SESSION['Userid'] .",NULL,2,NULL,'". $remarks ."');";
+				
                     try
                     {   
             			$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
-						$stmt = $this->_db->prepare($sql);
-						$stmt->bindParam(":from", $from, PDO::PARAM_INT);
-						$stmt->bindParam(":to", $to, PDO::PARAM_INT);
-						$stmt->bindParam(":material", $material, PDO::PARAM_INT);
-						$stmt->bindParam(":bags", $bags, PDO::PARAM_INT);
-						$stmt->bindParam(":user", $_SESSION['Userid'], PDO::PARAM_INT);
-						$stmt->bindParam(":remarks", $remarks, PDO::PARAM_STR);
-						$stmt->execute();
-						$stmt->closeCursor();
-                        echo '<strong>SUCCESS!</strong> The <strong>'. $bags .'</strong> bags of the material:<b> REPROCESS - MACCHI </b>were successfully issued.';
+                        $stmt = $this->_db->prepare($sql);
+                        $stmt->execute();
+                        $stmt->closeCursor();
+                        echo '<strong>SUCCESS!</strong> The <strong>'. $bags .'</strong>  bags/drumps/pieces of the material:<b> '.$MATERIAL .' - '. $GRADE.' </b>were successfully issued.';
                         return TRUE;
                     } 
                     catch (PDOException $e) {
-						if ($e->getCode() == 23000) {
-						  echo '<strong>ERROR</strong> There is a issue for this material already in this date.';
-						} else {
-                          echo '<strong>ERROR</strong> Could not decrease the number of bags of this material or create the stock transfer on the database. Please try again.<br>'. $e->getMessage(); 
-						}return FALSE;
+                        echo '<strong>ERROR</strong> Could not decrease the number of  bags/drumps/pieces of this material or create the transfer from the database. Please try again.<br>'. $e->getMessage(); 
                         return FALSE;
                     } 
+                }
+                else
+                {
+                    echo '<strong>ERROR: </strong>There is not enough bags/drumps/pieces of the material:<b> '.$MATERIAL .' - '. $GRADE.' </b>on stock. There are <b>'. $BAGSTOCK .' bags/drumps/pieces</b> and you want to send <b>'. $bags .' bags/drumps/pieces</b>. Please try with a lower number of bags/drumps/pieces.';
+                    return FALSE;
+                }
+            }
+            else
+            {
+                echo '<strong>ERROR: </strong>There is not bags/drumps/pieces of this material on this stock location.';
+                return FALSE;
             }
             $stmt->closeCursor();
         }
@@ -5243,6 +5440,7 @@ ORDER BY report.datereport;";
             echo '<strong>ERROR</strong> Could not issue the raw material. Please try again.<br>'. $e->getMessage();
             return FALSE;
         } 
+            
 
     }
 	
@@ -5255,7 +5453,7 @@ ORDER BY report.datereport;";
     {
         $bags = $material = "";
         
-		$material = trim($_POST["material2"]);
+		$material = trim($_POST["material3"]);
         $material = stripslashes($material);
         $material = htmlspecialchars($material);
         
@@ -5264,9 +5462,9 @@ ORDER BY report.datereport;";
         $bags = htmlspecialchars($bags);
 		
         $date = "NOW()";
-        if(!empty($_POST['date2']))
+        if(!empty($_POST['date3']))
         {
-            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date2']);
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date3']);
             $newDateString = $myDateTime->format('Y-m-d');
             $date = "'".$newDateString ." 07:00:00'";
         }
@@ -5278,8 +5476,8 @@ ORDER BY report.datereport;";
 		 //CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
         $sql = "SELECT stock_material_id, bags, material_name, material_grade
                 FROM stock_materials 
-				NATURAL JOIN materials
-                WHERE material_id = ". $material." AND machine_id = 1;";
+				JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id = ". $material." AND machine_id = 1;";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -5343,14 +5541,15 @@ ORDER BY report.datereport;";
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%d/%m/%Y %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, `stock_materials_transfers`.`bags_issued`, `stock_materials_transfers`.`bags_receipt`,
                     u_required.username AS urequired ,u_issued.username AS uissued, u_receipt.username AS ureceipt ,`stock_materials_transfers`.`status_transfer`
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id 
                     INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                     INNER JOIN users u_issued ON stock_materials_transfers.user_id_issued = u_issued.user_id
                     LEFT JOIN users u_receipt ON stock_materials_transfers.user_id_receipt = u_receipt.user_id
                     INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                     INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.machine_id =  ". $machine ."
 			   WHERE stock_materials_transfers.machine_from <> 100 AND (MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE()) OR status_transfer = 2) 
-               ORDER BY `date_required` DESC, status_transfer;";
+               ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
 		
         if($stmt = $this->_db->prepare($sql))
         {
@@ -5432,7 +5631,8 @@ ORDER BY report.datereport;";
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
                     `stock_materials_transfers`.`bags_required`, `stock_materials_transfers`.`bags_issued`, `stock_materials_transfers`.`bags_receipt`,
                     u_required.username AS urequired ,u_issued.username AS uissued, u_receipt.username AS ureceipt ,`stock_materials_transfers`.`status_transfer`
-                FROM stock_materials_transfers NATURAL JOIN materials 
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id 
                     INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
                     INNER JOIN users u_issued ON stock_materials_transfers.user_id_issued = u_issued.user_id
                     LEFT JOIN users u_receipt ON stock_materials_transfers.user_id_receipt = u_receipt.user_id
@@ -5489,7 +5689,7 @@ ORDER BY report.datereport;";
                 echo '<tr>
                         <td><button class="btn btn-link'. $disabled .'">Receive</button></td>
                         <td>'. $DATE .'</td>
-                        <td>'. $TO .'</td>
+                        <td>'. $FROM .'</td>
                         <td><b>'. $MATERIAL .'</b>&nbsp - &nbsp'. $GRADE .'</td>
                         <td class="text-right">'. number_format((float) $BAGSRE,1,'.',',') .'</td>
                         <td>'. $REQUESTEDBY .'</td>
@@ -5533,8 +5733,8 @@ ORDER BY report.datereport;";
         
         //CHECK THE ACTUAL BAGS IN STOCK MATERIAL 
         $sql = "SELECT stock_material_id, bags, material_name, material_grade, consumables
-                FROM stock_materials NATURAL JOIN materials 
-                WHERE material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
+                FROM stock_materials JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id IN (SELECT material_id FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .") AND
                 machine_id IN (SELECT machine_to FROM stock_materials_transfers WHERE stock_materials_transfers_id = ". $id .");";
         try
         {   

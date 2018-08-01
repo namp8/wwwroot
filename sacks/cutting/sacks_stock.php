@@ -18,9 +18,9 @@
 		<li class="breadcrumb-item">
 			<a href="../process.php">Sacks</a>
 		</li>
-        <li class="breadcrumb-item active">Sacks on floor</li>
+        <li class="breadcrumb-item active">Cut Goods not packed</li>
     </ol>
-    <h2>Sacks - Cutting - Sacks on floor</h2>
+    <h2>Sacks - Cutting - Cut Goods not packed</h2>
 
     <div class="panel panel-info">
         <div class="panel-heading"> Sacks information </div>

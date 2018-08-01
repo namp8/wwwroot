@@ -38,6 +38,29 @@ class General
 		}
 	}
 	
+	public function giveMachines($location)
+	{
+		$sql = "SELECT `machines`.`machine_id`, `machines`.`machine_name`, `machines`.`location_id`, `machines`.`size`, location_name
+				FROM `machines`
+				INNER JOIN locations ON machines.location_id = locations.location_id
+				WHERE location_name = '". $location."' AND section = 0;";
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                echo '<li><a onclick="selectMachine('. $row['machine_id'] .',\''.$row['machine_name'].'\')">'.$row['machine_name'].'</a></li>';
+            }
+            $stmt->closeCursor();
+            
+        }  
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+	}
+	
+	///SHORTFALLS 
 	
 	/**
      * Checks and inserts a new short fall
@@ -101,41 +124,30 @@ class General
         } 
 
     }
-	
 	/**
      * Checks gives the shortfalls reasons
      *
      */
     public function giveShortFall($location)
     {
-//        $sql = "SELECT machine_name,
-//    `shortfalls`.`date_fall`,
-//    `shortfalls`.`downtime` AS time_t,
-//    `shortfalls`.`reason`,
-//    `shortfalls`.`action_plan`
-//FROM
-//    `shortfalls`
-//NATURAL JOIN `machines`
-//WHERE
-//    location_id = ". $location ." AND MONTH(date_fall) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_fall) = YEAR(CURRENT_DATE())
-//ORDER BY date_fall, `shortfalls`.machine_id;";
-		
-		$sql = "SELECT machine_name,
+		$sql = "SELECT `shortfalls`.`shortfall_id`,  machines.machine_id, machine_name,
     `shortfalls`.`date_fall`,
     `shortfalls`.`downtime` AS time_t,
     `shortfalls`.`reason`,
     `shortfalls`.`action_plan`
 FROM
     `shortfalls`
-NATURAL JOIN `machines`
-WHERE
-    location_id = ". $location ."
+INNER JOIN machines ON machines.machine_id = shortfalls.machine_id
+INNER JOIN locations ON machines.location_id = locations.location_id
+WHERE location_name = '". $location."' AND MONTH(date_fall) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_fall) = YEAR(CURRENT_DATE())
 ORDER BY date_fall, `shortfalls`.machine_id;";
+		
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();
             while($row = $stmt->fetch())
             {
+				$ID = $row['shortfall_id'];
                 echo '<tr>
                     <td>'. $row['date_fall'] .'</td>
                     <td>'. $row['machine_name'] .'</td>

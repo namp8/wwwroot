@@ -37,9 +37,12 @@
 
 		<li>
 			<ul id="multilayer_submenu" class="sub-menu collapse">
-				<li><a href="materials.php">Materials, Ink and Solvents</a></li>
+				<li><a href="materials.php">Materials</a></li>
+				<li><a href="inks.php">Ink and Solvents</a></li>
+				<li><a href="masterbatch.php">Master batch</a></li>
 				<li><a href="consumables.php">Consumable Items</a></li>
 				<li><a href="semifinished.php">Semi finished products</a></li>
+				<li><a href="spareparts.php">Spare Parts</a></li>
 			</ul>
 		</li>
 		<!-- /warehouse -->
@@ -67,8 +70,11 @@
 									<span>Issue</span>
 							</a>
 		</li>
-
-		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>';
+	}
+	if($stock->access(2) or $stock->access(3))
+	{
+		echo '
 		<li>
 			<a href="receive.php"><i class="fa fa-share" aria-hidden="true"></i><span>Receive</span></a>
 		</li>

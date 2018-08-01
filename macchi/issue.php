@@ -32,7 +32,7 @@
     if(!empty($_POST['to']) )
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
-        if($stock->sentReprocess(5)){
+        if($stock->sent()){
 
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
@@ -110,7 +110,8 @@
             <br>
             <div class="form-group">
                 <label for="form">From</label>
-                <input type="text" class="form-control" id="from" name="from" value="Macchi"  disabled>
+				<input type="hidden" class="form-control" id="from" name="from" value="5" required>
+                <input type="text" class="form-control" id="from_name" value="Macchi"  disabled>
             </div>
             <div class="form-group">
                 <label for="form">To <span class="text-danger">*</span></label><br />
@@ -127,11 +128,16 @@
             
            <div class="form-group">
                 <label for="material">Material</label>
-                <input type="text" class="form-control" id="from" name="from" value="REPROCESS - MACCHI"  disabled>
+				<input type="hidden" class="form-control" id="material2" name="material2" value="21" required>
+                <input type="text" class="form-control" id="material_name" value="REPROCESS - MACCHI"  disabled>
+            </div>
+            <div class="form-group">
+                <label for="total">Total bags</label>
+                <input type="number" class="form-control"  min="1" step="0.1" id="bags" name="bags"onkeyup="calculateKgs()" required>
             </div>
             <div class="form-group">
                 <label for="total">Total kgs</label>
-                <input type="number" class="form-control"  min="1" step="0.1" id="bags" name="bags">
+                <input type="number" class="form-control"  min="1" step="0.1" id="kgs"  onkeyup="calculateBags()" required>
             </div>
 			  
                 <div class="form-group">
@@ -153,6 +159,12 @@
         function selectMaterial(id, name, grade) {
             document.getElementById("btn_material").innerHTML = name + " - " + grade+ " &nbsp&nbsp<span class='caret'></span> ";
             document.getElementById("material").value = id;
+        }
+		function calculateKgs() {
+            document.getElementById("kgs").value = document.getElementById("bags").value * 20;
+        }
+		function calculateBags() {
+            document.getElementById("bags").value = document.getElementById("kgs").value / 20;
         }
         function filterMaterials() {
             var input, filter, ul, li, a, i;

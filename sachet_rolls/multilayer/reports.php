@@ -69,7 +69,7 @@
                         <li><a onclick="selectReport(3)">Waste Report</a></li>
                         <li><a onclick="selectReport(4)">Raw Material Consumption Report</a></li>
                         <li><a onclick="selectReport(5)">Short Fall and Downtime Report</a></li>
-                        <li><a onclick="selectReport(6)">Stock Details</a></li>
+                        <li><a onclick="selectReport(6)">Raw Material Stock Details</a></li>
                         <li><a onclick="selectReport(7)">Stock Details by Material</a></li>
                     </ul>
                 </div>
@@ -84,18 +84,18 @@
             <div class="panel panel-info">
                 <div class="panel-heading" id="titleReport"> </div>
                 <div class="panel-body">
-                    <div class="col-md-6" id="divChart1">
+                    <div class="col-12" id="divChart1">
                         <i aria-hidden="true" id="iconChart1"></i>
                         <div id="chartContainer">
 
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <i aria-hidden="true" id="iconChart2"></i>
                         <div id="chartContainer2" >
 
                         </div>
-                    </div>  
+                    </div>    
                         <div class="table-responsive">
                         
                             
@@ -176,7 +176,7 @@
             }
             else if (id == 6)
             {
-                name = "Multilayer - Stock Details";
+                name = "Multilayer - Raw Material Stock Details";
             }
 			else if (id == 7)
             {
@@ -490,6 +490,21 @@
   minimumFractionDigits: 1,
   maximumFractionDigits: 1
 })
+					);
+					
+					}";
+				}
+					else if(!empty($_POST['report']) && $_POST['report'] == 5)
+				{ 
+					echo ", \"footerCallback\": function(row, data, start, end, display) {
+					
+					var api = this.api(), data;
+					pageTotal_Duration = api.column(1, { page: 'current'} ).data().reduce( function (a, b) {
+						return moment.duration(a).asMilliseconds() + moment.duration(b).asMilliseconds();
+					}, 0 );
+					var days = moment.utc(pageTotal_Duration).format(\"DDD\") - 1;
+					$( api.column(2).footer()).html(
+					    days + ' days and ' + moment.utc(pageTotal_Duration).format(\"H\")  + ' hours and ' + moment.utc(pageTotal_Duration).format(\"m\")  + ' minutes.' 
 					);
 					
 					}";

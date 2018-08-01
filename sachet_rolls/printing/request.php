@@ -12,6 +12,8 @@
 
     include_once "../../inc/class.printing.inc.php";
     $printing = new printing($db);
+	include_once "../../inc/class.users.inc.php";
+    $users = new Users($db);
 ?>
     <ol class="breadcrumb">
        <li class="breadcrumb-item">
@@ -148,7 +150,12 @@
 <div class="form-group">
                 <label for="date">Date <span class="text-danger">*</span></label>
                 <div class='input-group date' id='datetimepicker'>
-                    <input type='text' class="form-control" id="date" name="date" required/>
+                    <input type='text' class="form-control" id="date" name="date" required <?php 
+						   if(!$users->admin())
+						   {	
+							   echo 'readonly';
+						   }
+						   ?>/>
                     <span class="input-group-addon">
                         <span class="fa fa-calendar"></span>
                     </span>
@@ -198,8 +205,8 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="total">Total quantity <span class="text-danger">*</span></label>
-                <input type="number" class="form-control"  min="1" id="bags" name="bags">
+                <label for="total">Total quantity (drums/pcs)<span class="text-danger">*</span></label>
+                <input type="number" class="form-control"  min="1" max="10" id="bags" name="bags" oninvalid="setCustomValidity('The quantity should be in drums, not in kgs.')">
             </div>
                </div>
           <div class="modal-footer">
@@ -297,7 +304,8 @@
     <script>
         $(document).ready(function() {
                 $('#datetimepicker').datetimepicker({         
-                        format: 'DD/MM/YYYY'
+                        format: 'DD/MM/YYYY',
+						defaultDate: moment()
                     });
                 
                 $('#datetimepicker').data("DateTimePicker").maxDate(new Date());

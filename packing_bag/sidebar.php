@@ -44,9 +44,6 @@
 						<ul id="cutting" class="sub-menu collapse">
 							<li><a href="../cutting/settings.php"><i class="fa fa-cogs" aria-hidden="true"></i><span>&nbsp Settings</span></a></li>
 							<li><a href="../cutting/reports.php"><i class="fa fa-bar-chart" aria-hidden="true"></i><span>&nbsp Reports</span></a></li>
-                            <li class="divider"></li><center>Consumables</center>
-							<li><a class="two" href="../cutting/request.php"><i class="fa fa-reply " aria-hidden="true" ></i><span>&nbsp Request</span></a></li>
-							<li><a class="two" href="../cutting/receive.php"><i class="fa fa-share" aria-hidden="true"></i><span>&nbsp Receive</span></a></li>
                             <li class="divider"></li><center>Production</center>
 							<li><a class="four" href="../cutting/sacks.php"><i class="fa fa-battery-empty" aria-hidden="true"></i><span>&nbsp Sacks</span></a></li>
                             <li><a class="four" href="../cutting/sacks_stock.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Sacks on floor </span></a></li>

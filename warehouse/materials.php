@@ -1,5 +1,5 @@
 <?php
-    $pageTitle = "Warehouse - Materials, Master Batch, Ink and Solvents";
+    $pageTitle = "Warehouse - Materials";
     include_once "../base.php";
     include_once "../header.php";
     include_once "sidebarwarehouse.php";
@@ -25,9 +25,9 @@ if(!$stock->access(4))
         <li class="breadcrumb-item">
             <a href="home.php">Warehouse</a>
         </li>
-        <li class="breadcrumb-item active">Materials, Master Batch, Ink and Solvents</li>
+        <li class="breadcrumb-item active">Materials</li>
     </ol>
-    <h2>Warehouse - Materials, Master Batch, Ink and Solvents</h2>
+    <h2>Warehouse - Materials</h2>
 
 <div id="alertMessage" class="alert hide" role="alert">
 		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -65,7 +65,7 @@ if(!$stock->access(4))
 	}
 ?>
     <div class="panel panel-info">
-        <div class="panel-heading"> List of Materials, Master Batch, Ink and Solvents in Warehouse stock </div>
+        <div class="panel-heading"> List of Materials </div>
         <div class="panel-body">
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
@@ -73,7 +73,7 @@ if(!$stock->access(4))
                             <tr class="active">
                             <th>Material</th>
                             <th>Grade</th>
-                            <th>Bags / Drumps</th>
+                            <th>Bags</th>
                             <th>Kgs</th>
                         </tr>
                     </thead>

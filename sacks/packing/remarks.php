@@ -10,6 +10,8 @@
     include_once "../../inc/class.general.inc.php";
     $general = new General($db);
 
+	include_once "../../inc/class.users.inc.php";
+    $users = new Users($db);
 ?>
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -136,9 +138,22 @@
                 var month = d.getMonth()+1;
                 document.getElementById("date").value = d.getDate() + "/" + month +"/"+ d.getFullYear();
 			$('#datetimepicker2').datetimepicker({         
-                        format: 'DD/MM/YYYY'
+                        format: 'DD/MM/YYYY',
+						defaultDate: moment()
                     });
-                
+                <?php 
+						   if(!$users->admin())
+						   {	
+							   echo "if(moment().weekday()==1)
+								{
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-2, 'days').millisecond(0).second(0).minute(0).hour(0));
+								}
+								else
+								{
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-1, 'days').millisecond(0).second(0).minute(0).hour(0));
+								}";
+						   }
+					?>	
                 $('#datetimepicker2').data("DateTimePicker").maxDate(new Date());
                 
             $('#dataTable').DataTable( {

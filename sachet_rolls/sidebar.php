@@ -1,11 +1,18 @@
-
+<?php
+    include_once "../inc/class.users.inc.php";
+    $users = new Users($db);
+?>
 
 <!-- href links different in integration, collaspe in class added server side in integration --> 
 		<!-- sidebar --> 
 		<div id="sidebar" class="sidebar-toggle">
 			<ul class="nav nav-sidebar">
 				
+						<li>
+							<a href="process.php"><i class="fa fa-recycle" aria-hidden="true"></i><span>PROCESS</span></a>
+						</li><li role="separator" class="divider"></li>
                     <!-- orders -->
+<!--
 					<li data-toggle="collapse" href="#orders_submenu" aria-expanded="true" aria-controls="orders_submenu">
 						<a href="#"> 
 							<i class="fa fa-pencil-square-o fa-fw" aria-hidden="true"></i><span>ORDERS</span>
@@ -21,9 +28,12 @@
 						<ul id="orders_submenu" class="sub-menu collapse">
 							<li ><a  href="orders/orders.php"><i class="fa fa-group" aria-hidden="true" ></i><span>&nbsp Sales Orders</span></a></li>
                         </ul>
-					</li>
-                
-					<li role="separator" class="divider"></li>
+					</li><li role="separator" class="divider"></li>
+-->
+                <?php
+	if($users->access('multilayer'))
+	{
+		echo '
 					<!-- multilayer -->
 					<li data-toggle="collapse" href="#multilayer_submenu" aria-expanded="true" aria-controls="multilayer_submenu">
 						<a href="#"> 
@@ -53,9 +63,11 @@
 					</li>
 					<!-- /multilayer -->
 
-					<li role="separator" class="divider"></li>
-                
-                    <!-- printing -->
+					<li role="separator" class="divider"></li>';
+	}
+	if($users->access('printing'))
+	{
+		echo ' <!-- printing -->
 					<li data-toggle="collapse" href="#printing_submenu" aria-expanded="true" aria-controls="printing_submenu">
 						<a href="#"> 
 							<i class="fa fa-paint-brush fa-fw" aria-hidden="true"></i><span>PRINTING</span>
@@ -89,12 +101,14 @@
 					<!-- /printing -->
                 
                 
-					<li role="separator" class="divider"></li>
-				
-					<!-- printing -->
+					<li role="separator" class="divider"></li>';
+	}
+	if($users->access('slitting'))
+	{
+		echo '<!-- printing -->
 					<li data-toggle="collapse" href="#slitting_submenu" aria-expanded="true" aria-controls="slitting_submenu">
 						<a href="#"> 
-							<i class="fa fa-paint-brush fa-fw" aria-hidden="true"></i><span>SLITTING</span>
+							<i class="fa fa-battery-empty  fa-fw" aria-hidden="true"></i><span>SLITTING</span>
 						</a>
 					</li>
                 
@@ -118,7 +132,14 @@
 					</li>
 					<!-- /printing -->
                     
-					<li role="separator" class="divider"></li>
+					<li role="separator" class="divider"></li>';
+	}
+?>	
+					
+                
+                   
+				
+					
 			</ul>
 		</div>
 		<!-- /sidebar -->

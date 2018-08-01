@@ -601,11 +601,11 @@
 							</div>
 							<div class="form-group col-md-4">
 								<label for="total">Grand Total Emmdoray<span class="text-danger">*</span></label>
-								<input type="number" class="form-control" min="1" step="0.01" id="invoice" name="invoice" onkeyup="calculateClearing()" required>
+								<input type="number" class="form-control" min="0" step="0.01" id="invoice" name="invoice" onkeyup="calculateClearing()" >
 							</div>
 							<div class="form-group col-md-4">
 								<label for="total">Clearing cost (GHc)<span class="text-danger">*</span></label>
-								<input type="number" class="form-control" min="1" step="0.01" id="clearingghc" name="clearingghc" disabled>
+								<input type="number" class="form-control" min="1" step="0.01" id="clearingghc" name="clearingghc" onkeyup="calculateClearing2()" required>
 							</div>
 							<div class="form-group col-md-4">
 								<label for="total">Clearing cost (USD)<span class="text-danger">*</span></label>
@@ -838,6 +838,13 @@
 			var usd = parseFloat(Math.round(ghc / rate * 100) / 100).toFixed(2);
 			document.getElementById("clearing").value = usd;
 		}
+		function calculateClearing2() {
+			
+			var ghc = document.getElementById("clearingghc").value;
+			var rate = document.getElementById("rate").value;
+			var usd = parseFloat(Math.round(ghc / rate * 100) / 100).toFixed(2);
+			document.getElementById("clearing").value = usd;
+		}
 
 		function calculateUnloading() {
 			var containers = document.getElementById("containers").value;
@@ -886,7 +893,6 @@
 				format: 'DD/MM/YYYY'
 			});
 
-			$('#datetimepicker').data("DateTimePicker").maxDate(new Date());
 
 			$('#datetimepicker2').datetimepicker({
 				format: 'DD/MM/YYYY'
