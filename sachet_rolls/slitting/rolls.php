@@ -1,14 +1,14 @@
 <?php
-    $pageTitle = "Sacks - Cutting Sacks";
+    $pageTitle = "Slitting - Rolls";
     
     include_once "../../base.php";
     include_once "../../header.php";
-    include_once "../sidebar.php";
+    include_once "../sidebar1.php";
     include_once "../../content.php";
 
 
-    include_once "../../inc/class.sacks.inc.php";
-    $sacks = new Sacks($db);
+    include_once "../../inc/class.slitting.inc.php";
+    $slitting = new Slitting($db);
 
 	include_once "../../inc/class.users.inc.php";
     $users = new Users($db);
@@ -17,12 +17,15 @@
 		<li class="breadcrumb-item">
 			<a href="../../index.php">United Production System</a>
 		</li>
-		<li class="breadcrumb-item">
-			<a href="../process.php">Sacks</a>
-		</li>
-		<li class="breadcrumb-item active">Sacks</li>
+        <li class="breadcrumb-item">
+            <a href="../process.php">Sachet Rolls</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="process.php">Slitting</a>
+        </li>
+		<li class="breadcrumb-item active">Rolls</li>
 	</ol>
-	<h2>Cutting - Sacks</h2>
+	<h2>Slitting - Rolls</h2>
 
 
 	<div id="alertMessage" class="alert hide" role="alert">
@@ -33,7 +36,7 @@
     if(!empty($_POST['shift']) )
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
-        if($sacks->createSacks()){
+        if($slitting->createRolls()){
 
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
@@ -48,20 +51,8 @@
 
 
 	<div class="pull-right text-right">
-		<div class="dropdown">
-			<button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Submit sacks&nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
-			<ul class="dropdown-menu dropdown-menu-right">
-				<li><a onclick="selectMachine(21,'Cutting 1')" data-toggle="modal" data-target="#modal1">Cutting 1</a></li>
-				<li><a onclick="selectMachine(22,'Cutting 2')" data-toggle="modal" data-target="#modal1">Cutting 2</a></li>
-				<li><a onclick="selectMachine(23,'Cutting 3')" data-toggle="modal" data-target="#modal1">Cutting 3</a></li>
-				<li><a onclick="selectMachine(24,'Cutting 4')" data-toggle="modal" data-target="#modal1">Cutting 4</a></li>
-				<li><a onclick="selectMachine(25,'Cutting 5')" data-toggle="modal" data-target="#modal1">Cutting 5</a></li>
-				<li><a onclick="selectMachine(26,'Cutting 6')" data-toggle="modal" data-target="#modal1">Cutting 6</a></li>
-				<li><a onclick="selectMachine(27,'Cutting 7')" data-toggle="modal" data-target="#modal1">Cutting 7</a></li>
-				<li><a onclick="selectMachine(28,'Cutting 8')" data-toggle="modal" data-target="#modal1">Cutting 8</a></li>
-				<li><a onclick="selectMachine(29,'Cutting 9')" data-toggle="modal" data-target="#modal1">Cutting 9</a></li>
-			</ul>
-		</div>
+			<button class="btn btn-info" type="button" data-toggle="modal" data-target="#modal1">Submit rolls</button>
+			
 	</div>
 
 
@@ -89,7 +80,7 @@
 			<h3 id="dateTitle2"></h3>
 			<div class="panel panel-info">
 				<div class="panel-heading">
-					Daily sacks by machine
+					Output Rolls Details
 				</div>
 				<div class="panel-body">
 					
@@ -98,21 +89,14 @@
 							<thead>
 								<tr class="active text-center">
 									<th></th>
-									<th class="text-center">M/C No. 1</th>
-									<th class="text-center">M/C No. 2</th>
-									<th class="text-center">M/C No. 3</th>
-									<th class="text-center">M/C No. 4</th>
-									<th class="text-center">M/C No. 5</th>
-									<th class="text-center">M/C No. 6</th>
-									<th class="text-center">M/C No. 7</th>
-									<th class="text-center">M/C No. 8</th>
-									<th class="text-center">M/C No. 9</th>
-									<th class="text-center">Total</th>
+									<th>Gross Weight</th>
+									<th>Net Weight</th>
+									<th>Job name</th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
-     $sacks->giveSacksTable(0);
+     $slitting->giveRollsTable(0);
 ?>
 							</tbody>
 						</table>
@@ -124,7 +108,7 @@
 			<h3>Day</h3>
 <div class="panel panel-info">
 				<div class="panel-heading">
-					Daily sacks by machine
+					Output Rolls Details
 				</div>
 				<div class="panel-body">
 					
@@ -133,21 +117,14 @@
 							<thead>
 								<tr class="active text-center">
 									<th></th>
-									<th class="text-center">M/C No. 1</th>
-									<th class="text-center">M/C No. 2</th>
-									<th class="text-center">M/C No. 3</th>
-									<th class="text-center">M/C No. 4</th>
-									<th class="text-center">M/C No. 5</th>
-									<th class="text-center">M/C No. 6</th>
-									<th class="text-center">M/C No. 7</th>
-									<th class="text-center">M/C No. 8</th>
-									<th class="text-center">M/C No. 9</th>
-									<th class="text-center">Total</th>
+									<th>Gross Weight</th>
+									<th>Net Weight</th>
+									<th>Job name</th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
-     $sacks->giveSacksTable(1);
+     $slitting->giveRollsTable(1);
 ?>
 							</tbody>
 						</table>
@@ -161,7 +138,7 @@
 			<h3>Night</h3>
 			<div class="panel panel-info">
 				<div class="panel-heading">
-					Daily sacks by machine
+					Output Rolls Details
 				</div>
 				<div class="panel-body">
 					
@@ -170,25 +147,19 @@
 							<thead>
 								<tr class="active text-center">
 									<th></th>
-									<th class="text-center">M/C No. 1</th>
-									<th class="text-center">M/C No. 2</th>
-									<th class="text-center">M/C No. 3</th>
-									<th class="text-center">M/C No. 4</th>
-									<th class="text-center">M/C No. 5</th>
-									<th class="text-center">M/C No. 6</th>
-									<th class="text-center">M/C No. 7</th>
-									<th class="text-center">M/C No. 8</th>
-									<th class="text-center">M/C No. 9</th>
-									<th class="text-center">Total</th>
+									<th>Gross Weight</th>
+									<th>Net Weight</th>
+									<th>Job name</th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
-     $sacks->giveSacksTable(2);
+     $slitting->giveRollsTable(2);
 ?>
 							</tbody>
 						</table>
 					</div>
+						
 				</div>
 			</div>
 
@@ -200,12 +171,13 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<button class="close" type="button" data-dismiss="modal">x</button>
-						<h4 class="modal-title">Submit sacks</h4>
+						<h4 class="modal-title">Submit output rolls details</h4>
 					</div>
 					<form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 						<div class="modal-body">
+							
 							<div class="row">
-								<div class="col-md-4 form-group">
+								<div class="col-md-6 form-group">
 									<label for="date">Date <span class="text-danger">*</span></label>
 									<div class='input-group date' id='datetimepicker2'>
 										<input type='text' class="form-control" id="date" name="date" required/>
@@ -214,7 +186,7 @@
 										</span>
 									</div>
 								</div>
-								<div class="col-md-4 form-group">
+								<div class="col-md-6  form-group">
 									<label for="shift">Shift <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="shift" name="shift" value="1" required>
 									<div class="dropdown">
@@ -225,54 +197,48 @@
 										</ul>
 									</div>
 								</div>
-								<div class="col-md-4 form-group">
-									<label for="size">Machine <span class="text-danger">*</span></label><br />
-									<input type="hidden" class="form-control" id="machine" name="machine" value="1" required>
-									<input type="text" class="form-control" step="1" min="1" id="machineName"  value="" disabled>
-								</div>
 							</div>
 							<div class="row">
 								
 								<div class="col-md-6 form-group">
-									<label for="shift">Operator 1 <span class="text-danger">*</span></label><br />
+									<label for="shift">Operator <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="employee1" name="employee1" required>
 									<div class="btn-group">
 										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee1">&nbsp&nbsp<span class="caret"></span></button>
 										<ul class="dropdown-menu" role="menu" id="dropdown_employee1">
 											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee1" onkeyup="filterEmployee1()" width="100%"></li>
 											<?php
-	$sacks->operators1Dropdown();
+	$slitting->operatorsDropdown();
 ?>
 										</ul>
 									</div>
 								</div>
-								
-								<div class="col-md-6 form-group">
-									<label for="shift">Operator 2 </label><br />
-									<input type="hidden" class="form-control" id="employee2" name="employee2" >
-									<div class="btn-group">
-										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee2">&nbsp&nbsp<span class="caret"></span></button>
-										<ul class="dropdown-menu" role="menu" id="dropdown_employee2">
-											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee2" onkeyup="filterEmployee2()" width="100%"></li>
-											<?php
-	$sacks->operators2Dropdown();
-?>
-										</ul>
-									</div>
-								</div>
+								 <div class="col-lg-6 form-group">
+                                    <label for="customer">Customer</label><br />
+                                    <input type="hidden" class="form-control" id="customer" name="customer">
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_customer">&nbsp&nbsp<span class="caret"></span></button>
+                                        <ul class="dropdown-menu" id="dropdown_customer">
+                                            <li><input type="text" placeholder="Search customer.." class="searchDropdown" id="searchCustomer" onkeyup="filterCustomers()" width="100%"></li>
+                                            <?php
+    $slitting->customersDropdown();
+ ?>
+                                        </ul>
+                                    </div>
+                                </div>
 							</div>
 							<div class="panel panel-info">
 								<div class="panel-heading">
-									Sacks
+									Output Rolls Details
 								</div>
 								<div class="panel-body">
 									<table class="table table-bordered table-hover" width="100%" cellspacing="0">
 										<thead>
 											<tr class="active">
-												<th class="text-center">Sack No.</th>
-												<th class="text-center">Sack Wt.</th>
-												<th class="text-center">Sack No.</th>
-												<th class="text-center">Sack Wt.</th>
+												<th class="text-center">Roll No.</th>
+												<th class="text-center">Roll Wt.</th>
+												<th class="text-center">Roll No.</th>
+												<th class="text-center">Roll Wt.</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -324,6 +290,37 @@
 												<td>16</td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_16"></td>
 											</tr>
+											
+											<tr>
+												<td>17</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_17"></td>
+												<td>18</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_18"></td>
+											</tr>
+											
+											<tr>
+												<td>19</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_19"></td>
+												<td>20</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_20"></td>
+											</tr>
+											
+											<tr>
+												<td>21</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_21"></td>
+												<td>22</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_22"></td>
+											</tr>
+											<tr>
+												<td>23</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_23"></td>
+												<td>24</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_24"></td>
+											</tr>
+											<tr>
+												<td>25</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_25"></td>
+											</tr>
 										</tbody>
 									</table>
 								</div>
@@ -356,15 +353,17 @@
     
 ?>
 			<script>
+				 function selectCustomer(id, name) {
+                    document.getElementById("btn_customer").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+                    document.getElementById("customer").value = id;
+                }
+
+				
 				function selectEmployee1(id, name) {
 					document.getElementById("btn_employee1").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("employee1").value = id;
 				}
 				
-				function selectEmployee2(id, name) {
-					document.getElementById("btn_employee2").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
-					document.getElementById("employee2").value = id;
-				}
 
 				function filterEmployee1() {
 					var input, filter, ul, li, a, i;
@@ -381,20 +380,6 @@
 					}
 				}
 				
-				function filterEmployee2() {
-					var input, filter, ul, li, a, i;
-					input = document.getElementById("searchEmployee2");
-					filter = input.value.toUpperCase();
-					div = document.getElementById("dropdown_employee2");
-					a = div.getElementsByTagName("a");
-					for (i = 0; i < a.length; i++) {
-						if (a[i].id.toUpperCase().startsWith(filter)) {
-							a[i].style.display = "";
-						} else {
-							a[i].style.display = "none";
-						}
-					}
-				}
 				
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";

@@ -117,8 +117,12 @@ ORDER BY `materials`.`material_grade`;";
         }
     }
 	
-	 public function colorsDropdown()
+	 public function colorsDropdown($id)
     {
+		if(is_null($id))
+		{
+			$id = '';
+		}
         $sql = "SELECT `materials`.`material_id`,
                 `materials`.`material_name`,
                 `materials`.`material_grade`
@@ -133,7 +137,7 @@ ORDER BY `materials`.`material_grade`;";
                 $ID = $row['material_id'];
                 $NAME = $row['material_name'];
                 $GRADE = $row['material_grade'];
-                echo  '<li><a id="'. $NAME .'" onclick="selectType(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
+                echo  '<li><a id="'. $NAME .'" onclick="selectType'.$id.'(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
             }
             $stmt->closeCursor();
         }
@@ -172,8 +176,12 @@ ORDER BY `materials`.`material_grade`;";
         }
     }
 	
-	public function semifinishedDropdown()
+	public function semifinishedDropdown($id)
     {
+		if(is_null($id))
+		{
+			$id = '';
+		}
         $sql = "SELECT `materials`.`material_id`,`materials`.`material_name`,`materials`.`material_grade`
                 FROM  `materials`
 				WHERE `injection` = 1 AND `semifinished` = 1
@@ -186,7 +194,7 @@ ORDER BY `materials`.`material_grade`;";
                 $ID = $row['material_id'];
                 $NAME = $row['material_name'];
                 $GRADE = $row['material_grade'];
-                echo  '<li><a id="'. $NAME .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">'. $NAME .'</a></li>'; 
+                echo  '<li><a id="'. $NAME .'" onclick="selectMaterial'.$id.'(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">'. $NAME .'</a></li>'; 
             }
             $stmt->closeCursor();
         }
@@ -196,19 +204,107 @@ ORDER BY `materials`.`material_grade`;";
         }
     }
 	
+	public function finishedDropdown()
+    {
+        $sql = "SELECT `materials`.`material_id`,`materials`.`material_name`,`materials`.`material_grade`
+                FROM  `materials`
+				WHERE `injection` = 1 AND `finished` = 1
+                ORDER BY `materials`.`material_name`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['material_id'];
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectFinished(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">'. $NAME .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	
+	public function finishedFullDropdown()
+    {
+        $sql = "SELECT finishproduct, materials.material_name as finishname, 
+					`injection_sacks`.`semifinished1`, semi1.material_name as semi1name,
+					`injection_sacks`.`semifinished2`, semi2.material_name as semi2name,
+					`injection_sacks`.`semifinished3`, semi3.material_name as semi3name,
+					`injection_sacks`.`pieces`
+				FROM `injection_sacks`
+				JOIN materials ON materials.material_id = injection_sacks.finishproduct 
+				JOIN materials semi1 ON semi1.material_id = injection_sacks.semifinished1
+				LEFT JOIN materials semi2 ON semi2.material_id = injection_sacks.semifinished2 
+				LEFT JOIN materials semi3 ON semi3.material_id = injection_sacks.semifinished3 
+				WHERE actual = 1;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				$NAME = $row['finishname'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectFinished(\''. $row['finishproduct'] .'\',\''. $row['finishname'] .'\',\''. $row['semifinished1'] .'\',\''. $row['semi1name'] .'\',\''. $row['semifinished2'] .'\',\''. $row['semi2name'] .'\',\''. $row['semifinished3'] .'\',\''. $row['semi3name'] .'\',\''. $row['pieces'] .'\')">'. $NAME .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	public function giveSacksSettings()
+    {
+        $sql = "SELECT `injection_sacks`.`injection_sacks_id`,
+    finish.material_name as finished, semi1.material_name as semifinished1 , semi2.material_name as semifinished2 , semi3.material_name as semifinished3 , 
+    `injection_sacks`.`pieces`,`weight`
+FROM `injection_sacks`
+JOIN `materials` finish ON  finish.material_id = `injection_sacks`.`finishproduct`
+JOIN `materials` semi1 ON  semi1.material_id = `injection_sacks`.`semifinished1`
+LEFT JOIN `materials` semi2 ON  semi2.material_id = `injection_sacks`.`semifinished2`
+LEFT JOIN `materials` semi3 ON  semi3.material_id = `injection_sacks`.`semifinished3`
+WHERE `actual` = 1
+ORDER BY finish.material_name, finish.material_grade;";
+		
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				echo '<tr>
+                        <td>'. $row['finished'] .'</td>
+                        <td>'. $row['semifinished1'] .'</td>
+                        <td>'. $row['semifinished2'] .'</td>
+                        <td>'. $row['semifinished3'] .'</td>
+                        <td class="text-right">'. number_format($row['pieces'],0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['weight'],2,'.',',') .'</td>
+                    </tr>';
+				
+            }
+            $stmt->closeCursor();
+            
+            
+        }
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+    }
+	
 	public function giveSettings()
     {
         $sql = "SELECT material_name, material_grade,
     `injection_sacks_formulas`.`cycle`,
     `injection_sacks_formulas`.`cavities`,
     `injection_sacks_formulas`.`target`,
-    `injection_sacks_formulas`.`unit_weight`,
-    `injection_sacks_formulas`.`pcs_sack`,
-    `injection_sacks_formulas`.`sack_weight`
+    `injection_sacks_formulas`.`unit_weight`
 FROM `injection_sacks_formulas`
 JOIN `materials` ON  `materials`.material_id = `injection_sacks_formulas`.`material_id`
 WHERE `actual` = 1
-ORDER BY material_grade;";
+ORDER BY material_name, material_grade;";
 		
 		if($stmt = $this->_db->prepare($sql))
         {
@@ -219,11 +315,8 @@ ORDER BY material_grade;";
                         <td>'. $row['material_name'] .'</td>
                         <td class="text-right">'. number_format($row['cycle'],1,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['cavities'],0,'.',',') .'</td>
-                        <td class="text-right">'. number_format($row['target'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['target'],0,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['unit_weight'],1,'.',',') .'</td>
-                        <td class="text-right">'. number_format($row['pcs_sack'],2,'.',',') .'</td>
-                        <td class="text-right">'. number_format($row['sack_weight'],1,'.',',') .'</td>
-                        <td class="text-right">'. number_format($row['percentage'],1,'.',',')  .'</td>
                     </tr>';
 				
             }
@@ -290,6 +383,124 @@ ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
         {
             echo "Something went wrong. $db->errorInfo";
         }
+    }
+	
+	public function createSetting()
+    {
+        $material = $cycle = $cavities = $target = $part = $pcs = $sack = $remarks= "";
+		
+        $material = trim($_POST["product"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+		
+		$cycle = trim($_POST["cycle"]);
+        $cycle = stripslashes($cycle);
+        $cycle = htmlspecialchars($cycle);
+		
+		$cavities = trim($_POST["cavities"]);
+        $cavities = stripslashes($cavities);
+        $cavities = htmlspecialchars($cavities);
+		
+		$target = trim($_POST["target"]);
+        $target = stripslashes($target);
+        $target = htmlspecialchars($target);
+ 
+		$part = trim($_POST["part"]);
+        $part = stripslashes($part);
+        $part = htmlspecialchars($part);
+		
+        $remarks = stripslashes($_POST["remarks"]);
+        $remarks = htmlspecialchars($remarks);
+        
+        $sql = "INSERT INTO `injection_sacks_formulas`
+(`injection_sack_formula`,`material_id`,`cycle`,`cavities`,`target`,`unit_weight`,`from`,`to`,`actual`,`remarks`)
+VALUES
+(NULL,'". $material."','". $cycle."','". $cavities."', '". $target."', '". $part ."', CURRENT_DATE() ,NULL,1, '". $remarks."');";
+		echo '<script>alert("'.$sql.'");</script>';
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->execute();
+            $stmt->closeCursor();
+            
+            echo '<strong>SUCCESS!</strong> The product was successfully added to the settings';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> The product is already in the settings.<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not insert the formula into the database. Please try again.<br>'. $e->getMessage();
+            }
+            
+            return FALSE;
+        } 
+
+    }
+	
+	public function createSackSetting()
+    {
+        $finished = $semifinished1 = $semifinished2 = $semifinished3 = $pieces = $sack = $remarks= "";
+		
+        $finished = trim($_POST["finished"]);
+        $finished = stripslashes($finished);
+        $finished = htmlspecialchars($finished);
+		
+		$semifinished1 = trim($_POST["semifinished1"]);
+        $semifinished1 = stripslashes($semifinished1);
+        $semifinished1 = htmlspecialchars($semifinished1);
+		
+		$semifinished2 = trim($_POST["semifinished2"]);
+        $semifinished2 = stripslashes($semifinished2);
+        $semifinished2 = htmlspecialchars($semifinished2);
+		
+		if(empty($_POST['semifinished2']))
+		{
+			$semifinished2 = 'NULL';
+		}
+ 
+		$semifinished3 = trim($_POST["semifinished3"]);
+        $semifinished3 = stripslashes($semifinished3);
+        $semifinished3 = htmlspecialchars($semifinished3);	
+		if(empty($_POST['semifinished3']))
+		{
+			$semifinished3 = 'NULL';
+		}
+		
+        $pieces = trim($_POST["pieces"]);
+        $pieces = stripslashes($pieces);
+        $pieces = htmlspecialchars($pieces);
+		
+		$sack = trim($_POST["sack"]);
+        $sack = stripslashes($sack);
+        $sack = htmlspecialchars($sack);
+        $remarks = stripslashes($_POST["remarks"]);
+        $remarks = htmlspecialchars($remarks);
+		
+        $sql = "INSERT INTO `injection_sacks`
+(`injection_sacks_id`,`finishproduct`,`semifinished1`,`semifinished2`,`semifinished3`,`pieces`,`weight`,`user_id`,`from`,`to`,`actual`,`remarks`)
+VALUES
+(NULL,'". $finished."','". $semifinished1."',". $semifinished2.", ". $semifinished3.", '". $pieces ."', '". $sack ."', ". $_SESSION['Userid'] .", CURRENT_DATE() ,NULL,1, '". $remarks."');";
+		echo '<script>alert("'.$sql.'");</script>';
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->execute();
+            $stmt->closeCursor();
+            
+            echo '<strong>SUCCESS!</strong> The sack was successfully added to the settings';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> The sack is already in the settings.<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not insert the sack into the database. Please try again.<br>'. $e->getMessage();
+            }
+            
+            return FALSE;
+        } 
+
     }
 	
 	public function createFormula()
@@ -597,16 +808,17 @@ GROUP BY stock_material_id;";
 
         $sql = "SELECT  machine_name,
     materials.material_name, materials.material_grade, types.material_name as type, 
-    `injection_production`.`cavities`,
-    `injection_production`.`produced_pcs`,
-    `injection_production`.`waste_pcs`,
-    `injection_production`.`good_pcs`,
-    `injection_production`.`net_weight`
+   `injection_production`.`cavities`,
+    SUM(`injection_production`.`produced_pcs`) as produced_pcs,
+    SUM(`injection_production`.`waste_pcs`) as waste_pcs,
+    SUM(`injection_production`.`good_pcs`) as good_pcs,
+    SUM(`injection_production`.`net_weight`) as net_weight 
 FROM `injection_production`
 JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
 JOIN materials ON materials.material_id = `injection_production`.`material_id`
 LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
-	WHERE ". $date ." ORDER BY material_name";
+	WHERE ". $date ." GROUP BY `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
+    ORDER BY material_name ";
 
         if($shift != 0)
         {
@@ -624,6 +836,7 @@ LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id
 	WHERE ". $date ." AND SHIFT = ". $shift ." ORDER BY material_name";
         }
         
+		$total1 = $total2 = $total3 = $total4 = $total5 = 0;
                 
         if($stmt = $this->_db->prepare($sql))
         {
@@ -637,6 +850,11 @@ LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id
 				{
 					$type = 'Transparent';
 				}
+				$total1 += $shots;
+				$total2 += $row['produced_pcs'];
+				$total3 += $row['waste_pcs'];
+				$total4 += $row['good_pcs'];
+				$total5 += $row['net_weight'];
                 echo '<tr>
                         <td>'.  $row['material_name'] .' - '. $row['material_grade'].'</td>
                         <td>'.  $type .'</td>                        
@@ -651,7 +869,494 @@ LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id
                        </tr>';
             }
             $stmt->closeCursor();
-            
+            echo '
+				<tfoot><tr class="active">
+						<th></th>
+						<th></th>     
+						<th></th>                        
+                        <th class="text-right">Total</th>
+                        <th class="text-right">'. number_format($total1,0,'.',',') .'</th>
+                        <th class="text-right">'. number_format($total2,0,'.',',') .'</th>
+                        <th class="text-right">'. number_format($total3,0,'.',',') .'</th>
+                        <th class="text-right">'. number_format($total4,0,'.',',') .'</th>
+                        <th class="text-right">'. number_format($total5,2,'.',',') .'</th>
+                        
+                       </tr>
+				</tfoot>';
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                    <td></td>
+                </tr>";
+        }
+        
+    }
+	
+	public function createSacksProduction()
+    { 
+		$shift = $finished = $type1 = $type2 =$type3 = $sacks = "";
+		
+        $shift = trim($_POST["shift"]);
+        $shift = stripslashes($shift);
+        $shift = htmlspecialchars($shift);
+		
+		$finished = trim($_POST["finished"]);
+        $finished = stripslashes($finished);
+        $finished = htmlspecialchars($finished);
+	
+		$type1 = trim($_POST["type1"]);
+        $type1 = stripslashes($type1);
+        $type1 = htmlspecialchars($type1);
+		if($type1 == -1)
+		{
+			$type1 = 'NULL';
+			$type1sql = 'IS '. $type1;;
+		}
+		else
+		{
+			$type1sql = '= '. $type1;
+		}
+		
+		$type2 = trim($_POST["type2"]);
+        $type2 = stripslashes($type2);
+        $type2 = htmlspecialchars($type2);
+		if($type2 == -1)
+		{
+			$type2 = 'NULL';
+			$type2sql = 'IS '. $type2;;
+		}
+		else
+		{
+			$type2sql = '= '. $type2;
+		}
+		
+		$type3 = trim($_POST["type3"]);
+        $type3 = stripslashes($type3);
+        $type3 = htmlspecialchars($type3);
+		if($type3 == -1)
+		{
+			$type3 = 'NULL';
+			$type3sql = 'IS '. $type3;;
+		}
+		else
+		{
+			$type3sql = '= '. $type3;
+		}
+		
+		$sacks = trim($_POST["sacks"]);
+        $sacks = stripslashes($sacks);
+        $sacks = htmlspecialchars($sacks);
+		
+		$pieces = trim($_POST["pieces"]);
+        $pieces = stripslashes($pieces);
+        $pieces = htmlspecialchars($pieces);
+		
+        //DATE
+        $date = date("Y-m-d");
+        if($shift == 2)
+        {
+            $date = date("Y-m-d", time() - 60 * 60 * 24);
+        }
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+		
+		$totalnet = $pieces * $sacks;
+		
+        $update = "";
+		
+		//SEMIFINISHED 1
+		$sql = "SELECT injection_production_id, SUM(`good_pcs`) as net, SUM(used_weight) as used
+FROM `injection_production`
+WHERE `status_production` = 0 AND type_id ". $type1sql ." AND material_id = (SELECT semifinished1 FROM `injection_sacks` WHERE finishproduct = ". $finished .");";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['injection_production_id']))
+				{
+					$TOTAL = $row['net'] - $row['used'];
+					if($TOTAL<$totalnet)
+					{
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock. <br> There are <strong>'. $TOTAL .'</strong> pieces in stock for the <strong>semifinished #1</strong>, and you need <strong>'. $totalnet .'</strong> pieces.  Please try again after submit the <strong>production for injection.</strong>.';
+						return false;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock for the <strong>semifinished #1</strong>. <br>  Please try again after submit the <strong>production for injection.</strong>';
+						return false;
+				   }
+            }
+		}
+		
+		$sql = "SELECT `injection_production_id`, `good_pcs` as net, used_weight as used
+				FROM `injection_production`
+				WHERE `status_production` = 0 AND type_id ". $type1sql ." AND material_id = (SELECT semifinished1 FROM `injection_sacks` WHERE finishproduct = ". $finished .");
+				ORDER BY date_production, injection_production_id
+				LIMIT 100;";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+			$pieces = $totalnet;
+            while($row = $stmt->fetch() and $pieces > 0)
+            {
+				if(!is_null($row['injection_production_id']) )
+				{
+					$status = 0;
+					$TOTAL = $row['net'] - $row['used'];
+					if(($TOTAL > $pieces) and ($pieces > 0))
+					{
+						if($pieces+ $row['used'] == $row['net'])
+						{
+							$status = 1;
+						}
+						$update = $update . "
+						UPDATE `injection_production` SET
+                        `used_weight` = `used_weight`+". $pieces .", `status_production` = ". $status ."
+						WHERE `injection_production_id` = ". $row['injection_production_id']."; ";
+						$pieces = 0;
+						
+						$stmt->closeCursor();
+					}
+					else if(($TOTAL <= $pieces) and ($pieces > 0))
+					{
+						$update = $update . "
+						UPDATE `injection_production` SET
+                        `used_weight` = `used_weight`+". $TOTAL .", `status_production` = 1
+						WHERE `injection_production_id` = ". $row['injection_production_id']."; ";
+						$pieces = $pieces - $TOTAL;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock for the <strong>semifinished #1</strong>. <br>  Please try again after submit the <strong>production for injection.</strong>';
+						return false;
+				   }
+            }
+		
+			
+		//SEMIFINISHED 2
+			
+		$sql = "SELECT semifinished2 FROM `injection_sacks` WHERE finishproduct = ". $finished .";";
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['semifinished2']))
+				{
+					$sql = "SELECT injection_production_id, SUM(`good_pcs`) as net, SUM(used_weight) as used
+FROM `injection_production`
+WHERE `status_production` = 0 AND type_id  ". $type2sql ." AND material_id = (SELECT semifinished2 FROM `injection_sacks` WHERE finishproduct = ". $finished .");";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['injection_production_id']))
+				{
+					$TOTAL = $row['net'] - $row['used'];
+					if($TOTAL<$totalnet)
+					{
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock. <br> There are <strong>'. $TOTAL .'</strong> pieces in stock for the <strong>semifinished #2</strong>, and you need <strong>'. $totalnet .'</strong> pieces.  Please try again after submit the <strong>production for injection.</strong>.';
+						return false;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock for the <strong>semifinished #2</strong>. <br>  Please try again after submit the <strong>production for injection.</strong>';
+						return false;
+				   }
+            }
+		}
+		
+		$sql = "SELECT `injection_production_id`, `good_pcs` as net, used_weight as used
+				FROM `injection_production`
+				WHERE `status_production` = 0 AND type_id  ". $type2sql ." AND material_id = (SELECT semifinished2 FROM `injection_sacks` WHERE finishproduct = ". $finished .");
+				ORDER BY date_production, injection_production_id
+				LIMIT 100;";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+			$pieces = $totalnet;
+            while($row = $stmt->fetch() and $pieces > 0)
+            {
+				if(!is_null($row['injection_production_id']) )
+				{
+					$status = 0;
+					$TOTAL = $row['net'] - $row['used'];
+					if(($TOTAL > $pieces) and ($pieces > 0))
+					{
+						if($pieces+ $row['used'] == $row['net'])
+						{
+							$status = 1;
+						}
+						$update = $update . "
+						UPDATE `injection_production` SET
+                        `used_weight` = `used_weight`+". $pieces .", `status_production` = ". $status ."
+						WHERE `injection_production_id` = ". $row['injection_production_id']."; ";
+						$pieces = 0;
+						
+						$stmt->closeCursor();
+					}
+					else if(($TOTAL <= $pieces) and ($pieces > 0))
+					{
+						$update = $update . "
+						UPDATE `injection_production` SET
+                        `used_weight` = `used_weight`+". $TOTAL .", `status_production` = 1
+						WHERE `injection_production_id` = ". $row['injection_production_id']."; ";
+						$pieces = $pieces - $TOTAL;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock for the <strong>semifinished #2</strong>. <br>  Please try again after submit the <strong>production for injection.</strong>';
+						return false;
+				   }
+            }
+		}
+				}
+			}
+		}
+			
+		
+		//SEMIFINISHED 3
+			
+		$sql = "SELECT semifinished3 FROM `injection_sacks` WHERE finishproduct = ". $finished .";";
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['semifinished3']))
+				{
+					$sql = "SELECT injection_production_id, SUM(`good_pcs`) as net, SUM(used_weight) as used
+FROM `injection_production`
+WHERE `status_production` = 0 AND type_id  ". $type3sql ." AND material_id = (SELECT semifinished3 FROM `injection_sacks` WHERE finishproduct = ". $finished .");";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['injection_production_id']))
+				{
+					$TOTAL = $row['net'] - $row['used'];
+					if($TOTAL<$totalnet)
+					{
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock. <br> There are <strong>'. $TOTAL .'</strong> pieces in stock for the <strong>semifinished #3</strong>, and you need <strong>'. $totalnet .'</strong> pieces.  Please try again after submit the <strong>production for injection.</strong>.';
+						return false;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock for the <strong>semifinished #3</strong>. <br>  Please try again after submit the <strong>production for injection.</strong>';
+						return false;
+				   }
+            }
+		}
+		
+		$sql = "SELECT `injection_production_id`, `good_pcs` as net, used_weight as used
+				FROM `injection_production`
+				WHERE `status_production` = 0 AND type_id  ". $type3sql ." AND material_id = (SELECT semifinished3 FROM `injection_sacks` WHERE finishproduct = ". $finished .");
+				ORDER BY date_production, injection_production_id
+				LIMIT 100;";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+			$pieces = $totalnet;
+            while($row = $stmt->fetch() and $pieces > 0)
+            {
+				if(!is_null($row['injection_production_id']) )
+				{
+					$status = 0;
+					$TOTAL = $row['net'] - $row['used'];
+					if(($TOTAL > $pieces) and ($pieces > 0))
+					{
+						if($pieces+ $row['used'] == $row['net'])
+						{
+							$status = 1;
+						}
+						$update = $update . "
+						UPDATE `injection_production` SET
+                        `used_weight` = `used_weight`+". $pieces .", `status_production` = ". $status ."
+						WHERE `injection_production_id` = ". $row['injection_production_id']."; ";
+						$pieces = 0;
+						
+						$stmt->closeCursor();
+					}
+					else if(($TOTAL <= $pieces) and ($pieces > 0))
+					{
+						$update = $update . "
+						UPDATE `injection_production` SET
+                        `used_weight` = `used_weight`+". $TOTAL .", `status_production` = 1
+						WHERE `injection_production_id` = ". $row['injection_production_id']."; ";
+						$pieces = $pieces - $TOTAL;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought production in stock for the <strong>semifinished #3</strong>. <br>  Please try again after submit the <strong>production for injection.</strong>';
+						return false;
+				   }
+            }
+		}
+				}
+			}
+		}	
+			
+			
+			//INSERT
+			$sql = "INSERT INTO `injection_sacks_production`
+(`injection_sacks_production_id`,`date_production`,`shift`,`finishproduct`,`semifinished1`,`semifinished2`,`semifinished3`,`sacks`,`user_id`,`status_production`,`used`) VALUES (NULL,'". $date."',". $shift .",". $finished .",". $type1 .",". $type2 .", ". $type3 .",". $sacks .",". $_SESSION['Userid'] .",0,0.00); ". $update; 
+			echo '<script>alert("'.$sql.'");</script>';
+			try
+			{   
+				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+				$stmt = $this->_db->prepare($sql);
+				$stmt->execute();
+				$stmt->closeCursor();
+                echo '<strong>SUCCESS!</strong> The production of sacks were successfully added to the database for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>';
+                return TRUE;
+            } 
+            catch (PDOException $e) {
+                if ($e->getCode() == 23000) {
+                    echo '<strong>ERROR</strong> The production of sacks have already being register for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>.<br>';
+                } 
+                else {
+                    echo '<strong>ERROR</strong> Could not insert the production into the database. Please try again.<br>'. $e->getMessage();
+                }
+                return FALSE;
+            }
+		}
+    }
+	
+	public function giveSacksProduction($shift)
+    {
+        $newDateString = date("Y-m-d");
+        if(!empty($_POST['dateSearch']))
+        {
+           $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+           $newDateString = $myDateTime->format('Y-m-d');
+        }
+        $date = "date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString ." 23:59:59'";
+
+        $sql = "SELECT `injection_sacks_production`.`injection_sacks_production_id`,
+    `injection_sacks_production`.`date_production`,
+    `injection_sacks_production`.`shift`,materials.material_name as finishname, 
+    semi1.material_name as semi1, color1.material_name as color1, 
+    semi2.material_name as semi2, color2.material_name as color2, 
+    semi3.material_name as semi3, color3.material_name as color3,
+    `injection_sacks_production`.`sacks`
+FROM `injection_sacks_production`
+JOIN injection_sacks ON injection_sacks_production.finishproduct = injection_sacks.finishproduct
+JOIN materials ON materials.material_id = injection_sacks_production.finishproduct 
+JOIN materials semi1 ON semi1.material_id = injection_sacks.semifinished1
+JOIN materials color1 ON color1.material_id = injection_sacks_production.semifinished1
+LEFT JOIN materials semi2 ON semi2.material_id = injection_sacks.semifinished2
+LEFT JOIN materials color2 ON color2.material_id = injection_sacks_production.semifinished2 
+LEFT JOIN materials semi3 ON semi3.material_id = injection_sacks.semifinished3
+LEFT JOIN materials color3 ON color3.material_id = injection_sacks_production.semifinished3
+	WHERE ". $date ."  
+	GROUP BY `date_production`, injection_sacks_production.finishproduct, injection_sacks_production.semifinished1, injection_sacks_production.semifinished2, injection_sacks_production.semifinished3
+    ORDER BY finishname ";
+
+        if($shift != 0)
+        {
+            $sql = "SELECT `injection_sacks_production`.`injection_sacks_production_id`,
+    `injection_sacks_production`.`date_production`,
+    `injection_sacks_production`.`shift`,materials.material_name as finishname, 
+    semi1.material_name as semi1, color1.material_name as color1, 
+    semi2.material_name as semi2, color2.material_name as color2, 
+    semi3.material_name as semi3, color3.material_name as color3,
+    `injection_sacks_production`.`sacks`
+FROM `injection_sacks_production`
+JOIN injection_sacks ON injection_sacks_production.finishproduct = injection_sacks.finishproduct
+JOIN materials ON materials.material_id = injection_sacks_production.finishproduct 
+JOIN materials semi1 ON semi1.material_id = injection_sacks.semifinished1
+JOIN materials color1 ON color1.material_id = injection_sacks_production.semifinished1
+LEFT JOIN materials semi2 ON semi2.material_id = injection_sacks.semifinished2
+LEFT JOIN materials color2 ON color2.material_id = injection_sacks_production.semifinished2 
+LEFT JOIN materials semi3 ON semi3.material_id = injection_sacks.semifinished3
+LEFT JOIN materials color3 ON color3.material_id = injection_sacks_production.semifinished3
+	WHERE ". $date ." AND SHIFT = ". $shift ." ORDER BY finishname";
+        }
+        
+		$total1 = $total2 = $total3 = $total4 = $total5 = 0;
+                
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+           
+            while($row = $stmt->fetch())
+            {   
+				$type1 = $row['color1'];
+				if(empty($row['color1']))
+				{
+					$type = 'Transparent';
+				}
+				$semi1 = $row['semi1'] .' - '.  $type1;
+				if(empty($row['semi1']))
+				{
+					$semi1 = '';
+				}
+				
+				$type2 = $row['color2'];
+				if(empty($row['color2']))
+				{
+					$type = 'Transparent';
+				}
+				$semi2 = $row['semi2'] .' - '.  $type2;
+				if(empty($row['semi2']))
+				{
+					$semi2 = '';
+				}
+				
+				$type3 = $row['color3'];
+				if(empty($row['color3']))
+				{
+					$type = 'Transparent';
+				}
+				$semi3 = $row['semi3'] .' - '.  $type3;
+				if(empty($row['semi3']))
+				{
+					$semi3 = '';
+				}
+				$total1 = $total1 + $row['sacks'];
+                echo '<tr>
+                        <td>'.  $row['finishname'] .'</td> 
+                        <td>'.  $semi1 .'</td>                   
+                        <td>'.  $semi2 .'</td>                     
+                        <td>'.  $semi3 .'</td>                         
+                        <td class="text-right">'. number_format($row['sacks'],0,'.',',') .'</td>
+                        
+                       </tr>';
+            }
+            $stmt->closeCursor();
+            echo '
+				<tfoot><tr class="active">
+						<th></th>
+						<th></th>
+						<th></th>
+                        <th class="text-right">Total</th>
+                        <th class="text-right">'. number_format($total1,0,'.',',') .'</th>
+                        
+                       </tr>
+				</tfoot>';
         }
         else
         {
@@ -675,7 +1380,8 @@ LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id
         $sql = "SELECT 
     materials.material_name as product,
     color.material_name as type,
-    SUM(`injection_production`.`good_pcs`) as pcs
+    SUM(`injection_production`.`good_pcs`) as pcs,
+    SUM(`injection_production`.`used_weight`) as used
 FROM `injection_production`
 JOIN materials ON materials.material_id = injection_production.material_id
 LEFT JOIN materials color ON color.material_id = type_id
@@ -692,7 +1398,7 @@ GROUP BY `injection_production`.material_id, type_id;";
 				{
 					$TYPE = 'Transparent';
 				}
-                $PCS = $row['pcs'];
+                $PCS = $row['pcs'] - $row['used'] ;
                 
                 echo '<tr>
                         <td>'. $PRODUCT .'</td>
@@ -740,7 +1446,7 @@ WHERE status_production = 0;";
 				{
 					$TYPE = 'Transparent';
 				}
-                $PCS = $row['pcs'];
+                $PCS = $row['pcs']  ;
                 
                 echo '<tr>
                         <td>'. $row['date_production'] .'</td>

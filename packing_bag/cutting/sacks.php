@@ -1,5 +1,5 @@
 <?php
-    $pageTitle = "Sacks - Cutting Sacks";
+    $pageTitle = "Packing Bags - Sacks";
     
     include_once "../../base.php";
     include_once "../../header.php";
@@ -7,8 +7,8 @@
     include_once "../../content.php";
 
 
-    include_once "../../inc/class.sacks.inc.php";
-    $sacks = new Sacks($db);
+    include_once "../../inc/class.packing.inc.php";
+    $packing = new Packing($db);
 
 	include_once "../../inc/class.users.inc.php";
     $users = new Users($db);
@@ -18,11 +18,11 @@
 			<a href="../../index.php">United Production System</a>
 		</li>
 		<li class="breadcrumb-item">
-			<a href="../process.php">Sacks</a>
+			<a href="../process.php">Packing Bags </a>
 		</li>
 		<li class="breadcrumb-item active">Sacks</li>
 	</ol>
-	<h2>Cutting - Sacks</h2>
+	<h2>Packing Bags - Sacks</h2>
 
 
 	<div id="alertMessage" class="alert hide" role="alert">
@@ -33,7 +33,7 @@
     if(!empty($_POST['shift']) )
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
-        if($sacks->createSacks()){
+        if($packing->createSacks()){
 
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
@@ -48,20 +48,8 @@
 
 
 	<div class="pull-right text-right">
-		<div class="dropdown">
-			<button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Submit sacks&nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
-			<ul class="dropdown-menu dropdown-menu-right">
-				<li><a onclick="selectMachine(21,'Cutting 1')" data-toggle="modal" data-target="#modal1">Cutting 1</a></li>
-				<li><a onclick="selectMachine(22,'Cutting 2')" data-toggle="modal" data-target="#modal1">Cutting 2</a></li>
-				<li><a onclick="selectMachine(23,'Cutting 3')" data-toggle="modal" data-target="#modal1">Cutting 3</a></li>
-				<li><a onclick="selectMachine(24,'Cutting 4')" data-toggle="modal" data-target="#modal1">Cutting 4</a></li>
-				<li><a onclick="selectMachine(25,'Cutting 5')" data-toggle="modal" data-target="#modal1">Cutting 5</a></li>
-				<li><a onclick="selectMachine(26,'Cutting 6')" data-toggle="modal" data-target="#modal1">Cutting 6</a></li>
-				<li><a onclick="selectMachine(27,'Cutting 7')" data-toggle="modal" data-target="#modal1">Cutting 7</a></li>
-				<li><a onclick="selectMachine(28,'Cutting 8')" data-toggle="modal" data-target="#modal1">Cutting 8</a></li>
-				<li><a onclick="selectMachine(29,'Cutting 9')" data-toggle="modal" data-target="#modal1">Cutting 9</a></li>
-			</ul>
-		</div>
+			<button class="btn btn-info" type="button" data-toggle="modal" data-target="#modal1">Submit sacks</button>
+			
 	</div>
 
 
@@ -98,21 +86,14 @@
 							<thead>
 								<tr class="active text-center">
 									<th></th>
-									<th class="text-center">M/C No. 1</th>
-									<th class="text-center">M/C No. 2</th>
-									<th class="text-center">M/C No. 3</th>
-									<th class="text-center">M/C No. 4</th>
-									<th class="text-center">M/C No. 5</th>
-									<th class="text-center">M/C No. 6</th>
-									<th class="text-center">M/C No. 7</th>
-									<th class="text-center">M/C No. 8</th>
-									<th class="text-center">M/C No. 9</th>
-									<th class="text-center">Total</th>
+									<th>Sacks Weight</th>
+									<th>Size</th>
+									<th>Job name</th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
-     $sacks->giveSacksTable(0);
+     $packing->giveSacksTable(0);
 ?>
 							</tbody>
 						</table>
@@ -133,21 +114,14 @@
 							<thead>
 								<tr class="active text-center">
 									<th></th>
-									<th class="text-center">M/C No. 1</th>
-									<th class="text-center">M/C No. 2</th>
-									<th class="text-center">M/C No. 3</th>
-									<th class="text-center">M/C No. 4</th>
-									<th class="text-center">M/C No. 5</th>
-									<th class="text-center">M/C No. 6</th>
-									<th class="text-center">M/C No. 7</th>
-									<th class="text-center">M/C No. 8</th>
-									<th class="text-center">M/C No. 9</th>
-									<th class="text-center">Total</th>
+									<th>Sacks Weight</th>
+									<th>Size</th>
+									<th>Job name</th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
-     $sacks->giveSacksTable(1);
+     $packing->giveSacksTable(1);
 ?>
 							</tbody>
 						</table>
@@ -170,21 +144,14 @@
 							<thead>
 								<tr class="active text-center">
 									<th></th>
-									<th class="text-center">M/C No. 1</th>
-									<th class="text-center">M/C No. 2</th>
-									<th class="text-center">M/C No. 3</th>
-									<th class="text-center">M/C No. 4</th>
-									<th class="text-center">M/C No. 5</th>
-									<th class="text-center">M/C No. 6</th>
-									<th class="text-center">M/C No. 7</th>
-									<th class="text-center">M/C No. 8</th>
-									<th class="text-center">M/C No. 9</th>
-									<th class="text-center">Total</th>
+									<th>Sacks Weight</th>
+									<th>Size</th>
+									<th>Job name</th>
 								</tr>
 							</thead>
 							<tbody>
 								<?php
-     $sacks->giveSacksTable(2);
+     $packing->giveSacksTable(2);
 ?>
 							</tbody>
 						</table>
@@ -204,6 +171,7 @@
 					</div>
 					<form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 						<div class="modal-body">
+							
 							<div class="row">
 								<div class="col-md-4 form-group">
 									<label for="date">Date <span class="text-danger">*</span></label>
@@ -214,7 +182,7 @@
 										</span>
 									</div>
 								</div>
-								<div class="col-md-4 form-group">
+								<div class="col-md-4  form-group">
 									<label for="shift">Shift <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="shift" name="shift" value="1" required>
 									<div class="dropdown">
@@ -226,14 +194,20 @@
 									</div>
 								</div>
 								<div class="col-md-4 form-group">
-									<label for="size">Machine <span class="text-danger">*</span></label><br />
-									<input type="hidden" class="form-control" id="machine" name="machine" value="1" required>
-									<input type="text" class="form-control" step="1" min="1" id="machineName"  value="" disabled>
+									<label for="shift">Color<span class="text-danger">*</span></label><br />
+									<input type="hidden" class="form-control" id="color" name="color" value="0" required>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_color" style="height:30px;">Natural&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a onclick="selectColor(0,'Natural')">Natural</a></li>
+											<li><a onclick="selectColor(1,'White')">White</a></li>
+										</ul>
+									</div>
 								</div>
 							</div>
 							<div class="row">
 								
-								<div class="col-md-6 form-group">
+								<div class="col-md-4 form-group">
 									<label for="shift">Operator 1 <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="employee1" name="employee1" required>
 									<div class="btn-group">
@@ -241,25 +215,36 @@
 										<ul class="dropdown-menu" role="menu" id="dropdown_employee1">
 											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee1" onkeyup="filterEmployee1()" width="100%"></li>
 											<?php
-	$sacks->operators1Dropdown();
+	$packing->operators1Dropdown();
 ?>
 										</ul>
 									</div>
 								</div>
 								
-								<div class="col-md-6 form-group">
-									<label for="shift">Operator 2 </label><br />
-									<input type="hidden" class="form-control" id="employee2" name="employee2" >
-									<div class="btn-group">
-										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee2">&nbsp&nbsp<span class="caret"></span></button>
-										<ul class="dropdown-menu" role="menu" id="dropdown_employee2">
-											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee2" onkeyup="filterEmployee2()" width="100%"></li>
-											<?php
-	$sacks->operators2Dropdown();
-?>
+								<div class="col-md-4 form-group">
+									<label for="size">Size<span class="text-danger">*</span></label><br />
+									<input type="hidden" class="form-control" id="size" name="size" value="1" required>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_size" style="height:30px;">5000 ml x 100&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a onclick="selectSize(1,'5000 ml x 100' )">5000 ml x 100</a></li>
+											<li><a onclick="selectSize(2,'1000 ml x 100' )">1000 ml x 100</a></li>
 										</ul>
 									</div>
 								</div>
+								 <div class="col-lg-4 form-group">
+                                    <label for="customer">Customer</label><br />
+                                    <input type="hidden" class="form-control" id="customer" name="customer">
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_customer">&nbsp&nbsp<span class="caret"></span></button>
+                                        <ul class="dropdown-menu" id="dropdown_customer">
+                                            <li><input type="text" placeholder="Search customer.." class="searchDropdown" id="searchCustomer" onkeyup="filterCustomers()" width="100%"></li>
+                                            <?php
+    $packing->customersDropdown();
+ ?>
+                                        </ul>
+                                    </div>
+                                </div>
 							</div>
 							<div class="panel panel-info">
 								<div class="panel-heading">
@@ -324,6 +309,21 @@
 												<td>16</td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_16"></td>
 											</tr>
+											
+											<tr>
+												<td>17</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_17"></td>
+												<td>18</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_18"></td>
+											</tr>
+											
+											<tr>
+												<td>19</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_19"></td>
+												<td>20</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_20"></td>
+											</tr>
+											
 										</tbody>
 									</table>
 								</div>
@@ -356,6 +356,12 @@
     
 ?>
 			<script>
+				 function selectCustomer(id, name) {
+                    document.getElementById("btn_customer").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+                    document.getElementById("customer").value = id;
+                }
+
+				
 				function selectEmployee1(id, name) {
 					document.getElementById("btn_employee1").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("employee1").value = id;

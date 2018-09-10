@@ -58,7 +58,7 @@ class Packing
                 $ID = $row['material_id'];
                 $NAME = $row['material_name'];
                 $GRADE = $row['material_grade'];
-                echo  '<li><a id="'. $NAME .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
+                echo  '<li><a id="'. $NAME .' - '. $GRADE .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
             }
             $stmt->closeCursor();
         }
@@ -85,6 +85,51 @@ class Packing
                 $NAME = $row['material_name'];
                 $GRADE = $row['material_grade'];
                 echo  '<li><a id="'. $NAME .'" onclick="selectConsumable(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	
+	public function operators1Dropdown()
+    {
+        $sql = "SELECT `employees`.`employee_id`,
+					`employees`.employee_name
+				FROM `ups_db`.`employees`
+				WHERE packing = 1;
+				ORDER BY employee_name";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['employee_id'];
+                $NAME = $row['employee_name'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectEmployee1(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	public function customersDropdown()
+    {
+        $sql = "SELECT `customers`.`customer_id`,`customers`.`customer_name`
+        FROM  `customers`
+		WHERE packing_bags = 1;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['customer_id'];
+                $NAME = $row['customer_name'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectCustomer(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
             }
             $stmt->closeCursor();
         }
@@ -828,6 +873,236 @@ WHERE `actual` = 1 AND `packing_bag_formulas`.color = 0;";
 		}
     }
 	
+	public function createSacks()
+    {
+        
+        
+      $shift  = $employee1 = $size = $color = "";
+		
+        $shift = trim($_POST["shift"]);
+        $shift = stripslashes($shift);
+        $shift = htmlspecialchars($shift);
+		
+		
+		$size = trim($_POST["size"]);
+        $size = stripslashes($size);
+        $size = htmlspecialchars($size);
+				
+		$customer = trim($_POST["customer"]);
+        $customer = stripslashes($customer);
+        $customer = htmlspecialchars($customer);
+		if(empty($_POST['customer']))
+        {
+			$customer = 'NULL';
+		}
+		
+		$color = trim($_POST["color"]);
+        $color = stripslashes($color);
+        $color = htmlspecialchars($color);
+		
+		$employee1 = trim($_POST["employee1"]);
+        $employee1 = stripslashes($employee1);
+        $employee1 = htmlspecialchars($employee1);
+		if(empty($_POST['employee1']))
+        {
+			$employee1 = 'NULL';
+		}
+		
+		
+        //DATE
+        $date = date("Y-m-d");
+        if($shift == 2)
+        {
+            $date = date("Y-m-d", time() - 60 * 60 * 24);
+        }
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+		
+		$totalnet = 0;
+		
+		$sacks = "INSERT INTO `packing_bags_sacks`(`packing_bags_sacks_id`,`date_sacks`,`shift`,`gross_weight`,`net_weight`,`user_id`,`employee_id`,`size`,`color`,`customer_id`) VALUES";
+		foreach ($_POST as $k=>$v)
+		{
+			if (substr( $k, 0, 3 ) === "wt_" and !empty($v)){
+				$net = $v;
+				$totalnet = $totalnet + $net;
+				$sacks = $sacks. " (NULL, '". $date."', ". $shift .", ". $v .", ". $net .", ". $_SESSION['Userid'] .", ". $employee1 .", ". $size .",". $color.", ". $customer.") ,";
+			}
+		}
+		
+		$update = "";
+		
+		
+		$sql = "SELECT packing_rolls_id, SUM(`net_weight`) as net, SUM(used_weight) as used
+				FROM `packing_rolls`
+				WHERE `status_roll` = 0 AND `color` = ". $color .";";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['packing_rolls_id']))
+				{
+					$TOTAL = $row['net'] - $row['used'];
+					if($TOTAL<$totalnet)
+					{
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought rolls production in stock. <br> There are <strong>'. $TOTAL .'</strong> kgs in stock, and you need <strong>'. $totalnet .'</strong> kgs.  Please try again after submit the rolls for the packing bags - extruder.';
+						return false;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sack was not added to the production. Because there is not enought rolls production in stock. <br>  Please try again after submit the rolls for the packing bags - extruder.';
+						return false;
+				   }
+            }
+		}
+		
+		$sql = "SELECT packing_rolls_id, `net_weight`, used_weight
+				FROM `packing_rolls`
+				WHERE `status_roll` = 0 AND `color` = ". $color ."
+				ORDER BY date_roll, packing_rolls_id
+				LIMIT 100;";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['packing_rolls_id']))
+				{
+					$TOTAL = $row['net_weight'] - $row['used_weight'];
+					if(($TOTAL > $totalnet) and ($totalnet > 0))
+					{
+						if($totalnet + $row['used_weight'] == $row['net_weight'])
+						{
+							
+							$update = $update . "
+						UPDATE `packing_rolls` SET
+                        `used_weight` = `used_weight`+". $totalnet .", `status_roll` = 1
+						WHERE `packing_rolls_id` = ". $row['packing_rolls_id']."; ";
+						}
+						else
+						{
+							
+							$update = $update . "
+						UPDATE `packing_rolls` SET
+                        `used_weight` = `used_weight`+". $totalnet .", `status_roll` = 1
+						WHERE `packing_rolls_id` = ". $row['packing_rolls_id']."; ";
+						}
+						$totalnet = 0;
+						$stmt->closeCursor();
+					}
+					else if(($TOTAL <= $totalnet) and ($totalnet > 0))
+					{
+						$update = $update . "
+						UPDATE `packing_rolls` SET
+                        `used_weight` = `used_weight`+". $TOTAL .", `status_roll` = 1
+						WHERE `packing_rolls_id` = ". $row['packing_rolls_id']."; ";
+						$totalnet = $totalnet - $TOTAL;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sack was not added to the production. Because there is not enought rolls production in stock. <br>  Please try again after submit the rolls for the Packing Bags - extruder.';
+						return false;
+				   }
+            }
+		
+			
+			
+			$sql = substr($sacks,0,strlen($sacks)-2). "; ". $update;
+			try {   
+				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+				$stmt = $this->_db->prepare($sql);
+				$stmt->execute();
+				$stmt->closeCursor();
+				echo '<strong>SUCCESS!</strong> The sacks were successfully added to the database for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>';
+				return TRUE;
+			}
+			catch (PDOException $e) {
+				echo '<strong>ERROR</strong> Could not insert the sacks into the database. Please try again.<br>'. $e->getMessage();
+				return FALSE;
+			}
+			}
+		}
+	
+	public function giveSacksTable($shift)
+    {
+        $newDateString = date("Y-m-d");
+        if(!empty($_POST['dateSearch']))
+        {
+           $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+           $newDateString = $myDateTime->format('Y-m-d');
+        }
+        $date = "date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString ." 23:59:59'";
+		
+		
+		$sql = "SELECT  gross_weight, null as one, size, color, customer_name
+FROM packing_bags_sacks
+LEFT JOIN employees one ON one.employee_id = packing_bags_sacks.employee_id
+LEFT JOIN customers ON packing_bags_sacks.customer_id = customers.customer_id
+WHERE ". $date ."
+ORDER BY `packing_bags_sacks_id`";
+
+		if($shift != 0)
+		{
+			$sql = "SELECT  gross_weight, one.employee_name as one, size, color, customer_name
+				FROM packing_bags_sacks
+				LEFT JOIN employees one ON one.employee_id = packing_bags_sacks.employee_id
+				LEFT JOIN customers ON packing_bags_sacks.customer_id = customers.customer_id
+				WHERE ". $date ." AND shift = ". $shift ." ORDER BY `packing_bags_sacks_id`";
+		}
+		
+		if($stmt = $this->_db->prepare($sql))
+		{
+				$stmt->execute();
+				$entro = false;
+				$i = 0;
+				$total = 0;
+				while($row = $stmt->fetch())
+				{ 
+					$i++;
+				   if(!$entro)
+					{
+						echo '<tr class="active">
+								  <th style="text-align:center">Operator name</th>
+								  <th class="text-right">'. $row['one'] .'</th>
+								  <th></th>
+								  <th></th>
+								</tr>';
+					   $entro = true;
+					}
+					$total += $row['gross_weight'];
+					$SIZE = $row['size'];
+					$COLOR = $this->giveColorName($row['color']);
+					if(!is_null($row['customer_name']))
+					{
+						$COLOR = $COLOR . ' - ' .$row['customer_name'];
+					}
+					echo '<tr>
+								  <td style="text-align:center">'. $i .'</th>
+								  <td class="text-right">'. number_format($row['gross_weight'],2,'.',',') .'</th>
+								  <td style="text-align:center">'. $this->giveSizeSacks($SIZE)  .'</th>
+								  <td style="text-align:center">'.  $COLOR .'</th>
+								</tr>';
+					
+				}
+				echo '
+								<tr class="active">
+								  <th style="text-align:center">Total sacks wt.</th>
+								  <th class="text-right">'. number_format($total,2,'.',',') .'</th>
+								  <th style="text-align:center">Total No. of sacks.</th>
+								  <th class="text-right">'. number_format($i,2,'.',',') .'</th>
+								</tr>';
+		}
+		
+	 }
 	 /**
      * Loads the table of all the consumption for the rolls
      * This function outputs <tr> tags with rolls
@@ -1128,7 +1403,135 @@ WHERE `actual` = 1 AND `packing_bag_formulas`.color = 0;";
             }
         }
     }
-    
+    public function createSacksWaste()
+    {
+        $shift = $total = "";
+       
+		
+        $shift = trim($_POST["shift"]);
+        $shift = stripslashes($shift);
+        $shift = htmlspecialchars($shift);
+		
+        $cutting = trim($_POST["cutting"]);
+        $cutting = stripslashes($cutting);
+        $cutting = htmlspecialchars($cutting); 
+		
+        $printing = trim($_POST["printing"]);
+        $printing = stripslashes($printing);
+        $printing = htmlspecialchars($printing); 
+		
+		$totalnet = $cutting + $printing;
+        
+        //DATE
+        $date = date("Y-m-d");
+        if($shift == 2)
+        {
+            $date = date("Y-m-d", time() - 60 * 60 * 24);
+        }
+		if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+        
+        $update = "";
+		
+		
+		$sql = "SELECT packing_rolls_id, SUM(`net_weight`) as net, SUM(used_weight) as used
+				FROM `packing_rolls`
+				WHERE `status_roll` = 0;";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['packing_rolls_id']))
+				{
+					$TOTAL = $row['net'] - $row['used'];
+					if($TOTAL<$totalnet)
+					{
+						echo '<strong>ERROR</strong> The waste were not added to the production. Because there is not enought rolls production in stock. <br> There are <strong>'. $TOTAL .'</strong> kgs in stock, and you need <strong>'. $totalnet .'</strong> kgs.  Please try again after submit the <strong>rolls for the packing bags - extruder</strong>.';
+						return false;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The waste was not added to the production. Because there is not enought rolls production in stock. <br>  Please try again after submit the <strong>rolls for the packing bags -  extruder</strong>.';
+						return false;
+				   }
+            }
+		}
+		
+		$sql = "SELECT packing_rolls_id, `net_weight`, used_weight
+				FROM `packing_rolls`
+				WHERE `status_roll` = 0
+				ORDER BY date_roll, packing_rolls_id
+				LIMIT 100;";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['packing_rolls_id']))
+				{
+					$status = 0;
+					$TOTAL = $row['net_weight'] - $row['used_weight'];
+					if(($TOTAL > $totalnet) and ($totalnet > 0))
+					{
+						if($totalnet + $row['used_weight'] == $row['net_weight'])
+						{
+							$status = 1;
+						}
+						$update = $update . "
+						UPDATE `packing_rolls` SET
+                        `used_weight` = `used_weight`+". $totalnet .", `status_roll` = ". $status. "
+						WHERE `packing_rolls_id` = ". $row['packing_rolls_id']."; ";
+						$totalnet = 0;
+						
+						$stmt->closeCursor();
+					}
+					else if(($TOTAL <= $totalnet) and ($totalnet > 0))
+					{
+						$update = $update . "
+						UPDATE `packing_rolls` SET
+                        `used_weight` = `used_weight`+". $TOTAL .", `status_roll` = 1
+						WHERE `packing_rolls_id` = ". $row['packing_rolls_id']."; ";
+						$totalnet = $totalnet - $TOTAL;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The  waste was not added to the production. Because there is not enought rolls production in stock. <br>  Please try again after submit the <strong>rolls for the extruder</strong>.';
+						return false;
+				   }
+            }
+			
+            $machine = 45;
+            //INSERT THE WASTE 
+            $sql = "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`) VALUES (NULL,'". $date."', ". $shift .",". $machine .", ". $cutting .", ". $_SESSION['Userid'] .", 1), (NULL,'". $date."', ". $shift .",". $machine .", ". $printing .", ". $_SESSION['Userid'] .", 2);". $update;
+            try
+            {   
+                $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+                    $stmt = $this->_db->prepare($sql);
+                    $stmt->execute();
+                    $stmt->closeCursor();
+                    echo '<strong>SUCCESS!</strong> The waste were successfully added to the database for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>';
+                    return TRUE;
+                } 
+            catch (PDOException $e) {
+                if ($e->getCode() == 23000) {
+                    echo '<strong>ERROR</strong> The waste have already being register for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>.<br>';
+                } 
+                else {
+                    echo '<strong>ERROR</strong> Could not insert the waste into the database. Please try again.<br>'. $e->getMessage();
+                }
+                return FALSE;
+            }
+        }
+    }
 	
 	/**
      * Loads the table of all the waste in the multilayer section
@@ -1154,7 +1557,7 @@ FROM
         AND `waste`.shift = block_waste.shift
         AND block_waste.type = 2 
 WHERE
-	`waste`.type = 1 AND location_id = 8
+	`waste`.type = 1 AND (machines.machine_id = 9 OR machines.machine_id = 10)
 ORDER BY `waste`.date_waste DESC, `waste`.`shift` DESC, `waste`.machine_id;";
         if($stmt = $this->_db->prepare($sql))
         {
@@ -1172,6 +1575,60 @@ ORDER BY `waste`.date_waste DESC, `waste`.`shift` DESC, `waste`.machine_id;";
                         <td>'. $USER .'</td>
                         <th class="text-right">'. number_format($row['film'],2,'.',',') .'</th>
                         <th class="text-right">'. number_format($row['block'],2,'.',',') .'</th>
+                    </tr>';
+                }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
+	public function giveCuttingWaste()
+    {
+		$sql = "SELECT 
+    machine_name,
+    `waste`.`date_waste`,
+    `waste`.`shift`,
+    `waste`.`waste` as cutting, block_waste.waste as printing,
+    username
+FROM
+    `waste`
+        NATURAL JOIN
+    users
+        NATURAL JOIN
+    machines
+        LEFT JOIN
+    `waste` block_waste ON `waste`.date_waste = block_waste.date_waste
+        AND `waste`.machine_id = block_waste.machine_id
+        AND `waste`.shift = block_waste.shift
+        AND block_waste.type = 2 
+WHERE
+	`waste`.type = 1 AND waste.machine_id = 45 AND MONTH(`waste`.date_waste) >= MONTH(CURRENT_DATE())-1 AND YEAR(`waste`.date_waste) = YEAR(CURRENT_DATE())
+ORDER BY `waste`.date_waste DESC, `waste`.`shift` DESC;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $DATE = $row['date_waste'];
+                $USER = $row['username'];
+                $SHIFT = $this->giveShiftname($row['shift']);
+                $TOTAL = $row['cutting'] + $row['printing'];
+                
+                echo '<tr>
+                        <td>'. $DATE .'</td>
+                        <td>'. $SHIFT .'</td>
+                        <td>'. $USER .'</td>
+                        <td class="text-right">'. number_format($row['cutting'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['printing'],2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($TOTAL,2,'.',',') .'</th>
                     </tr>';
                 }
             
@@ -1215,7 +1672,54 @@ FROM
     `shortfalls`
 NATURAL JOIN `machines`
 WHERE
-    location_id = 8 
+    location_id = 8 AND machine_id <>45
+ORDER BY date_fall;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                echo '<tr>
+                    <td>'. $row['date_fall'] .'</td>
+                    <td>'. $row['machine_name'] .'</td>
+                    <td>'. $row['time_t'] .'</td>
+                    <td>'. $row['reason'] .'</td>
+                    <td>'. $row['action_plan'] .'</td>
+                </tr>';
+            }
+            $stmt->closeCursor();
+            
+        }  
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+    }
+	
+	public function giveShortFallSacks()
+    {
+//        $sql = "SELECT machine_name,
+//    `shortfalls`.`date_fall`,
+//    `shortfalls`.`downtime` AS time_t,
+//    `shortfalls`.`reason`,
+//    `shortfalls`.`action_plan`
+//FROM
+//    `shortfalls`
+//NATURAL JOIN `machines`
+//WHERE
+//    location_id = 8 
+//        AND MONTH(date_fall) = MONTH(CURRENT_DATE())
+//        AND YEAR(date_fall) = YEAR(CURRENT_DATE())
+//ORDER BY date_fall;";
+		$sql = "SELECT machine_name,
+    `shortfalls`.`date_fall`,
+    `shortfalls`.`downtime` AS time_t,
+    `shortfalls`.`reason`,
+    `shortfalls`.`action_plan`
+FROM
+    `shortfalls`
+NATURAL JOIN `machines`
+WHERE machines.machine_id = 45
 ORDER BY date_fall;";
         if($stmt = $this->_db->prepare($sql))
         {
@@ -1484,6 +1988,19 @@ ORDER BY date_fall;";
 		else if($size == 2)
         {
             $sizename = "9.8 x 2.5";
+        }
+        return $sizename;
+    }
+	 public function giveSizeSacks($size)
+    {
+        $sizename = "";
+        if($size == 1)
+        {
+            $sizename = "5000 ml x 100";
+        }
+		else if($size == 2)
+        {
+            $sizename = "1000 ml x 100";
         }
         return $sizename;
     }

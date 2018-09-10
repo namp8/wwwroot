@@ -131,7 +131,7 @@ $materials->materialsStockDropdown(1);
                 </div>
                 <div class="form-group">
                     <label for="oldbags">Bags/Drumps on UPS<span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="1" id="oldbags" name="oldbags" readonly="readonly">
+                    <input type="number" class="form-control" min="1" step="0.001" id="oldbags" name="oldbags" onkeyup="calculate()" >
                 </div>
                 <div class="form-group">
                     <label for="newbags">Bags/Drumps on floor<span class="text-danger">*</span></label>

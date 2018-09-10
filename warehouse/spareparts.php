@@ -131,7 +131,7 @@ $materials->sparepartsStockDropdown(1);
                 </div>
                 <div class="form-group">
                     <label for="oldbags">Quantity on UPS<span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="1" id="oldbags" name="oldbags" readonly="readonly">
+                    <input type="number" class="form-control" min="1" id="oldbags" name="oldbags" onkeyup="calculate()" step="0.001">
                 </div>
                 <div class="form-group">
                     <label for="newbags">Quantity on floor<span class="text-danger">*</span></label>

@@ -231,31 +231,31 @@
             document.getElementById("material").value = id;
         }
         function filterMaterials() {
-            var input, filter, ul, li, a, i;
-            input = document.getElementById("searchMaterial");
-            filter = input.value.toUpperCase();
-            div = document.getElementById("dropdown_material");
-            a = div.getElementsByTagName("a");
-            for (i = 0; i < a.length; i++) {
-                if (a[i].id.toUpperCase().startsWith(filter)) {
-                    a[i].style.display = "";
-                } else {
-                    a[i].style.display = "none";
-                }
-            }
-        }
+			var input, filter, ul, li, a, i;
+			input = document.getElementById("searchMaterial");
+			filter = input.value.toUpperCase();
+			div = document.getElementById("dropdown_material");
+			a = div.getElementsByTagName("a");
+			for (i = 0; i < a.length; i++) {
+				if (a[i].id.toUpperCase().includes(filter)) {
+					a[i].style.display = "";
+				} else {
+					a[i].style.display = "none";
+				}
+			}
+		}
 	 function selectConsumable(id, name) {
             document.getElementById("btn_consumable").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
             document.getElementById("material").value = id;
         }
-        function filterConsumables() {
+        function filterConsumable() {
             var input, filter, ul, li, a, i;
             input = document.getElementById("searchConsumable");
             filter = input.value.toUpperCase();
             div = document.getElementById("dropdown_consumable");
             a = div.getElementsByTagName("a");
             for (i = 0; i < a.length; i++) {
-                if (a[i].id.toUpperCase().startsWith(filter)) {
+                if (a[i].id.toUpperCase().includes(filter)) {
                     a[i].style.display = "";
                 } else {
                     a[i].style.display = "none";

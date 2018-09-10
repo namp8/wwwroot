@@ -1,5 +1,5 @@
 <?php
-    $pageTitle = "Injection - Production";
+    $pageTitle = "Injection - Sacks Production";
     
     include_once "../base.php";
     include_once "../header.php";
@@ -18,9 +18,9 @@
 		<li class="breadcrumb-item">
 			<a href="process.php">Injection</a>
 		</li>
-		<li class="breadcrumb-item active">Production</li>
+		<li class="breadcrumb-item active">Sacks Production</li>
 	</ol>
-	<h2>Injection - Production</h2>
+	<h2>Injection - Sacks Production</h2>
 
 
 	<div id="alertMessage" class="alert hide" role="alert">
@@ -28,10 +28,10 @@
             <span aria-hidden="true">&times;</span>
           </button>
 		<?php
-    if(!empty($_POST['shift']) and !empty($_POST['product']))
+    if(!empty($_POST['shift']) and !empty($_POST['finished']))
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
-        if($injection->createProduction()){
+        if($injection->createSacksProduction()){
 
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
@@ -46,19 +46,7 @@
 
 <div class="pull-right text-right">
 		<div class="dropdown">
-			<button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Submit production&nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
-			<ul class="dropdown-menu dropdown-menu-right">
-				<li><a onclick="selectMachine(35,'Injection 1')" data-toggle="modal" data-target="#modal1">Injection 1</a></li>
-				<li><a onclick="selectMachine(36,'Injection 2')" data-toggle="modal" data-target="#modal1">Injection 2</a></li>
-				<li><a onclick="selectMachine(37,'Injection 3')" data-toggle="modal" data-target="#modal1">Injection 3</a></li>
-				<li><a onclick="selectMachine(38,'Injection 4')" data-toggle="modal" data-target="#modal1">Injection 4</a></li>
-				<li><a onclick="selectMachine(39,'Injection 5')" data-toggle="modal" data-target="#modal1">Injection 5</a></li>
-				<li><a onclick="selectMachine(40,'Injection 6')" data-toggle="modal" data-target="#modal1">Injection 6</a></li>
-				<li><a onclick="selectMachine(41,'Injection 7')" data-toggle="modal" data-target="#modal1">Injection 7</a></li>
-				<li><a onclick="selectMachine(42,'Injection 8')" data-toggle="modal" data-target="#modal1">Injection 8</a></li>
-				<li><a onclick="selectMachine(43,'Injection 9')" data-toggle="modal" data-target="#modal1">Injection 9</a></li>
-				<li><a onclick="selectMachine(44,'Injection 10')" data-toggle="modal" data-target="#modal1">Injection 9</a></li>
-			</ul>
+			<button class="btn btn-info" type="button"  data-toggle="modal" data-target="#modal1">Submit sacks production</button>
 		</div>
 	</div>
 
@@ -93,20 +81,16 @@
 					<table class="table table-bordered table-hover" width="100%" cellspacing="0">
 						<thead>
 							<tr class="active">
-								<th>Product Name</th>
-								<th>Type</th>
-								<th>Machine</th>
-								<th>No. of Cavities</th>
-								<th>Produced Qty (Shots)</th>
-								<th>Produced Qty (Pcs)</th>
-								<th>Produced Waste (Pcs)</th>
-								<th>Good Production (Pcs)</th>
-								<th>Raw Material Consumption</th>
+                            <th>Finished Product</th>
+                            <th>Semifinished product 1</th>
+                            <th>Semifinished product 2</th>
+                            <th>Semifinished product 3</th>
+                            <th>Sacks</th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php
-$injection->giveProduction(0);
+$injection->giveSacksProduction(0);
 ?>
 						</tbody>
 					</table>
@@ -124,20 +108,16 @@ $injection->giveProduction(0);
 					<table class="table table-bordered table-hover" width="100%" cellspacing="0">
 						<thead>
 							<tr class="active">
-								<th>Product Name</th>
-								<th>Type</th>
-								<th>Machine</th>
-								<th>No. of Cavities</th>
-								<th>Produced Qty (Shots)</th>
-								<th>Produced Qty (Pcs)</th>
-								<th>Produced Waste (Pcs)</th>
-								<th>Good Production (Pcs)</th>
-								<th>Raw Material Consumption</th>
+                            <th>Finished Product</th>
+                            <th>Semifinished product 1</th>
+                            <th>Semifinished product 2</th>
+                            <th>Semifinished product 3</th>
+                            <th>Sacks</th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php
-$injection->giveProduction(1);
+$injection->giveSacksProduction(1);
 ?>
 						</tbody>
 					</table>
@@ -156,20 +136,16 @@ $injection->giveProduction(1);
 					<table class="table table-bordered table-hover" width="100%" cellspacing="0">
 						<thead>
 							<tr class="active">
-								<th>Product Name</th>
-								<th>Type</th>
-								<th>Machine</th>
-								<th>No. of Cavities</th>
-								<th>Produced Qty (Shots)</th>
-								<th>Produced Qty (Pcs)</th>
-								<th>Produced Waste (Pcs)</th>
-								<th>Good Production (Pcs)</th>
-								<th>Raw Material Consumption</th>
+                            <th>Finished Product</th>
+                            <th>Semifinished product 1</th>
+                            <th>Semifinished product 2</th>
+                            <th>Semifinished product 3</th>
+                            <th>Sacks</th>
 							</tr>
 						</thead>
 						<tbody>
 							<?php
-$injection->giveProduction(2);
+$injection->giveSacksProduction(2);
 ?>
 						</tbody>
 					</table>
@@ -212,71 +188,89 @@ $injection->giveProduction(2);
 							</div>
 							<div class="row">
 								<div class="col-md-6 form-group">
-									<label for="size">Machine <span class="text-danger">*</span></label><br />
-									<input type="hidden" class="form-control" id="machine" name="machine" value="1" required>
-									<input type="text" class="form-control" step="1" min="1" id="machineName"  value="" disabled>
-								</div>
-								<div class="col-md-6 form-group">
-									<label for="material">Product Name <span class="text-danger">*</span></label><br>
-									<input type="hidden" class="form-control" id="product" name="product" required>
+									<label for="material">Finished Product <span class="text-danger">*</span></label><br>
+									<input type="hidden" class="form-control" id="finished" name="finished" required>
 									<div class="btn-group">
-										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_material">&nbsp&nbsp<span class="caret"></span></button>
-										<ul class="dropdown-menu" role="menu" id="dropdown_material">
-											<li><input type="text" placeholder="Search material.." class="searchDropdown" id="searchMaterial" onkeyup="filterMaterials()" width="100%"></li>
+										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_finished">&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu" role="menu" id="dropdown_finished">
+											<li><input type="text" placeholder="Search finished product.." class="searchDropdown" id="searchFinished" onkeyup="filterFinished()" width="100%"></li>
 											<?php
-						$injection->semifinishedDropdown(null);
+						$injection->finishedFullDropdown();
 					?>
 										</ul>
 									</div>
 								</div>
 							</div>
 							<div class="row">
+								<div class="col-md-6 form-group">
+									<label for="material">Semi-Finished Product 1 <span class="text-danger">*</span></label><br>
+									<input type="hidden" class="form-control" id="semifinished1" name="semifinished1" required>
+									<input type="text" class="form-control input-sm"  id="btn_material1"  readonly required >	
+								</div>
 								<div class="col-md-6 form-group">
 									<label for="shift">Type <span class="text-danger">*</span></label><br />
-									<input type="hidden" class="form-control" id="type" name="type" value="-1" required>
+									<input type="hidden" class="form-control" id="type1" name="type1" required>
 									<div class="dropdown">
-										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_type" style="height:30px;">Transparent&nbsp&nbsp<span class="caret"></span></button>
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_type1" style="height:30px;">&nbsp&nbsp<span class="caret"></span></button>
 										<ul class="dropdown-menu">
-											<li><a onclick="selectType(-1,'Transparent')">Transparent</a></li>
+											<li><a onclick="selectType1(-1,'Transparent')">Transparent</a></li>
 											<?php
-						$injection->colorsDropdown(null);
+						$injection->colorsDropdown(1);
 					?>
 										</ul>
 									</div>
 								</div>
+							</div>
+							<div class="row">
 								<div class="col-md-6 form-group">
-									<label for="size">No. of running cavities <span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" step="1" min="0" name="cavities" id="cavities" value="2">
+									<label for="material">Semi-Finished Product 2 <span class="text-danger">*</span></label><br>
+									<input type="hidden" class="form-control" id="semifinished2" name="semifinished2" required>
+									<input type="text" class="form-control input-sm"  id="btn_material2"  readonly required >	
+								</div>
+								<div class="col-md-6 form-group">
+									<label for="shift">Type <span class="text-danger">*</span></label><br />
+									<input type="hidden" class="form-control" id="type2" name="type2"  required>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_type2" style="height:30px;">&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a onclick="selectType2(-1,'Transparent')">Transparent</a></li>
+											<?php
+						$injection->colorsDropdown(2);
+					?>
+										</ul>
+									</div>
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-md-6 form-group">
-									<label for="size" class="text-info">Produced Qty in Shots <span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="shots" id="shots" value="0"  step="1" min="1" required onkeyup="calculateProducedPcs()" >
+									<label for="material">Semi-Finished Product 3 <span class="text-danger">*</span></label><br>
+									<input type="hidden" class="form-control" id="semifinished3" name="semifinished3" required>
+											
+									<input type="text" class="form-control input-sm"  id="btn_material3"  readonly required >							
+
 								</div>
 								<div class="col-md-6 form-group">
-									<label for="size" class="text-info">Produced Qty in Pcs <span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="pcs" id="pcs"   value="0"  step="1" min="1" required readonly>
+									<label for="shift">Type </label><br />
+									<input type="hidden" class="form-control" id="type3" name="type3"  required>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_type3" style="height:30px;">&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a onclick="selectType3(-1,'Transparent')">Transparent</a></li>
+											<?php
+						$injection->colorsDropdown(3);
+					?>
+										</ul>
+									</div>
 								</div>
 							</div>
 							<div class="row">
 								<div class="col-md-6 form-group">
-									<label for="size" class="text-danger">Produced Waste in Kgs <span class="text-danger">*</span></label>
-									<input type="numer" class="form-control input-sm" name="waste" id="waste" value="0"  step="0.001" min="0"  onkeyup="calculateTotal()"  required>
+									<label for="size" >Pieces in sack<span class="text-danger">*</span></label>
+									<input type="number" class="form-control input-sm" name="pieces" id="pieces" value="0"  step="1" min="1" required >
 								</div>
 								<div class="col-md-6 form-group">
-									<label for="size" class="text-danger">Produced Waste in Pcs<span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="wastepcs" id="wastepcs"  value="0"  step="1" min="0" required  onkeyup="calculateGood()" >
-								</div>
-							</div>
-							<div class="row">
-								<div class="col-md-6 form-group">
-									<label for="size" class="text-success">Total Raw material used in kgs<span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="consumed" id="consumed" value="0"  step="0.01" min="1" required >
-								</div>
-								<div class="col-md-6 form-group">
-									<label for="size" class="text-success">Good production in Pcs <span class="text-danger">*</span></label>
-									<input type="number" class="form-control input-sm" name="good" id="good"  value="0"  step="1" min="1" required readonly>
+									<label for="size" >Sacks<span class="text-danger">*</span></label>
+									<input type="number" class="form-control input-sm" name="sacks" id="sacks" value="0"  step="1" min="1" required >
 								</div>
 							</div>
 						</div>
@@ -322,63 +316,51 @@ $injection->giveProduction(2);
 					}
 
 				}
-				function selectMachine(id, name) {
-					document.getElementById("machine").value = id;
-					document.getElementById("machineName").value = name;
+				
+				function selectType1(id, name) {
+					document.getElementById("btn_type1").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("type1").value = id;
 				}
 				
-				function calculateProducedPcs() {
-					var shots= document.getElementById('shots').value;
-					var cavities= document.getElementById('cavities').value;
-					if(shots != null && cavities!= null)
-					{
-						document.getElementById('pcs').value = shots * cavities;
-						calculateGood();
-					}
-					else
-					{
-						document.getElementById('pcs').value = 0;
-					}
+				function selectType2(id, name) {
+					document.getElementById("btn_type2").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("type2").value = id;
 				}
 				
-				function calculateGood() {
-					var pcs= document.getElementById('pcs').value;
-					var waste= document.getElementById('wastepcs').value;
-					if(pcs != null && waste!= null)
-					{
-						document.getElementById('good').value = pcs - waste;
-						calculateTotal();
-					}
-					else
-					{
-						document.getElementById('good').value = 0;
-					}
+				
+				function selectType3(id, name) {
+					document.getElementById("btn_type3").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("type3").value = id;
 				}
 				
-				function calculateTotal() {
-					var waste= document.getElementById('waste').value;
-					var wastepcs= document.getElementById('wastepcs').value;
-					if(waste != null && wastepcs!= null)
+				function selectFinished(id, name, semi1id, semi1name, semi2id, semi2name, semi3id, semi3name, pieces ) {
+					document.getElementById("btn_finished").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("finished").value = id;
+					if(semi1id != null)
 					{
-						var weight = waste / wastepcs;
-						var consumed = weight * document.getElementById('good').value;
-						document.getElementById('consumed').value = consumed.toFixed(2);
+						selectType1(-1,'Transparent');
 					}
-					else
+					if(semi2id != null)
 					{
-						document.getElementById('consumed').value  = 0;
+						selectType2(-1,'Transparent');
 					}
+					if(semi3id != null)
+					{
+						selectType3(-1,'Transparent');
+					}
+					document.getElementById("btn_material1").value = semi1name;
+					document.getElementById("semifinished1").value = semi1id;
+					document.getElementById("btn_material2").value = semi2name;
+					document.getElementById("semifinished2").value = semi2id;
+					document.getElementById("btn_material3").value = semi3name;
+					document.getElementById("semifinished3").value = semi3id;
+					document.getElementById("pieces").value = pieces;
 				}
-				
-				function selectMaterial(id, name, grade) {
-					document.getElementById("btn_material").innerHTML = name + " - " + grade+ " &nbsp&nbsp<span class='caret'></span> ";
-					document.getElementById("product").value = id;
-				}
-				function filterMaterials() {
+				function filterFinished() {
 					var input, filter, ul, li, a, i;
-					input = document.getElementById("searchMaterial");
+					input = document.getElementById("searchFinished");
 					filter = input.value.toUpperCase();
-					div = document.getElementById("dropdown_material");
+					div = document.getElementById("dropdown_finished");
 					a = div.getElementsByTagName("a");
 					for (i = 0; i < a.length; i++) {
 						if (a[i].id.toUpperCase().startsWith(filter)) {
@@ -387,11 +369,6 @@ $injection->giveProduction(2);
 							a[i].style.display = "none";
 						}
 					}
-				}
-				
-				function selectType(id, name) {
-					document.getElementById("btn_type").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
-					document.getElementById("type").value = id;
 				}
 				
 			</script>

@@ -69,6 +69,14 @@
 ?>
                 </ul>
             </div>
+				<div class="dropdown">
+                <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown" onclick="selectFrom(3)">Submit Packing Bags roll&nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <?php
+    $printing->machinesDropdown();
+?>
+                </ul>
+            </div>
 			</form>
         </div>
 
@@ -233,14 +241,14 @@
 
                                 <input type="hidden" class="form-control" id="machine1" name="machine1">
                                 <div class="col-lg-3 form-group">
-                                    <label for="date">Date</label>
-                                    <div class='input-group date'>
-                                        <input type='text' class="form-control" id="date" name="date" disabled/>
-                                        <span class="input-group-addon">
-                        <span class="fa fa-calendar"></span>
-                                        </span>
-                                    </div>
-                                </div>
+									<label for="date">Date:</label>
+									<div class='input-group date' id='datetimepicker2'>
+										<input type='text' class="form-control" name="date" id="date" />
+										<span class="input-group-addon">
+														<span class="fa fa-calendar"></span>
+										</span>
+									</div>
+								</div>
                                 <div class="col-lg-3 form-group">
                                     <label for="customer">Customer</label><br />
                                     <input type="hidden" class="form-control" id="customer" name="customer">
@@ -249,7 +257,19 @@
                                         <ul class="dropdown-menu" id="dropdown_customer">
                                             <li><input type="text" placeholder="Search customer.." class="searchDropdown" id="searchCustomer" onkeyup="filterCustomers()" width="100%"></li>
                                             <?php
-    $printing->customersDropdown();
+    
+   if(!empty($_POST['machine']) and $_POST['from'] ==1 )
+   {
+        $printing->customersDropdown();
+   }
+   if(!empty($_POST['machine']) and $_POST['from'] ==2 )
+   {
+        $printing->customersDropdown();
+   }	
+   if(!empty($_POST['machine']) and $_POST['from'] ==3 )
+   {
+        $printing->customersPackingDropdown();
+   }
  ?>
                                         </ul>
                                     </div>
@@ -275,34 +295,39 @@
 
                             <div class="panel panel-info">
                                 <div class="panel-heading">
-                                    Input Roll Details
+                                    Input Rolls Details
                                 </div>
                                 <div class="panel-body">
                                     <div class="col-lg-3 form-group">
                                         <label for="rollno">Roll No.</label><br />
                                         <input type="hidden" class="form-control" id="rollid" name="rollid">
                                         <input type="hidden" class="form-control" id="rollno" name="rollno">
-                                        <input type="hidden" class="form-control" id="from" name="from">
+                                        <input type="hidden" class="form-control" id="from1" name="from">
                                         <div class="dropdown">
                                             <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_roll">&nbsp&nbsp<span class="caret"></span></button>
                                             <ul class="dropdown-menu" id="dropdown_roll">
-                                                <li><input type="text" placeholder="Search machine.." class="searchDropdown" id="searchRoll" onkeyup="filterRolls()" width="100%"></li>
+                                                <li><input type="text" placeholder="Search roll.." class="searchDropdown" id="searchRoll" onkeyup="filterRolls()" width="100%"></li>
                                                 <?php
    if(!empty($_POST['machine']) and $_POST['from'] ==1 )
    {
-        $printing->giveRollsMultilayerDropdown($_POST['machine']);
+        $printing->giveRollsMultilayerDropdown($_POST['machine'],1);
         echo '<script>document.getElementById("titlemachine").innerHTML = "'.$_POST['name'].'";</script>';
         echo '<script>document.getElementById("machine1").value = '.$_POST['machine'].';</script>';
-        echo '<script>document.getElementById("from").value = '.$_POST['from'].';</script>';
-        echo '<script>$(modal1).modal();</script>';
+        echo '<script>document.getElementById("from1").value = '.$_POST['from'].';</script>';
    }
    if(!empty($_POST['machine']) and $_POST['from'] ==2 )
    {
-        $printing->giveRollsMacchiDropdown($_POST['machine']);
+        $printing->giveRollsMacchiDropdown($_POST['machine'],1);
         echo '<script>document.getElementById("titlemachine").innerHTML = "'.$_POST['name'].'";</script>';
         echo '<script>document.getElementById("machine1").value = '.$_POST['machine'].';</script>';
-        echo '<script>document.getElementById("from").value = '.$_POST['from'].';</script>';
-        echo '<script>$(modal1).modal();</script>';
+        echo '<script>document.getElementById("from1").value = '.$_POST['from'].';</script>';
+   }	
+   if(!empty($_POST['machine']) and $_POST['from'] ==3 )
+   {
+        $printing->giveRollsPackingDropdown($_POST['machine'],1);
+        echo '<script>document.getElementById("titlemachine").innerHTML = "'.$_POST['name'].'";</script>';
+        echo '<script>document.getElementById("machine1").value = '.$_POST['machine'].';</script>';
+        echo '<script>document.getElementById("from1").value = '.$_POST['from'].';</script>';
    }
  ?>
                                             </ul>
@@ -326,6 +351,53 @@
                                             <label><input type="checkbox" value="1" name="dyne" checked>Dyne test</label>
                                         </div>
                                     </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="rollno2">Roll No.</label><br />
+                                        <input type="hidden" class="form-control" id="rollid2" name="rollid2" value="null">
+                                        <input type="hidden" class="form-control" id="rollno2" name="rollno">
+                                        <div class="dropdown">
+                                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_roll2">&nbsp&nbsp<span class="caret"></span></button>
+                                            <ul class="dropdown-menu" id="dropdown_roll2">
+                                                <li><input type="text" placeholder="Search roll.." class="searchDropdown" id="searchRoll2" onkeyup="filterRolls2()" width="100%"></li>
+												<li><a onclick="selectRoll(2,null,'None',0,0)">None</a></li>
+                                                <?php
+   if(!empty($_POST['machine']) and $_POST['from'] ==1 )
+   {
+        $printing->giveRollsMultilayerDropdown($_POST['machine'],2);
+        echo '<script>$(modal1).modal();</script>';
+   }
+   if(!empty($_POST['machine']) and $_POST['from'] ==2 )
+   {
+        $printing->giveRollsMacchiDropdown($_POST['machine'],2);
+        echo '<script>$(modal1).modal();</script>';
+   }	
+   if(!empty($_POST['machine']) and $_POST['from'] ==3 )
+   {
+        $printing->giveRollsPackingDropdown($_POST['machine'],2);
+        echo '<script>$(modal1).modal();</script>';
+   }
+ ?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 form-group">
+                                        <label>Gross Wt.</label>
+                                        <input type="number" class="form-control" step="0.1" min="1" id="inputRollWt2" value="0" disabled>
+                                    </div>
+                                    <div class="col-lg-2 form-group">
+                                        <label>Net Wt.</label>
+                                        <input type="number" class="form-control" step="0.1" min="1" id="inputNetWt2" value="0" disabled>
+                                    </div>
+                                    <div class="col-lg-2 form-group">
+                                        <label>Waste</label>
+                                        <input type="number" class="form-control" step="0.01" min="0" id="inputWaste2" name="inputWaste2" value="0">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label>Test</label>
+                                        <div class="checkbox" style="font-size: 16px;">
+                                            <label><input type="checkbox" value="1" name="dyne2" checked>Dyne test</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="panel panel-info">
@@ -335,7 +407,7 @@
                                 <div class="panel-body">
                                     <div class="col-lg-3 form-group">
                                         <label>Roll No.</label>
-                                        <input class="form-control" id="outputRoll" disabled>
+                                        <input class="form-control" id="outputRoll" name="outputRoll">
                                     </div>
                                     <div class="col-lg-2 form-group">
                                         <label>Gross Wt.</label>
@@ -410,13 +482,24 @@
 
                 }
 
-                function selectRoll(id, no, gross, net) {
-                    document.getElementById("btn_roll").innerHTML = no + " &nbsp&nbsp<span class='caret'></span> ";
-                    document.getElementById("rollid").value = id;
-                    document.getElementById("rollno").value = no;
-                    document.getElementById("inputRollWt").value = gross;
-                    document.getElementById("inputNetWt").value = net;
-                    document.getElementById("outputRoll").value = no + "-P";
+                function selectRoll(i, id, no, gross, net) {
+					if(i == 1)
+					{
+						document.getElementById("btn_roll").innerHTML = no + " &nbsp&nbsp<span class='caret'></span> ";
+						document.getElementById("rollid").value = id;
+						document.getElementById("rollno").value = no;
+						document.getElementById("inputRollWt").value = gross;
+						document.getElementById("inputNetWt").value = net;
+					}
+					else
+					{
+						document.getElementById("btn_roll2").innerHTML = no + " &nbsp&nbsp<span class='caret'></span> ";
+						document.getElementById("rollid2").value = id;
+						document.getElementById("rollno2").value = no;
+						document.getElementById("inputRollWt2").value = gross;
+						document.getElementById("inputNetWt2").value = net;
+					}
+                    document.getElementById("outputRoll").value = document.getElementById("date").value.split("/")[0] + "-" + document.getElementById("date").value.split("/")[1] + "-";
                 }
 
                 function selectCustomer(id, name) {
@@ -442,6 +525,21 @@
                         }
                     }
                 }
+				
+                function filterRolls2() {
+                    var input, filter, ul, li, a, i;
+                    input = document.getElementById("searchRoll2");
+                    filter = input.value.toUpperCase();
+                    div = document.getElementById("dropdown_roll2");
+                    a = div.getElementsByTagName("a");
+                    for (i = 0; i < a.length; i++) {
+                        if (a[i].id.toUpperCase().startsWith(filter)) {
+                            a[i].style.display = "";
+                        } else {
+                            a[i].style.display = "none";
+                        }
+                    }
+                }
             </script>
             <script>
                 $(function() {
@@ -452,6 +550,14 @@
 
 
                     $('#datetimepicker').data("DateTimePicker").maxDate(new Date());
+					
+					$('#datetimepicker2').datetimepicker({
+                        format: 'DD/MM/YYYY'
+                    });
+
+
+                    $('#datetimepicker2').data("DateTimePicker").maxDate(new Date());
+					
                     var d = new Date();
                     var month = d.getMonth() + 1;
                     document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();

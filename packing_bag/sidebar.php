@@ -47,6 +47,9 @@
                             <li class="divider"></li><center>Production</center>
 							<li><a class="four" href="../cutting/sacks.php"><i class="fa fa-battery-empty" aria-hidden="true"></i><span>&nbsp Sacks</span></a></li>
                             <li><a class="four" href="../cutting/sacks_stock.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Sacks on floor </span></a></li>
+                            <li><a class="five" href="../cutting/waste.php"><i class="fa fa-trash-o" aria-hidden="true"></i><span>&nbsp Waste</span></a></li>
+                            <li class="divider"></li>
+                            <li><a class="one" href="../cutting/remarks.php"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i><span>&nbsp Short Fall</span></a></li>
                             
                         </ul>
 					</li>

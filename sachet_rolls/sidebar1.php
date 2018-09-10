@@ -76,9 +76,10 @@
                     <li>
 						<ul id="printing_submenu" class="sub-menu collapse">
 							<li ><a  href="../printing/process.php"><i class="fa fa-recycle" aria-hidden="true" ></i><span>&nbsp Process</span></a></li>
-							<li><a href="../printing/formula.php"><i class="fa fa-eyedropper" aria-hidden="true"></i><span>&nbsp Formula</span></a></li>
-							<li ><a  href="../printing/plan.php"><i class="fa fa-recycle" aria-hidden="true" ></i><span>&nbsp Production Plan</span></a></li>
                             <li><a href="../printing/reports.php"><i class="fa fa-bar-chart" aria-hidden="true"></i><span>&nbsp Reports</span></a></li>
+							<li ><a  href="../printing/plan.php"><i class="fa fa-recycle" aria-hidden="true" ></i><span>&nbsp Production Plan</span></a></li>
+							<li><a href="../printing/formula.php"><i class="fa fa-eyedropper" aria-hidden="true"></i><span>&nbsp Formula</span></a></li>
+                            <li><a href="../printing/customers.php"><i class="fa fa-eyedropper" aria-hidden="true"></i><span>&nbsp Customers</span></a></li>
 							
                             <li class="divider"></li><center>Ink and Solvent</center>
 							<li><a class="two" href="../printing/request.php"><i class="fa fa-reply " aria-hidden="true" ></i><span>&nbsp Request</span></a></li>

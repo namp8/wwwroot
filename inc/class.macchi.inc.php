@@ -58,7 +58,7 @@ class Macchi
                 $ID = $row['material_id'];
                 $NAME = $row['material_name'];
                 $GRADE = $row['material_grade'];
-                echo  '<li><a id="'. $NAME .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
+                echo  '<li><a id="'. $NAME .' - '. $GRADE .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
             }
             $stmt->closeCursor();
         }
@@ -972,7 +972,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 			$stmt->execute();
 
 			$row = $stmt->fetch();
-			$count = $row['rollcount'] ;
+			$count = $row['rollcount']  ;
 			$stmt->closeCursor();
 
 		}
@@ -1024,7 +1024,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 				$rollno = "M".$newDateString."-".$count;
 				$net = $v - $CONE;
 				$totalnet = $totalnet + $net;
-				$rolls = $rolls. " (NULL, '". $datetime."', '".$rollno."', ". $shift .", ". $size .", ". $v .", ". $net .",". $_SESSION['Userid'] .", 0, 1, NULL,". $thickness .") ,";
+				$rolls = $rolls. " (NULL, '". $datetime."', '".$rollno."', ". $shift .", ". $size .", ". $v .", ". $net .",". $_SESSION['Userid'] .", 0, 1, 0.00,". $thickness .") ,";
 			}
 		}
 		
@@ -1035,13 +1035,12 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = 1
+INNER JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = 1 AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product = 1
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = 1
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = 1
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = 1
-
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = 1 AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = 1 AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = 1 AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = 1 AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 UNION ALL
 
 SELECT  stock_material_id, material_name, material_grade,bags,kgs_bag,
@@ -1051,12 +1050,12 @@ SELECT  stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1  AND b.product = 1
+INNER JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = 1 AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = 1
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = 1
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = 1
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = 1
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = 1 AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = 1 AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = 1 AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = 1 AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 WHERE a.material_id IS NULL
 
 UNION ALL
@@ -1068,12 +1067,12 @@ SELECT  stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = 1
+INNER JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = 1 AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = 1
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product = 1
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = 1
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = 1
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = 1 AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = 1 AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = 1 AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = 1 AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 WHERE a.material_id IS NULL AND b.material_id IS NULL
 
 UNION ALL
@@ -1085,12 +1084,12 @@ SELECT stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = 1
+INNER JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = 1 AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = 1
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product = 1
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = 1
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = 1
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = 1 AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = 1 AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = 1 AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = 1 AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL
 
 UNION ALL
@@ -1102,12 +1101,12 @@ SELECT stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = 1
+INNER JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = 1 AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = 1
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product = 1
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = 1
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = 1
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = 1 AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = 1 AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = 1 AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = 1 AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
 WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL AND d.material_id IS NULL";
 		
 		$update = "";
@@ -1595,13 +1594,12 @@ NATURAL JOIN customers
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = " . $product . "
+INNER JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = ".$product." AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product =  " . $product . "
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product =  " . $product . "
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product =  " . $product . "
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product =  " . $product . "
-
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = ".$product." AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = ".$product." AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = ".$product." AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = ".$product." AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 UNION ALL
 
 SELECT  stock_material_id, material_name, material_grade,bags,kgs_bag,
@@ -1611,12 +1609,12 @@ SELECT  stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1  AND b.product = " . $product . "
+INNER JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = ".$product." AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = " . $product . "
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = " . $product . "
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = " . $product . "
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = " . $product . "
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = ".$product." AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = ".$product." AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = ".$product." AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = ".$product." AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 WHERE a.material_id IS NULL
 
 UNION ALL
@@ -1628,12 +1626,12 @@ SELECT  stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = " . $product . "
+INNER JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = ".$product." AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = " . $product . "
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product = " . $product . "
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = " . $product . "
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = " . $product . "
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = ".$product." AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = ".$product." AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = ".$product." AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = ".$product." AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 WHERE a.material_id IS NULL AND b.material_id IS NULL
 
 UNION ALL
@@ -1645,12 +1643,12 @@ SELECT stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = " . $product . "
+INNER JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = ".$product." AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = " . $product . "
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product = " . $product . "
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = " . $product . "
-LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = " . $product . "
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = ".$product." AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = ".$product." AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = ".$product." AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = ".$product." AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL
 
 UNION ALL
@@ -1662,12 +1660,12 @@ SELECT stock_material_id, material_name, material_grade,bags,kgs_bag,
 (d.percentage)*20 AS d_percentage, 
 (e.percentage)*10 AS e_percentage
 FROM materials 
-INNER JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.actual = 1 AND e.product = " . $product . "
+INNER JOIN `macchi_formulas` e ON materials.material_id = e.material_id AND e.layer=5 AND e.product = ".$product." AND e.`from` <= '".$date."' AND (e.`to` IS NULL OR e.`to` > '".$date."')
 LEFT JOIN stock_materials ON materials.material_id = stock_materials.material_id  AND machine_id = 5
-LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.actual = 1 AND a.product = " . $product . "
-LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.actual = 1 AND b.product = " . $product . "
-LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.actual = 1 AND c.product = " . $product . "
-LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.actual = 1 AND d.product = " . $product . "
+LEFT JOIN `macchi_formulas` a ON materials.material_id = a.material_id AND a.layer=1 AND a.product = ".$product." AND a.`from` <= '".$date."' AND (a.`to` IS NULL OR a.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` b ON materials.material_id = b.material_id AND b.layer=2 AND b.product = ".$product." AND b.`from` <= '".$date."' AND (b.`to` IS NULL OR b.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` c ON materials.material_id = c.material_id AND c.layer=3 AND c.product = ".$product." AND c.`from` <= '".$date."' AND (c.`to` IS NULL OR c.`to` > '".$date."')
+LEFT JOIN `macchi_formulas` d ON materials.material_id = d.material_id AND d.layer=4 AND d.product = ".$product." AND d.`from` <= '".$date."' AND (d.`to` IS NULL OR d.`to` > '".$date."')
 WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL AND d.material_id IS NULL;";
 		
         $update = "";

@@ -46,7 +46,7 @@ class Printing
     {
         $sql = "SELECT `machines`.`machine_id`,`machines`.`machine_name`
                 FROM  `machines`
-                WHERE location_id = 3;
+                WHERE location_id = 3 AND machine_id <> 33
                 ORDER BY `machines`.`machine_name`;";
         if($stmt = $this->_db->prepare($sql))
         {
@@ -159,7 +159,7 @@ class Printing
      * This function outputs <li> tags with the rolls
      * Param $x is the machine
      */
-    public function giveRollsMultilayerDropdown($x)
+    public function giveRollsMultilayerDropdown($x, $i)
     {
         $sql = "SELECT `multilayer_rolls`.`multilayer_rolls_id`, `multilayer_rolls`.`rollno`, gross_weight, net_weight,     `multilayer_rolls`.`size`
                 FROM  `multilayer_rolls`
@@ -175,10 +175,10 @@ class Printing
                 $GROSS = $row['gross_weight'];
                 $NET = $row['net_weight'];
                 $SIZE = $row['size'];
-                echo  '<li><a id="'. $ROLLNO .'" onclick="selectRoll(\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $ROLLNO .'</a></li>'; 
+                echo  '<li><a id="'. $ROLLNO .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $ROLLNO .'</a></li>'; 
             }
             
-           
+			
             $stmt->closeCursor();
         }
         else
@@ -199,7 +199,7 @@ class Printing
 
         $sql = "SELECT `settings`.`value_setting`
                 FROM `settings`
-                WHERE location_id=3 AND `name_setting` = '". $name ."' ";
+                WHERE machine_id=33 AND `name_setting` = '". $name ."' ";
 
         if($stmt = $this->_db->prepare($sql))
         {
@@ -223,7 +223,7 @@ class Printing
      * This function outputs <li> tags with the rolls
      * Param $x is the machine
      */
-    public function giveRollsMacchiDropdown($x)
+    public function giveRollsMacchiDropdown($x, $i)
     {
         $sql = "SELECT `macchi_rolls_id`, `rollno`, gross_weight, net_weight,  `size`
                 FROM  `macchi_rolls`
@@ -239,7 +239,7 @@ class Printing
                 $GROSS = $row['gross_weight'];
                 $NET = $row['net_weight'];
                 $SIZE = $row['size'];
-                echo  '<li><a id="'. $ROLLNO .'" onclick="selectRoll(\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $ROLLNO .'</a></li>'; 
+                echo  '<li><a id="'. $ROLLNO .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $ROLLNO .'</a></li>'; 
             }
             
            
@@ -263,7 +263,69 @@ class Printing
 
         $sql = "SELECT `settings`.`value_setting`
                 FROM `settings`
-                WHERE location_id=3 AND `name_setting` = '". $name ."' ";
+                WHERE machine_id=33 AND `name_setting` = '". $name ."' ";
+
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {  
+                $CONE = $row['value_setting'];
+                 echo '<script>document.getElementById("cone").value = "'. $CONE .'";</script>';
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "Something went wrong. ". $db->errorInfo;
+        }
+    }
+	
+	 public function giveRollsPackingDropdown($x, $i)
+    {
+        $sql = "SELECT `packing_rolls_id`, `rollno`, gross_weight, net_weight
+FROM  `packing_rolls`
+ WHERE status_roll = 0 ;";
+        $SIZE = 0;
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['packing_rolls_id'];
+                $ROLLNO = $row['rollno'];
+                $GROSS = $row['gross_weight'];
+                $NET = $row['net_weight'];
+                echo  '<li><a id="'. $GROSS .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $GROSS .'</a></li>'; 
+            }
+            
+           
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "Something went wrong. ". $db->errorInfo;
+        }
+		 $SIZE = 3;
+        echo '<script>document.getElementById("size").value = "'. $SIZE .'";</script>';
+        echo '<script>document.getElementById("sizeName").value = "'.$this->giveSizename($SIZE).'";</script>';
+        $name = "";
+        if($SIZE == 1)
+        {
+            $name = "680cone";
+        }
+        else if($SIZE == 2)
+        {
+            $name = "1010cone";
+        }
+        else if($SIZE == 3)
+        {
+            $name = "packingcone";
+        }
+
+        $sql = "SELECT `settings`.`value_setting`
+                FROM `settings`
+                WHERE machine_id=33 AND `name_setting` = '". $name ."' ";
 
         if($stmt = $this->_db->prepare($sql))
         {
@@ -382,12 +444,32 @@ class Printing
             }
         }
 		
-        $dyne = $tape = 0;
+		$PACKINGCONE = 0;
+        $sql = "SELECT `settings`.`value_setting`
+                FROM  `settings` 
+                WHERE machine_id=33 AND name_setting='packingcone';";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $PACKINGCONE = $row['value_setting'];
+            }
+        }
+		
+        $dyne = $dyne2 = $tape = 0;
         if(!empty($_POST['dyne']) )
         {
             $dyne = trim($_POST["dyne"]);
             $dyne = stripslashes($dyne);
             $dyne = htmlspecialchars($dyne);
+        }
+		
+        if(!empty($_POST['dyne2']) )
+        {
+            $dyne2 = trim($_POST["dyne2"]);
+            $dyne2 = stripslashes($dyne2);
+            $dyne2 = htmlspecialchars($dyne2);
         }
         if(!empty($_POST['tape']) )
         {
@@ -399,20 +481,29 @@ class Printing
         $inputWaste = trim($_POST["inputWaste"]);
         $inputWaste = stripslashes($inputWaste);
         $inputWaste = htmlspecialchars($inputWaste);
+		
+		
+        $inputWaste2 = trim($_POST["inputWaste2"]);
+        $inputWaste2 = stripslashes($inputWaste2);
+        $inputWaste2 = htmlspecialchars($inputWaste2);
         
         $outputWaste = trim($_POST["outputWaste"]);
-        $outputWaste = stripslashes($inputWaste);
-        $outputWaste = htmlspecialchars($inputWaste);
+        $outputWaste = stripslashes($outputWaste);
+        $outputWaste = htmlspecialchars($outputWaste);
         
-        $rollno = trim($_POST["rollno"]);
+        $rollno = trim($_POST["outputRoll"]);
         $rollno = stripslashes($rollno);
         $rollno = htmlspecialchars($rollno);
-        $rollno = $rollno . "-P";
         
         
         $rollid = trim($_POST["rollid"]);
         $rollid = stripslashes($rollid);
         $rollid = htmlspecialchars($rollid);
+		
+		
+        $rollid2 = trim($_POST["rollid2"]);
+        $rollid2 = stripslashes($rollid2);
+        $rollid2 = htmlspecialchars($rollid2);
         
         $shift = trim($_POST["shift"]);
         $shift = stripslashes($shift);
@@ -422,6 +513,12 @@ class Printing
         if($shift == 2)
         {
             $date = date("Y-m-d", time() - 60 * 60 * 24);
+        }
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
         }
         
         $size = trim($_POST["size"]);
@@ -437,6 +534,10 @@ class Printing
 		{
 			$cone = $CONEBIG;
 		}
+		else if($size == 3)
+		{
+			$cone = $PACKINGCONE;
+		}
         
         $net = $gross - $cone;
 
@@ -448,6 +549,11 @@ class Printing
         $customer = stripslashes($customer);
         $customer = htmlspecialchars($customer);
         
+		
+        $from = trim($_POST["from"]);
+        $from = stripslashes($from);
+        $from = htmlspecialchars($from);
+		
         $a=array();
         //REVISA LA FORMULA PARA LA MAQUINA
         $sql = "SELECT stock_material_id, printing_formulas.material_id, percentage, bags, kgs_bag, material_name  
@@ -535,32 +641,68 @@ class Printing
                     $update = $update . "UPDATE  `stock_materials` SET `bags` = ".$newbags." WHERE `stock_material_id` = ". $a[$i][0]. "; ";
                 }
             }
-			 $from = trim($_POST["from"]);
-			$from = stripslashes($from);
-			$from = htmlspecialchars($from);
 				
 			if($from == 1)
 			{
-				$sql = "INSERT INTO  `printing_multilayer_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`multilayer_rolls_id`,`tape_test`,`waste_printing`)
-				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .", ". $tape.",". $outputWaste .");
+				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`)
+				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .", ". $tape.",". $outputWaste .", 0, 1,0);
 				UPDATE `multilayer_rolls`
 				SET `dyne_test` = ". $dyne .",
 				`status_roll` = 1,
 				`waste_printing` = ". $inputWaste ."
 				WHERE `multilayer_rolls_id` = ". $rollid ."; ". $update;
+				
+				if(!is_null($rollid2))
+				{
+					$sql = $sql . " UPDATE `multilayer_rolls`
+				SET `dyne_test` = ". $dyne2 .",
+				`status_roll` = 1,
+				`waste_printing` = ". $inputWaste2 ."
+				WHERE `multilayer_rolls_id` = ". $rollid2 .";";
+				}
 			}
-			else
+			else if($from == 2)
 			{
-				$sql = "INSERT INTO  `printing_macchi_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`multilayer_rolls_id`,`tape_test`,`waste_printing`)
-				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .", ". $tape.",". $outputWaste .");
-				UPDATE `multilayer_rolls`
+				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`)
+				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .", ". $tape.",". $outputWaste .", 1, 0,0);
+				UPDATE `macchi_rolls`
 				SET `dyne_test` = ". $dyne .",
 				`status_roll` = 1,
 				`waste_printing` = ". $inputWaste ."
-				WHERE `multilayer_rolls_id` = ". $rollid ."; ". $update;
+				WHERE `macchi_rolls_id` = ". $rollid ."; ". $update;
+				
+				if(!is_null($rollid2))
+				{
+					$sql = $sql . " UPDATE `macchi_rolls`
+				SET `dyne_test` = ". $dyne2 .",
+				`status_roll` = 1,
+				`waste_printing` = ". $inputWaste2 ."
+				WHERE `macchi_rolls_id` = ". $rollid2 .";";
+				}
+			}
+			else if($from == 3)
+			{
+				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`)
+				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .", ". $tape.",". $outputWaste .", 0, 0,1);
+				UPDATE `packing_rolls`
+				SET `dyne_test` = ". $dyne .",
+				`status_roll` = 1,
+                `used_weight` = `net_weight`,
+				`waste_printing` = ". $inputWaste ."
+				WHERE `packing_rolls_id` = ". $rollid ."; ". $update;
+				
+				if(!is_null($rollid2))
+				{
+					$sql = $sql . " UPDATE `packing_rolls`
+				SET `dyne_test` = ". $dyne2 .",
+				`status_roll` = 1,
+                `used_weight` = `net_weight`,
+				`waste_printing` = ". $inputWaste2 ."
+				WHERE `packing_rolls_id` = ". $rollid2 ."; ;";
+				}
+				
 			}
             
-
             try
             {   
                 $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -601,21 +743,95 @@ class Printing
            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
            $newDateString = $myDateTime->format('Y-m-d');
         }
-        $date = "`printing_multilayer_rolls`.`date_roll` BETWEEN '". $newDateString ." ' AND '". $newDateString ." '";
+        $date = "`printing_rolls`.`date_roll` BETWEEN '". $newDateString ." ' AND '". $newDateString ." '";
 
-        $sql = "SELECT `customers`.`customer_name`,`multilayer_rolls`.`rollno` AS inputno ,`multilayer_rolls`.`gross_weight` AS inputgross ,`multilayer_rolls`.`net_weight` AS inputnet ,`multilayer_rolls`.`waste_printing` AS inputwaste ,`multilayer_rolls`.`dyne_test`,`printing_multilayer_rolls`.`rollno`,`printing_multilayer_rolls`.`gross_weight`,`printing_multilayer_rolls`.`net_weight`,`printing_multilayer_rolls`.`waste_printing`,`printing_multilayer_rolls`.`tape_test`
-        FROM `printing_multilayer_rolls`
-        INNER JOIN `customers` ON `customers`.`customer_id` = `printing_multilayer_rolls`.`customer_id`
-        INNER JOIN `multilayer_rolls` ON `multilayer_rolls`.`multilayer_rolls_id` = `printing_multilayer_rolls`.`multilayer_rolls_id` 
-        WHERE ". $date ."  AND `printing_multilayer_rolls`.`machine_id` = ". $machine ." ";
+        $sql = "SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
+`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id = `macchi_rolls`.macchi_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND macchi = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
+`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id2 = `macchi_rolls`.macchi_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND macchi = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
+`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id = `multilayer_rolls`.multilayer_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND multilayer = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
+`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id2 = `multilayer_rolls`.multilayer_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND multilayer = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
+`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id = `packing_rolls`.packing_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND `printing_rolls`.`packing_bags` = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
+`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packing_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND `printing_rolls`.`packing_bags` = 1
+		order by rollno";
 
         if($x != 0)
         {
-            $sql = "SELECT `customers`.`customer_name`,`multilayer_rolls`.`rollno` AS inputno ,`multilayer_rolls`.`gross_weight` AS inputgross ,`multilayer_rolls`.`net_weight` AS inputnet ,`multilayer_rolls`.`waste_printing` AS inputwaste ,`multilayer_rolls`.`dyne_test`,`printing_multilayer_rolls`.`rollno`,`printing_multilayer_rolls`.`gross_weight`,`printing_multilayer_rolls`.`net_weight`,`printing_multilayer_rolls`.`waste_printing`,`printing_multilayer_rolls`.`tape_test`
-			FROM `printing_multilayer_rolls`
-            INNER JOIN `customers` ON `customers`.`customer_id` = `printing_multilayer_rolls`.`customer_id`
-            INNER JOIN `multilayer_rolls` ON `multilayer_rolls`.`multilayer_rolls_id` = `printing_multilayer_rolls`.`multilayer_rolls_id` 
-            WHERE ". $date ." AND `printing_multilayer_rolls`.`shift` = ". $x ." AND `printing_multilayer_rolls`.`machine_id` = ". $machine ."";
+            $sql = "SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
+`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id = `macchi_rolls`.macchi_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."  AND macchi = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
+`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id2 = `macchi_rolls`.macchi_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."  AND macchi = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
+`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id = `multilayer_rolls`.multilayer_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."  AND multilayer = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
+`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id2 = `multilayer_rolls`.multilayer_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."   AND multilayer = 1
+		UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
+`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id = `packing_rolls`.packing_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ." AND `printing_rolls`.`shift` = ". $x ."  AND `printing_rolls`.`packing_bags` = 1
+UNION 
+SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
+`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
+FROM `printing_rolls`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packing_rolls_id
+        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ." AND `printing_rolls`.`shift` = ". $x ."  AND `printing_rolls`.`packing_bags`= 1
+		order by rollno";
         }
         
         $total1 = $total2 = $total3 = $total4 = $total5 = $total6 = 0;
@@ -626,17 +842,19 @@ class Printing
             echo '<table class="table table-bordered table-hover" width="100%" cellspacing="0">
                             <thead>
                                 <tr class="active">
-                                    <th></th>
-                                    <th colspan="5" style="text-align:center">INPUT ROLL</th>
-                                    <th colspan="5" style="text-align:center">OUTPUT ROLL </th>
+                                    <th></th>'.
+                                    '<th colspan="5" style="text-align:center">INPUT ROLL</th>'.
+                                    '<th colspan="5" style="text-align:center">OUTPUT ROLL </th>
                                 </tr>
                                 <tr class="active">
-                                    <th>Customer</th>
+                                    <th>Customer</th>'.
+									'
                                     <th>Roll No.</th>
                                     <th>Gross Wt.</th>
                                     <th>Net Wt.</th>
                                     <th>Waste</th>
-                                    <th>Dyne</th>
+                                    <th>Dyne</th>'.
+				'
                                     <th>Roll No.</th>
                                     <th>Gross Wt.</th>
                                     <th>Net Wt.</th>
@@ -667,11 +885,11 @@ class Printing
                 
                 echo '<tr>
                         <td>'.  $row['customer_name'] .'</td>
-                        <td>'.  $row['inputno'] .'</td>                        
+                        <td>'.  $row['inputroll'] .'</td>                        
                         <td class="text-right">'. number_format($row['inputgross'],1,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['inputnet'],1,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['inputwaste'],1,'.',',') .'</td>
-                        <td>'.  $DYNE .'</td>           
+                        <td>'.  $DYNE .'</td> 
                         <td>'.  $row['rollno'] .'</td>                        
                         <td class="text-right">'. number_format($row['gross_weight'],1,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['net_weight'],1,'.',',') .'</td>
@@ -683,13 +901,13 @@ class Printing
               <tfoot>
                 <tr class="active">
                   <th style="text-align:center"></th>
-                  <th style="text-align:center">TOTAL</th>
-                  <th class="text-right">'. number_format($total1,2,'.',',') .'</th>
+                  <th style="text-align:center">TOTAL</th>'.
+                  '<th class="text-right">'. number_format($total1,2,'.',',') .'</th>
                   <th class="text-right">'. number_format($total2,2,'.',',') .'</th>
                   <th class="text-right">'. number_format($total3,2,'.',',') .'</th>
                   <th style="text-align:center"></th>
-                  <th style="text-align:center">TOTAL</th>
-                  <th class="text-right">'. number_format($total4,2,'.',',') .'</th>
+                  <th style="text-align:center">TOTAL</th>'.
+                  '<th class="text-right">'. number_format($total4,2,'.',',') .'</th>
                   <th class="text-right">'. number_format($total5,2,'.',',') .'</th>
                   <th class="text-right">'. number_format($total6,2,'.',',') .'</th>
                   <th></th>
@@ -721,10 +939,10 @@ class Printing
         $b=array();
         $c=array();
         $d=array();
-        $sql = "SELECT `customers`.`customer_name`, count(`printing_multilayer_rolls`.`printing_multilayer_rolls_id`) AS count_rolls, ROUND(SUM(`printing_multilayer_rolls`.`gross_weight`),2) AS totalgross, ROUND(SUM(`printing_multilayer_rolls`.`net_weight`),2) As totalnet, ROUND(SUM(`printing_multilayer_rolls`.`net_weight`)/count(`printing_multilayer_rolls`.`printing_multilayer_rolls_id`),2) AS average_weight
-        FROM  `printing_multilayer_rolls`
+        $sql = "SELECT `customers`.`customer_name`, count(`printing_rolls`.`printing_rolls_id`) AS count_rolls, ROUND(SUM(`printing_rolls`.`gross_weight`),2) AS totalgross, ROUND(SUM(`printing_rolls`.`net_weight`),2) As totalnet, ROUND(SUM(`printing_rolls`.`net_weight`)/count(`printing_rolls`.`printing_rolls_id`),2) AS average_weight
+        FROM  `printing_rolls`
         NATURAL JOIN `customers`
-        WHERE status_roll = 0 group by `printing_multilayer_rolls`.`customer_id`;";
+        WHERE status_roll = 0 group by `printing_rolls`.`customer_id`;";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();
@@ -778,8 +996,8 @@ class Printing
      */
     public function giveRollsStock()
     {
-         $sql = "SELECT `customers`.`customer_name`,`printing_multilayer_rolls`.`rollno`,`printing_multilayer_rolls`.`size`, `printing_multilayer_rolls`.`gross_weight`, `printing_multilayer_rolls`.`net_weight`
-        FROM  `printing_multilayer_rolls`
+         $sql = "SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`size`, `printing_rolls`.`gross_weight`, `printing_rolls`.`net_weight`
+        FROM  `printing_rolls`
         NATURAL JOIN `customers`
         WHERE status_roll = 0;";
         if($stmt = $this->_db->prepare($sql))
@@ -1140,7 +1358,29 @@ class Printing
     public function customersDropdown()
     {
         $sql = "SELECT `customers`.`customer_id`,`customers`.`customer_name`
-        FROM  `customers`;";
+        FROM  `customers`
+		WHERE sachet_rolls=1;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['customer_id'];
+                $NAME = $row['customer_name'];
+                echo  '<li><a id="'. $NAME .'" onclick="selectCustomer(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+	public function customersPackingDropdown()
+    {
+        $sql = "SELECT `customers`.`customer_id`,`customers`.`customer_name`
+        FROM  `customers`
+		WHERE packing_bags = 1;";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();
@@ -1605,6 +1845,10 @@ class Printing
         {
             $sizename = "1010 mm";
         }
+        else if($size == 3)
+        {
+            $sizename = "Natural Film";
+        }
         return $sizename;
     }
     
@@ -1662,9 +1906,9 @@ class Printing
                $newDateString2 = $myDateTime->format('Y-m-d');
             }
             
-            $sql = " SELECT DATE_FORMAT(`date_roll`, '%b/%Y') as date, DATE_FORMAT(`date_roll`, '%m/%Y') as date2, machine_id, machine_name, ROUND(SUM(net_weight),2) as actual, COUNT(printing_multilayer_rolls_id) as rolls 
-            FROM printing_multilayer_rolls NATURAL JOIN machines
-            WHERE `printing_multilayer_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+            $sql = " SELECT DATE_FORMAT(`date_roll`, '%b/%Y') as date, DATE_FORMAT(`date_roll`, '%m/%Y') as date2, machine_id, machine_name, ROUND(SUM(net_weight),2) as actual, COUNT(printing_rolls_id) as rolls 
+            FROM printing_rolls NATURAL JOIN machines
+            WHERE `printing_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
             GROUP BY DATE_FORMAT(`date_roll`, '%b/%Y'), machine_id 
             ORDER BY `date_roll`;";
             
@@ -1684,9 +1928,9 @@ class Printing
                $newDateString2 = $myDateTime->format('Y-m-d');
             }
             
-            $sql = " SELECT DATE_FORMAT(`date_roll`, '%Y') as date, machine_id, machine_name, ROUND(SUM(net_weight),2) as actual, COUNT(printing_multilayer_rolls_id) as rolls 
-            FROM printing_multilayer_rolls NATURAL JOIN machines
-            WHERE `printing_multilayer_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+            $sql = " SELECT DATE_FORMAT(`date_roll`, '%Y') as date, machine_id, machine_name, ROUND(SUM(net_weight),2) as actual, COUNT(printing_rolls_id) as rolls 
+            FROM printing_rolls NATURAL JOIN machines
+            WHERE `printing_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
             GROUP BY DATE_FORMAT(`date_roll`, '%Y'), machine_id 
             ORDER BY `date_roll`;;";
         }
@@ -1703,9 +1947,9 @@ class Printing
                $newDateString2 = $myDateTime->format('Y-m-d');
             }
             
-            $sql = " SELECT DATE_FORMAT(`date_roll`, '%d/%m/%Y') as date, machine_id, machine_name, ROUND(SUM(net_weight),2) as actual, COUNT(printing_multilayer_rolls_id) as rolls 
-            FROM printing_multilayer_rolls NATURAL JOIN machines
-            WHERE `printing_multilayer_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+            $sql = " SELECT DATE_FORMAT(`date_roll`, '%d/%m/%Y') as date, machine_id, machine_name, ROUND(SUM(net_weight),2) as actual, COUNT(printing_rolls_id) as rolls 
+            FROM printing_rolls NATURAL JOIN machines
+            WHERE `printing_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
             GROUP BY DATE_FORMAT(`date_roll`, '%d/%m/%Y'), machine_id 
             ORDER BY `date_roll`;;";
             

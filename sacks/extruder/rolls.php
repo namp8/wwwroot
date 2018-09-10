@@ -105,6 +105,7 @@
 									<th class="text-center">M/C No. 6</th>
 									<th class="text-center">M/C No. 7</th>
 									<th class="text-center">M/C No. 8</th>
+									<th class="text-center">Total</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -142,6 +143,7 @@
 									<th class="text-center">M/C No. 6</th>
 									<th class="text-center">M/C No. 7</th>
 									<th class="text-center">M/C No. 8</th>
+									<th class="text-center">Total</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -175,6 +177,7 @@
 									<th class="text-center">M/C No. 6</th>
 									<th class="text-center">M/C No. 7</th>
 									<th class="text-center">M/C No. 8</th>
+									<th class="text-center">Total</th>
 								</tr>
 							</thead>
 							<tbody>

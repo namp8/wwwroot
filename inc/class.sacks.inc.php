@@ -262,6 +262,8 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 		$machine7t = array();
 		$machine8t = array();
 		
+		$t1 = $t2 = $t3 =$t4 = 0;
+		
 		
 		for($machine = 13; $machine<21; ++$machine) 
 		{ 
@@ -325,6 +327,10 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 				$net = $total1 - $total2;
 				if($i > 0)
 				{
+					$t1 += $total1;
+					$t2 += $i;
+					$t3 += $net;
+					$t4 += $total2;
 					if($machine == 13)
 					{
 						array_push($machine1t,number_format($total1,2,'.',','));
@@ -454,6 +460,7 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 				<td>'. $machine6t[0] .'</td>
 				<td>'. $machine7t[0] .'</td>
 				<td>'. $machine8t[0] .'</td>
+				<th class="text-center">'. $t1 .'</th>
 			</tr>';
 		echo '<tr class="text-center">
 				<th class="text-center">No. of Rolls produced</th>
@@ -465,6 +472,7 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 				<td>'. $machine6t[1] .'</td>
 				<td>'. $machine7t[1] .'</td>
 				<td>'. $machine8t[1] .'</td>
+				<th class="text-center">'. $t2 .'</th>
 			</tr>';
         echo '<tr class="text-center">
 				<th class="text-center">Cone weight</th>
@@ -476,6 +484,7 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 				<td>'. $machine6t[2] .'</td>
 				<td>'. $machine7t[2] .'</td>
 				<td>'. $machine8t[2] .'</td>
+				<th class="text-center">'. $t3.'</th>
 			</tr>';
         echo '<tr class="text-center">
 				<th class="text-center">Good production</th>
@@ -487,9 +496,11 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 				<td>'. $machine6t[3] .'</td>
 				<td>'. $machine7t[3] .'</td>
 				<td>'. $machine8t[3] .'</td>
+				<th class="text-center">'. $t4 .'</th>
 			</tr>';
 		 echo '<tr class="active text-center">
 				<th class="text-center">Roll Weight</th>
+				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -578,6 +589,7 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 			{
 				$string = $string.  '<td></td>';
 			}
+			$string = $string.  '<td></td>';
 			$string = $string.  '</tr>';
 			if($entro)
 			{
@@ -623,7 +635,9 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 		$machine7t = array();
 		$machine8t = array();
 		$machine9t = array();
+		 
 		
+		$t1 = $t2 = $t3 =$t4 =$t5= 0;
 		
 		for($machine = 21; $machine<30; ++$machine) 
 		{ 
@@ -705,6 +719,12 @@ ORDER BY cutting_sacks_id";
 				$label = $total1 *0.00195;
 				if($i > 0)
 				{
+					
+					$t1 += $total1;
+					$t2 += $i;
+					$t3 += $sacks;
+					$t4 += $label;
+					$t5 += $total2;
 					if($machine == 21)
 					{
 						array_push($machine1t,number_format($total1,2,'.',','));
@@ -886,6 +906,7 @@ ORDER BY cutting_sacks_id";
 				<td>'. $machine7t[0] .'</td>
 				<td>'. $machine8t[0] .'</td>
 				<td>'. $machine9t[0] .'</td>
+				<th class="text-center">'. $t1.'</th>
 			</tr>';
 		echo '<tr class="text-center">
 				<th class="text-center">No. of sacks</th>
@@ -898,6 +919,7 @@ ORDER BY cutting_sacks_id";
 				<td>'. $machine7t[1] .'</td>
 				<td>'. $machine8t[1] .'</td>
 				<td>'. $machine9t[1] .'</td>
+				<th class="text-center">'. $t2.'</th>
 			</tr>';
         echo '<tr class="text-center">
 				<th class="text-center">Sacks weight</th>
@@ -910,6 +932,7 @@ ORDER BY cutting_sacks_id";
 				<td>'. $machine7t[2] .'</td>
 				<td>'. $machine8t[2] .'</td>
 				<td>'. $machine9t[2] .'</td>
+				<th class="text-center">'. $t3.'</th>
 			</tr>';
         echo '<tr class="text-center">
 				<th class="text-center">Label weight</th>
@@ -922,6 +945,7 @@ ORDER BY cutting_sacks_id";
 				<td>'. $machine7t[3] .'</td>
 				<td>'. $machine8t[3] .'</td>
 				<td>'. $machine9t[3] .'</td>
+				<th class="text-center">'. $t4.'</th>
 			</tr>';
         echo '<tr class="text-center">
 				<th class="text-center">Net production</th>
@@ -934,6 +958,7 @@ ORDER BY cutting_sacks_id";
 				<td>'. $machine7t[4] .'</td>
 				<td>'. $machine8t[4] .'</td>
 				<td>'. $machine9t[4] .'</td>
+				<th class="text-center">'. $t5.'</th>
 			</tr>';
         echo '<tr class="text-center">
 				<th class="text-center">Operator Name</th>
@@ -946,9 +971,11 @@ ORDER BY cutting_sacks_id";
 				<td>'. $machine7t[5] .'</td>
 				<td>'. $machine8t[5] .'</td>
 				<td>'. $machine9t[5] .'</td>
+				<td></td>
 			</tr>';
 		 echo '<tr class="active text-center">
 				<th class="text-center">Sacks Weight</th>
+				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -1047,6 +1074,7 @@ ORDER BY cutting_sacks_id";
 			{
 				$string = $string.  '<td></td>';
 			}
+			$string = $string.  '<td></td>';
 			$string = $string.  '</tr>';
 			if($entro)
 			{
@@ -1259,7 +1287,7 @@ ORDER BY packing_sacks_id";
 					$TOTAL = $row['net'] - $row['used'];
 					if($TOTAL<$totalnet)
 					{
-						echo '<strong>ERROR</strong> The rolls were not added to the production. Because there is not enought rolls production in stock. <br> There are <strong>'. $TOTAL .'</strong> kgs in stock, and you need <strong>'. $totalnet .'</strong> kgs.  Please try again after submit the rolls for the extruder.';
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought rolls production in stock. <br> There are <strong>'. $TOTAL .'</strong> kgs in stock, and you need <strong>'. $totalnet .'</strong> kgs.  Please try again after submit the rolls for the extruder.';
 						return false;
 					}
 				}

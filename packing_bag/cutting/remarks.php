@@ -1,27 +1,26 @@
 <?php
-    $pageTitle = "Injection Short Falls";
-	$location = "Injection";
+    $pageTitle = "Packing Bags Sacks - Short Falls";
     
-    include_once "../base.php";
-    include_once "../header.php";
-    include_once "sidebar.php";
-    include_once "../content.php";
+    include_once "../../base.php";
+    include_once "../../header.php";
+    include_once "../sidebar.php";
+    include_once "../../content.php";
 
 
-    include_once "../inc/class.general.inc.php";
-    $general = new General($db);
+    include_once "../../inc/class.packing.inc.php";
+    $packing = new Packing($db);
 
 ?>
     <ol class="breadcrumb">
         <li class="breadcrumb-item">
-            <a href="../index.php">United Production System</a>
+            <a href="../../index.php">United Production System</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="process.php">Injection </a>
+            <a href="process.php">Packing Bags Sacks </a>
         </li>
         <li class="breadcrumb-item active">Short Fall</li>
     </ol>
-    <h2>Injection - Short Fall</h2>
+    <h2>Packing Bags Sacks  - Short Fall</h2>
 
 <div id="alertMessage" class="alert hide" role="alert">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -31,7 +30,7 @@
     if(!empty($_POST['reason']))
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
-        if($general->createFall()){
+        if($packing->createFall()){
 
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
@@ -43,20 +42,8 @@
 ?>
     </div>
 <div class="pull-right text-right">
-		<div class="dropdown" style="margin-top:5px;margin-right:30px;">
-			<button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Submit Reason for Short Fall&nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
-			<ul class="dropdown-menu dropdown-menu-right">
-				<li><a onclick="selectMachine(35,'Injection 1')" data-toggle="modal" data-target="#modal1">Injection 1</a></li>
-				<li><a onclick="selectMachine(36,'Injection 2')" data-toggle="modal" data-target="#modal1">Injection 2</a></li>
-				<li><a onclick="selectMachine(37,'Injection 3')" data-toggle="modal" data-target="#modal1">Injection 3</a></li>
-				<li><a onclick="selectMachine(38,'Injection 4')" data-toggle="modal" data-target="#modal1">Injection 4</a></li>
-				<li><a onclick="selectMachine(39,'Injection 5')" data-toggle="modal" data-target="#modal1">Injection 5</a></li>
-				<li><a onclick="selectMachine(40,'Injection 6')" data-toggle="modal" data-target="#modal1">Injection 6</a></li>
-				<li><a onclick="selectMachine(41,'Injection 7')" data-toggle="modal" data-target="#modal1">Injection 7</a></li>
-				<li><a onclick="selectMachine(42,'Injection 8')" data-toggle="modal" data-target="#modal1">Injection 8</a></li>
-				<li><a onclick="selectMachine(43,'Injection 9')" data-toggle="modal" data-target="#modal1">Injection 9</a></li>
-				<li><a onclick="selectMachine(44,'Injection 10')" data-toggle="modal" data-target="#modal1">Injection 10</a></li>
-			</ul>
+		<div style="margin-top:5px;margin-right:30px;">
+			<button class="btn btn-info" type="button" data-toggle="modal" data-target="#modal1">Submit Reason for Short Fall</button>
 		</div>
 	</div>
 
@@ -77,7 +64,7 @@
                         </thead>
                         <tbody>
 <?php
-     $general->giveShortFall($location);
+     $packing->giveShortFallSacks();
 ?>
                         </tbody>
                     </table>
@@ -109,8 +96,8 @@
 			  
 			  <div class="form-group">
 				<label for="size">Machine <span class="text-danger">*</span></label><br />
-				<input type="hidden" class="form-control" id="machine" name="machine" value="1" required>
-				<input type="text" class="form-control" step="1" min="1" id="machineName"  value="" disabled>
+				<input type="hidden" class="form-control" id="machine" name="machine" value="45" required>
+				<input type="text" class="form-control" id="machineName"  value="Packing Cover Bag" disabled>
 			</div>
                 <div class="form-group">
                     <label>Downtime (HH:mm) <span class="text-danger">*</span></label>
@@ -139,10 +126,6 @@
       </div>
     </div>
       <script>
-		function selectMachine(id, name) {
-				document.getElementById("machine").value = id;
-				document.getElementById("machineName").value = name;
-		}
 		  
         $(document).ready(function() {
              var d = new Date();
@@ -166,5 +149,5 @@
 
     
     <?php
-    include_once '../footer.php';
+    include_once '../../footer.php';
 ?>

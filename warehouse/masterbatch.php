@@ -130,16 +130,19 @@ $materials->masterbatchStockDropdown(1);
 					</div>
                 </div>
                 <div class="form-group">
-                    <label for="oldbags">Bags/Drumps on UPS<span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="1" id="oldbags" name="oldbags" readonly="readonly">
+                    <label for="oldbags">Kgs on UPS<span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" min="0" step="0.0001"  id="old" name="old" onkeyup="calculate()" step="0.001">
                 </div>
+                    <input type="hidden" class="form-control" min="0" step="0.0001" id="newbags" name="newbags" required>	
+                    <input type="hidden" class="form-control" min="0" step="0.0001" id="oldbags" name="oldbags" required>	
+                    <input type="hidden" class="form-control" min="0" id="difference" name="difference" >
                 <div class="form-group">
-                    <label for="newbags">Bags/Drumps on floor<span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="1" step="0.001" id="newbags" name="newbags" onkeyup="calculate()" required>
+                    <label for="newbags">Kgs on floor<span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" min="0" step="0.0001" id="new" name="new" onkeyup="calculate()" required>
                 </div>
 			  	<div class="form-group">
                     <label for="difference">Variance<span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="1" id="difference" name="difference" readonly="readonly">
+                    <input type="number" class="form-control" min="1" id="diff" name="diff" readonly="readonly">
                 </div>
                 <div class="form-group">
                     <label for="remarks">Remarks</label>
@@ -161,16 +164,19 @@ $materials->masterbatchStockDropdown(1);
 	<script>
 		
 		function calculate() {
-            var oldbags = document.getElementById("oldbags").value;
-            var newbags = document.getElementById("newbags").value;
+            var oldbags = document.getElementById("old").value;
+            var newbags = document.getElementById("new").value;
 		   	var difference = newbags - oldbags;
-            document.getElementById("difference").value = difference.toFixed(2);
+            document.getElementById("diff").value = difference.toFixed(4);
+            document.getElementById("difference").value = (difference/25).toFixed(4);
+            document.getElementById("newbags").value = (document.getElementById("new").value/25).toFixed(4);
         }
 		
 		function selectMaterial(id, name, grade, bags) {
 			document.getElementById("btn_material").innerHTML = name + " - " + grade + " &nbsp&nbsp<span class='caret'></span> ";
 			document.getElementById("material").value = id;
 			document.getElementById("oldbags").value = bags;
+			document.getElementById("old").value = bags*25;
 			calculate();
 		}
 

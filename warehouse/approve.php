@@ -139,7 +139,7 @@
                 </div>
                 <div class="form-group">
                     <label for="total">Total Bags/Drumps approved <span class="text-danger">*</span></label>
-                    <input type="number" class="form-control" min="0" step="0.01" id="bags" name="bags" required>
+                    <input type="number" class="form-control" min="0" step="0.001" id="bags" name="bags" required>
                 </div>
                 <div class="form-group">
                     <label for="form">Remarks</label>

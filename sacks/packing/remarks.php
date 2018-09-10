@@ -1,5 +1,6 @@
 <?php
     $pageTitle = "Sacks - Packing Short Falls";
+	$location = "Packing";
     
     include_once "../../base.php";
     include_once "../../header.php";
@@ -66,7 +67,7 @@
                         </thead>
                         <tbody>
 <?php
-     $general->giveShortFall(11);
+     $general->giveShortFall($location);
 ?>
                         </tbody>
                     </table>

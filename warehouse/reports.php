@@ -69,6 +69,7 @@ if(!$stock->access(5))
                         <li><a onclick="selectReport(10)">Opening and Closing - Ink and Solvents</a></li>
                         <li><a onclick="selectReport(9)">Opening and Closing - Master Batch</a></li>
                         <li><a onclick="selectReport(11)">Opening and Closing - Consumable Items</a></li>
+                        <li><a onclick="selectReport(12)">Closing of month</a></li>
                         <li><a onclick="selectReport(3)">Outstanding Raw Material Orders</a></li>
                         <li><a onclick="selectReport(4)">Raw Material Import By Files</a></li>
                         <li><a onclick="selectReport(8)">Raw Material Import By Material</a></li>
@@ -362,6 +363,26 @@ if(!$stock->access(5))
         
         echo '</tbody>';
     }
+	else if($_POST['report'] == 12 )
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Type</th>';
+        echo '<th>Item</th>';
+        echo '<th>Closing</th>';
+        echo '</tr></thead>
+		<tfoot><tr  class="active">
+			<th></th>
+			<th></th>
+			<th>Total</th>
+			<th style="text-align:right"></th>
+			</tr></tfoot>
+			<tbody>';    
+		
+        $stock->ClosingMonth();
+        
+        echo '</tbody>';
+    }
 ?>
 
                 </table>
@@ -450,6 +471,11 @@ if(!$stock->access(5))
 				{
 					name = "Opening and Closing - Consumable Items";
 				}
+				
+				else if (id == 12)
+				{
+					name = "Closing of month";
+				}
 				document.getElementById("btn_report").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
             }
 
@@ -494,6 +520,13 @@ if(!$stock->access(5))
 								};
 							}
 							if (document.getElementById("titleReport").innerHTML.split("&nbsp;")[0].includes("Import by Material") && (x== 1 || x==2)) {
+								bdy[y][x] = {
+									text: table.rows[y].cells[x].innerHTML,
+									style: 'number'
+								};
+							}
+							
+							if (document.getElementById("titleReport").innerHTML.split("&nbsp;")[0].includes("Closing of month") && (x== 3)) {
 								bdy[y][x] = {
 									text: table.rows[y].cells[x].innerHTML,
 									style: 'number'
@@ -1127,6 +1160,36 @@ if(!$stock->access(5))
 					
 					}";
 				}
+					
+				else if(!empty($_POST['report']) && $_POST['report'] ==12)
+				{ 
+					echo ", \"footerCallback\": function(row, data, start, end, display) {
+					var api = this.api(),
+						data;
+
+					// Remove the formatting to get integer data for summation
+					var intVal = function(i) {
+						return typeof i === 'string' ?
+							i.replace(/[\$,]/g, '') * 1 :
+							typeof i === 'number' ?
+							i : 0;
+					};
+
+					// Total Amount
+					pageTotal3 = api
+						.column(3, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					$(api.column(3).footer()).html(
+						''+ pageTotal3.toLocaleString()
+					);
+					
+					}";
+				}	
 ?>
             } );
 

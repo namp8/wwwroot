@@ -30,14 +30,14 @@
 		echo '<li><a href="/injection/process.php"><i class="fa fa-hdd-o" aria-hidden="true"></i><span>Injection</span></a></li>
 		<li role="separator" class="divider"></li>';
 	}
-	if($users->access('multilayer') or $users->access('printing'))
-	{
-		echo '<li><a href="/sachet_rolls/process.php"><i class="fa fa-battery-empty" aria-hidden="true"></i><span>Sachet Rolls</span></a></li>
-		<li role="separator" class="divider"></li>';
-	}
 	if($users->access('packing'))
 	{
 		echo '<li><a href="/packing_bag/process.php"><i class="fa fa-square-o" aria-hidden="true"></i><span>Packing Bags</span></a></li>
+		<li role="separator" class="divider"></li>';
+	}
+	if($users->access('multilayer') or $users->access('printing'))
+	{
+		echo '<li><a href="/sachet_rolls/process.php"><i class="fa fa-battery-empty" aria-hidden="true"></i><span>Sachet Rolls</span></a></li>
 		<li role="separator" class="divider"></li>';
 	}
 	if($users->access('macchi'))
