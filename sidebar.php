@@ -19,6 +19,11 @@
 		<li role="separator" class="divider"></li>
 		<li role="separator" class="divider"></li>
 		<li role="separator" class="divider"></li>';
+		
+		echo '<li><a href="/finishedgoods/home.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>Finished Goods</span></a></li>
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>';
 	}
 	if($users->access('sacks'))
 	{
@@ -48,13 +53,8 @@
 	}
 ?>	
 		
-<!--
-		<li><a href="/finishedgoods/home.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>Finished Goods</span></a></li>
-		<li role="separator" class="divider"></li>
--->
 		
-		<li role="separator" class="divider"></li>
-		<li role="separator" class="divider"></li>
+		
 		
 <!--
 		<li><a href="/settings/home.php"><i class="fa fa-gears" aria-hidden="true"></i><span>Settings</span></a></li>

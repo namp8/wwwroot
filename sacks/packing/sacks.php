@@ -308,6 +308,22 @@
 												<td><input type="number" class="form-control input-sm" step="1" min="0" name="no_10" value="50"></td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_10"></td>
 											</tr>
+											<tr>
+												
+												<td><input type="number" class="form-control input-sm" step="1" min="0" name="no_11" value="50"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_11"></td>
+												
+												<td><input type="number" class="form-control input-sm" step="1" min="0" name="no_12" value="50"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_12"></td>
+											</tr>
+											<tr>
+												
+												<td><input type="number" class="form-control input-sm" step="1" min="0" name="no_13" value="50"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_13"></td>
+												
+												<td><input type="number" class="form-control input-sm" step="1" min="0" name="no_14" value="50"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_14"></td>
+											</tr>
 											
 										</tbody>
 									</table>

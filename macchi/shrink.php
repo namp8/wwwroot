@@ -133,6 +133,7 @@
 										<th># Rolls</th>
 										<th>Gross weight</th>
 										<th>Net weight</th>
+										<th>Size</th>
 										<th>Thickness</th>
 									</tr>
 								</thead>
@@ -180,6 +181,7 @@
 										<th># Rolls</th>
 										<th>Gross weight</th>
 										<th>Net weight</th>
+										<th>Size</th>
 										<th>Thickness</th>
 									</tr>
 								</thead>
@@ -221,7 +223,7 @@
 					<form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 						<div class="modal-body">
 							<div class="row">
-								<div class="col-md-6 form-group">
+								<div class="col-md-4 form-group">
 									<label for="date">Date <span class="text-danger">*</span></label>
 									<div class='input-group date' id='datetimepicker2'>
 										<input type='text' class="form-control" id="date" name="date" required/>
@@ -230,7 +232,7 @@
 										</span>
 									</div>
 								</div>
-								<div class="col-md-6 form-group">
+								<div class="col-md-4 form-group">
 									<label for="shift">Shift <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="shift" name="shift" value="1" required>
 									<div class="dropdown">
@@ -238,6 +240,17 @@
 										<ul class="dropdown-menu">
 											<li><a onclick="selectShift(1,'Day')">Day</a></li>
 											<li><a onclick="selectShift(2,'Night')">Night</a></li>
+										</ul>
+									</div>
+								</div>
+								<div class="col-md-4 form-group">
+									<label for="size">Production <span class="text-danger">*</span></label><br />
+									<input type="hidden" class="form-control" id="sample" name="sample" value="0" required>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_sample" style="height:30px;">Normal&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a onclick="selectSample(0,'Normal')">Normal</a></li>
+											<li><a onclick="selectSample(1,'Sample')">Sample</a></li>
 										</ul>
 									</div>
 								</div>
@@ -360,9 +373,9 @@
 														</span>
 													</div>
 												</td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_6" id="from_6" onkeyup="calculate(6)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_6" id="to_6" onkeyup="calculate(6)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_6" id="rolls_6" readonly value="0" ></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_6" id="from_6" onkeyup="calculate(6)" value="201"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_6" id="to_6" onkeyup="calculate(6)" value="240"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_6" id="rolls_6" readonly value="40" ></td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_6"></td>
 											</tr>
 											<tr>
@@ -374,9 +387,9 @@
 														</span>
 													</div>
 												</td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_7" id="from_7" onkeyup="calculate(7)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_7" id="to_7" onkeyup="calculate(7)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_7" id="rolls_7" readonly value="0" ></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_7" id="from_7" onkeyup="calculate(7)" value="241"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_7" id="to_7" onkeyup="calculate(7)" value="280"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_7" id="rolls_7" readonly value="40" ></td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_7"></td>
 											</tr>
 											<tr>
@@ -388,9 +401,9 @@
 														</span>
 													</div>
 												</td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_8" id="from_8" onkeyup="calculate(8)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_8" id="to_8" onkeyup="calculate(8)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_8" id="rolls_8" readonly value="0" ></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_8" id="from_8" onkeyup="calculate(8)" value="281"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_8" id="to_8" onkeyup="calculate(8)" value="320"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_8" id="rolls_8" readonly value="40" ></td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_8"></td>
 											</tr>
 											<tr>
@@ -402,9 +415,9 @@
 														</span>
 													</div>
 												</td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_9" id="from_9" onkeyup="calculate(9)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_9" id="to_9" onkeyup="calculate(9)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_9" id="rolls_9" readonly value="0" ></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_9" id="from_9" onkeyup="calculate(9)" value="321"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_9" id="to_9" onkeyup="calculate(9)" value="360"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_9" id="rolls_9" readonly value="40" ></td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_9"></td>
 											</tr>
 											<tr>
@@ -416,9 +429,9 @@
 														</span>
 													</div>
 												</td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_10" id="from_10" onkeyup="calculate(10)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_10" id="to_10" onkeyup="calculate(10)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_10" id="rolls_10" readonly value="0" ></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_10" id="from_10" onkeyup="calculate(10)" value="361"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_10" id="to_10" onkeyup="calculate(10)" value="400"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_10" id="rolls_10" readonly value="40" ></td>
 												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_10"></td>
 											</tr>
 										</tbody>
@@ -456,22 +469,18 @@
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("shift").value = id;
-					if (id == 1) {
-						var d = new Date();
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					} else {
-						var d = new Date();
-						d.setDate(d.getDate() - 1);
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					}
-
 				}
 				
 				function selectCustomer(id, name) {
 					document.getElementById("btn_customer").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("customer").value = id;
+				}
+				
+				
+				function selectSample(id, name) {
+					document.getElementById("btn_sample").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("sample").value = id;
+
 				}
 				
 				function calculate(id) {

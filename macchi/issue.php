@@ -32,7 +32,7 @@
     if(!empty($_POST['to']) )
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
-        if($stock->sent()){
+        if($stock->sentReprocess()){
 
             echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
@@ -132,12 +132,12 @@
                 <input type="text" class="form-control" id="material_name" value="REPROCESS - MACCHI"  disabled>
             </div>
             <div class="form-group">
-                <label for="total">Total bags</label>
-                <input type="number" class="form-control"  min="1" step="0.1" id="bags" name="bags"onkeyup="calculateKgs()" required>
-            </div>
-            <div class="form-group">
                 <label for="total">Total kgs</label>
                 <input type="number" class="form-control"  min="1" step="0.1" id="kgs"  onkeyup="calculateBags()" required>
+            </div>
+            <div class="form-group">
+                <label for="total">Total bags</label>
+                <input type="number" class="form-control"  min="1" step="0.1" id="bags" name="bags"onkeyup="calculateKgs()" required>
             </div>
 			  
                 <div class="form-group">

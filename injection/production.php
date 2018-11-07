@@ -57,7 +57,7 @@
 				<li><a onclick="selectMachine(41,'Injection 7')" data-toggle="modal" data-target="#modal1">Injection 7</a></li>
 				<li><a onclick="selectMachine(42,'Injection 8')" data-toggle="modal" data-target="#modal1">Injection 8</a></li>
 				<li><a onclick="selectMachine(43,'Injection 9')" data-toggle="modal" data-target="#modal1">Injection 9</a></li>
-				<li><a onclick="selectMachine(44,'Injection 10')" data-toggle="modal" data-target="#modal1">Injection 9</a></li>
+				<li><a onclick="selectMachine(44,'Injection 10')" data-toggle="modal" data-target="#modal1">Injection 10</a></li>
 			</ul>
 		</div>
 	</div>
@@ -310,16 +310,7 @@ $injection->giveProduction(2);
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("shift").value = id;
-					if (id == 1) {
-						var d = new Date();
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					} else {
-						var d = new Date();
-						d.setDate(d.getDate() - 1);
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					}
+					
 
 				}
 				function selectMachine(id, name) {

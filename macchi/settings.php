@@ -118,6 +118,11 @@
                         <input type='text'  class="form-control text-center" id="380cone" disabled/><br />
                         <button class="btn btn-default" onclick="cone('380cone')" data-toggle="modal" data-target="#modal1">Edit 380 cone</button>
 					</div>
+                    <div class="col-lg-2 form-group">
+                        <label for="date">390 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="390cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('390cone')" data-toggle="modal" data-target="#modal1">Edit 390 cone</button>
+					</div>
 					<div class="col-lg-2 form-group">
                         <label for="date">400 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="400cone" disabled/><br />
@@ -127,6 +132,11 @@
                         <label for="date">420 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="420cone" disabled/><br />
                         <button class="btn btn-default" onclick="cone('420cone')" data-toggle="modal" data-target="#modal1">Edit 420 cone</button>
+					</div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">430 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="430cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('430cone')" data-toggle="modal" data-target="#modal1">Edit 430 cone</button>
 					</div>
 				<div class="col-lg-2 form-group">
                         <label for="date">440 mm - Cone wt:</label>
@@ -185,6 +195,11 @@
                         <label for="date">870 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="870cone" disabled/><br />
                         <button class="btn btn-default" onclick="cone('870cone')" data-toggle="modal" data-target="#modal1">Edit 870 cone</button>
+					</div>
+					<div class="col-lg-2 form-group">
+                        <label for="date">1680 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="1680cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('1680cone')" data-toggle="modal" data-target="#modal1">Edit 1680 cone</button>
 					</div>
             </div>
         </div>

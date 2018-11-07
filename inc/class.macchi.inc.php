@@ -133,7 +133,7 @@ class Macchi
      */
     public function giveFormulas($product, $layer)
     {
-        $sql = "SELECT material_id, material_name, material_grade, percentage
+        $sql = "SELECT material_id, material_name, material_grade, percentage, layer
                 FROM  `macchi_formulas` NATURAL JOIN  `materials`
                 WHERE layer=". $layer ." AND `actual` = 1 AND `product` = ". $product ." ORDER BY material_name;";
         $a=array();
@@ -143,17 +143,20 @@ class Macchi
             $total = 0;
             while($row = $stmt->fetch())
             {
+                $ID = $row['material_id'];
                 $NAME = $row['material_name'];
                 if(!is_null($NAME))
                 {
                     $GRADE = $row['material_grade'];
                     $PERCENTAGE = $row['percentage'];
+                    $LAYER = $row['layer'];
                     $total = $total + $PERCENTAGE;
 
                     echo '<tr>
                         <td><b>'. $NAME .'</b></td>
                         <td>'. $GRADE .'</td>
                         <td class="text-right">'. number_format($PERCENTAGE,1,'.',',') .'</td>
+                        <td><button class="btn btn-xs btn-warning" type="button" onclick="update(\''. $LAYER .'\',\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">E</button><button class="btn btn-xs btn-danger" type="button" onclick="deleteFormula(\''. $LAYER .'\',\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">X</button></td>
                     </tr>';
                     $materialArray=array($NAME,$GRADE,$PERCENTAGE);
                     array_push($a,$materialArray);
@@ -163,6 +166,7 @@ class Macchi
             echo '<tr class="active">
                     <td colspan="2" class="text-center"><strong>TOTAL</strong></td>
                     <td><strong>'. number_format($total,1,'.',',') .'</strong></td>
+                    <td></td>
                 </tr>';
             $stmt->closeCursor();
             
@@ -439,11 +443,11 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
         }
         $date = "date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString ." 23:59:59'";
 
-        $sql = "SELECT rollno, DATE_FORMAT(date_roll, '%H:%i') AS time_r, gross_weight, net_weight, thickness FROM `macchi_rolls` WHERE ". $date ." AND size = ". $size ." ORDER BY macchi_rolls_id;";
+        $sql = "SELECT rollno, DATE_FORMAT(date_roll, '%H:%i') AS time_r, gross_weight, net_weight, thickness FROM `macchi_rolls` WHERE ". $date ." AND size = ". $size ." ORDER BY CAST(SUBSTRING(rollno,8,2) AS UNSIGNED);";
 
         if($x != 0)
         {
-            $sql = "SELECT rollno, DATE_FORMAT(date_roll, '%H:%i') AS time_r, gross_weight, net_weight, thickness FROM `macchi_rolls` WHERE ". $date ." AND SHIFT = ". $x ." AND size = ". $size ." ORDER BY macchi_rolls_id;";
+            $sql = "SELECT rollno, DATE_FORMAT(date_roll, '%H:%i') AS time_r, gross_weight, net_weight, thickness FROM `macchi_rolls` WHERE ". $date ." AND SHIFT = ". $x ." AND size = ". $size ." ORDER BY CAST(SUBSTRING(rollno,8,2) AS UNSIGNED);";
         }
         
         $total1 = $total2 = 0;
@@ -602,13 +606,13 @@ ORDER BY `macchi_shrink_id`";
 
         $sql = "SELECT rollno, DATE_FORMAT(date_roll, '%H:%i') AS time_r, `net_weight` AS production
                 FROM `macchi_rolls` 
-                WHERE ". $date ." ;";
+                WHERE ". $date ." ORDER BY CAST(SUBSTRING(rollno,8,2) AS UNSIGNED);";
 
         if($x != 0)
         {
             $sql = "SELECT rollno, DATE_FORMAT(date_roll, '%H:%i') AS time_r, `net_weight` AS production
                 FROM `macchi_rolls` 
-                WHERE ". $date ." AND shift = ". $x .";";
+                WHERE ". $date ." AND shift = ". $x ." ORDER BY CAST(SUBSTRING(rollno,8,2) AS UNSIGNED);";
         }       
         $a = $this->giveFormulaFor($newDateString,1);
         if($stmt = $this->_db->prepare($sql))
@@ -926,7 +930,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		
         
         
-        $shift = $thickness = $size = "";
+        $shift = $thickness = $size = $sample = "";
 		
         $shift = trim($_POST["shift"]);
         $shift = stripslashes($shift);
@@ -935,6 +939,10 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		$size = trim($_POST["size"]);
         $size = stripslashes($size);
         $size = htmlspecialchars($size);
+		
+		$sample = trim($_POST["sample"]);
+        $sample = stripslashes($sample);
+        $sample = htmlspecialchars($sample);
 		
 		
 		$thickness = trim($_POST["thickness"]);
@@ -965,7 +973,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		
 		// GETS ROLL NO 
 	   $sql = "SELECT COUNT(DISTINCT(rollno)) as rollcount
-				FROM `macchi_rolls` WHERE date_roll BETWEEN '". $date ." 00:00:00' AND '". $date ." 23:59:59';";
+				FROM `macchi_rolls` WHERE size =  ". $size ." AND  date_roll BETWEEN '". $date ." 00:00:00' AND '". $date ." 23:59:59' ;";
 		$count = 0;
 		if($stmt = $this->_db->prepare($sql))
 		{
@@ -980,7 +988,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		$myDateTime = DateTime::createFromFormat('Y-m-d', $date);
 		$newDateString = $myDateTime->format('d-m');
 		
-		$rolls = "INSERT INTO `macchi_rolls`(`macchi_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`dyne_test`,`waste_printing`,`thickness`)VALUES ";
+		$rolls = "INSERT INTO `macchi_rolls`(`macchi_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`dyne_test`,`waste_printing`,`thickness`,`sample`)VALUES ";
 		foreach ($_POST as $k=>$v)
 		{
 			if (substr( $k, 0, 3 ) === "wt_" and !empty($v)){
@@ -1024,7 +1032,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 				$rollno = "M".$newDateString."-".$count;
 				$net = $v - $CONE;
 				$totalnet = $totalnet + $net;
-				$rolls = $rolls. " (NULL, '". $datetime."', '".$rollno."', ". $shift .", ". $size .", ". $v .", ". $net .",". $_SESSION['Userid'] .", 0, 1, 0.00,". $thickness .") ,";
+				$rolls = $rolls. " (NULL, '". $datetime."', '".$rollno."', ". $shift .", ". $size .", ". $v .", ". $net .",". $_SESSION['Userid'] .", 0, 1, 0.00,". $thickness .",". $sample .") ,";
 			}
 		}
 		
@@ -1738,7 +1746,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
     public function createShrink()
     {
        
-        $shift = $thickness = $size = $customer = "";
+        $shift = $thickness = $size = $customer = $sample = "";
 		
 		$size = trim($_POST["size"]);
         $size = stripslashes($size);
@@ -1763,7 +1771,9 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
         $shift = stripslashes($shift);
         $shift = htmlspecialchars($shift);
 		
-		
+		$sample = trim($_POST["sample"]);
+        $sample = stripslashes($sample);
+        $sample = htmlspecialchars($sample);
 		
 		$thickness = trim($_POST["thickness"]);
         $thickness = stripslashes($thickness);
@@ -1791,7 +1801,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		
 		// GETS ROLL NO 
 	   	$sql = "SELECT SUM(`rolls`) as rollcount
-				FROM `macchi_shrink` WHERE date_shrink BETWEEN '". $date ." 00:00:00' AND '". $date ." 23:59:59';";
+				FROM `macchi_shrink` WHERE customer_id = ".$customer." AND date_shrink BETWEEN '". $date ." 00:00:00' AND '". $date ." 23:59:59';";
 		$count = 0;
 		if($stmt = $this->_db->prepare($sql))
 		{
@@ -1806,7 +1816,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		$myDateTime = DateTime::createFromFormat('Y-m-d', $date);
 		$newDateString = $myDateTime->format('d-m');
 		
-		$rollsql = "INSERT INTO `macchi_shrink`(`macchi_shrink_id`,`date_shrink`,`roll_from`,`roll_to`,`rolls`,`shift`,`size`,`thickness`,`gross_weight`,`net_weight`,`user_id`,`customer_id`,`status_shrink`)
+		$rollsql = "INSERT INTO `macchi_shrink`(`macchi_shrink_id`,`date_shrink`,`roll_from`,`roll_to`,`rolls`,`shift`,`size`,`thickness`,`gross_weight`,`net_weight`,`user_id`,`customer_id`,`status_shrink`,`sample`)
 		VALUES ";
 		foreach ($_POST as $k=>$v)
 		{
@@ -1868,7 +1878,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 					$rollno2 = "M".$newDateString."-".$count;
 					$net = $v - ($CONE*$rolls);
 					$totalnet = $totalnet + $net;
-					$rollsql = $rollsql. " (NULL, '". $datetime."', '".$rollno."', '".$rollno2."', '".$rolls."', ". $shift .", ". $size .",". $thickness .", ". $v .", ". $net .",". $_SESSION['Userid'] .", '".$customer."', 0) ,";
+					$rollsql = $rollsql. " (NULL, '". $datetime."', '".$rollno."', '".$rollno2."', '".$rolls."', ". $shift .", ". $size .",". $thickness .", ". $v .", ". $net .",". $_SESSION['Userid'] .", '".$customer."', 0, '".$sample."') ,";
 				}
 			}
 		}
@@ -3662,8 +3672,7 @@ ORDER BY date, actual_shrink;";
                         <td></td>
                     </tr>";
         }
-         echo '</tbody>';
-        echo '<script>document.getElementById("chartContainer").style= "height:200px;";</script>';
+         echo '</tbody>'; echo '<script>document.getElementById("chartContainer").style= "height:200px;";</script>';
         echo '<script>document.getElementById("chartContainer2").style= "height:200px;";</script>';
          echo '<script> 
             var chart = new CanvasJS.Chart("chartContainer", {

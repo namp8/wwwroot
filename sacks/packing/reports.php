@@ -331,6 +331,7 @@
 						''+ pageTotal3.toLocaleString()
 					);
 					
+					
 					// TOTAL 4
 					pageTotal4 = api
 						.column(4, {
@@ -345,16 +346,6 @@
 						 pageTotal4.toLocaleString() 
 					);
 					
-					// Total 5
-					pageTotal6 = pageTotal4/pageTotal1*100;
-					$(api.column(6).footer()).html(
-						'' + pageTotal6.toLocaleString(undefined, {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-})+'%'
-					);
-					
-					// TOTAL 8
 					pageTotal5 = api
 						.column(5, {
 							page: 'current'
@@ -364,13 +355,23 @@
 							return intVal(a) + intVal(b);
 						}, 0);
 					$(api.column(5).footer()).html(
-						''+ pageTotal5.toLocaleString(undefined, {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-})
+						
+						 pageTotal5.toLocaleString() 
 					);
 					
-					// Total 6
+					pageTotal6 = api
+						.column(6, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					$(api.column(6).footer()).html(
+						
+						 pageTotal6.toLocaleString() 
+					);
+					
 					pageTotal7 = api
 						.column(7, {
 							page: 'current'
@@ -386,16 +387,83 @@
 })
 					);
 					
-					// Total Bags
-					pageTotal8 = pageTotal7/pageTotal5*100;
+					pageTotal8 = pageTotal4/pageTotal1*100;
 					$(api.column(8).footer()).html(
-						 pageTotal8.toLocaleString(undefined, {
+						'' + pageTotal8.toLocaleString(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})+'%'
+					);
+					
+					// Total 6
+					pageTotal9 = api
+						.column(9, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					$(api.column(9).footer()).html(
+						''+ pageTotal9.toLocaleString(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})
+					);
+					
+					// Total Bags
+					pageTotal10 = pageTotal9/pageTotal7*100;
+					$(api.column(10).footer()).html(
+						 pageTotal10.toLocaleString(undefined, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2
 })+ '%'
 					);
 					
+					count = api
+						.column(11, {
+							page: 'current'
+						})
+						.data();
 					
+					
+					pageTotal11 = api
+						.column(11, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+						
+					pageTotal11 = pageTotal11 / count.count();
+					
+					$(api.column(11).footer()).html(
+						
+						 pageTotal11.toLocaleString(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+}) 
+					);
+					
+					
+					pageTotal12 = api
+						.column(12, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+						
+					pageTotal12 = pageTotal7 / pageTotal4;
+					$(api.column(12).footer()).html(
+						
+						 pageTotal12.toLocaleString(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+}) 
+					);
 					
 					}";
 				}

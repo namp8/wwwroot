@@ -89,7 +89,7 @@
 <form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
  		<input type="submit" id="approveAll" name="approveAll" class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" value="Issued All">
      </form>
-    <button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" data-toggle="modal" data-target="#modal2">Send to Send to Finished Goods</button>
+    <button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" data-toggle="modal" data-target="#modal2">Send to Finished Goods</button>
     <button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" data-toggle="modal" data-target="#modal3">Use Consumable Item in Warehouse</button> 
 
 
@@ -367,7 +367,6 @@ $materials->materialsKgDropdown();
                 }
             }
         }
-		
     </script>
 
     <script>

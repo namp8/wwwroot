@@ -121,6 +121,31 @@ class Stock
         }
 	}
 	
+	public function materialsconsumablesDropdown()
+    {
+        $sql = "SELECT `materials`.`material_id`,
+                `materials`.`material_name`,
+                `materials`.`material_grade`
+                FROM `materials`
+				WHERE `macchi` = 1  OR `consumables` = 1 OR `color` = 1 OR `master_batch` = 1
+                ORDER BY `materials`.`material_name`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['material_id'];
+                $NAME = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                echo  '<li><a id="'. $NAME .' - '. $GRADE .'" onclick="selectMaterial(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')"><b>'. $NAME .'</b>&nbsp - &nbsp'. $GRADE .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
 	
 	
 	/**
@@ -860,7 +885,7 @@ ORDER BY `date` DESC;";
 				FROM `rm_loans`
 				JOIN materials ON materials.material_id = `rm_loans`.material_id
 				JOIN users ON users.user_id = `rm_loans`.user_id
-				WHERE MONTH(date_arrived) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_arrived) = YEAR(CURRENT_DATE())
+				WHERE MONTH(date_arrived) >= MONTH(CURRENT_DATE())-2 AND YEAR(date_arrived) = YEAR(CURRENT_DATE())
 				ORDER BY date_arrived DESC;";
         
         if($stmt = $this->_db->prepare($sql))
@@ -1969,6 +1994,11 @@ ORDER BY `date` DESC;";
         $bags = trim($_POST["bags"]);
         $bags = stripslashes($bags);
         $bags = htmlspecialchars($bags);
+		
+		$material = trim($_POST["material"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+		
         
         $remarks = trim($_POST["remarks"]);
         $remarks = stripslashes($remarks);
@@ -1985,7 +2015,8 @@ ORDER BY `date` DESC;";
 							`user_id_approved` = :user,
 							`user_id_issued` = :user,
 							`user_id_receipt` = :user,
-							`remarks_approved` = :remarks
+							`remarks_approved` = :remarks,
+							`material_id` = :material
 					WHERE `stock_materials_transfers_id` = :id;";
 			 try
 			{   
@@ -1994,6 +2025,7 @@ ORDER BY `date` DESC;";
 				$stmt->bindParam(":bags", $bags, PDO::PARAM_INT);
 				$stmt->bindParam(":remarks", $remarks, PDO::PARAM_STR);
 				$stmt->bindParam(":id", $id, PDO::PARAM_INT);
+				$stmt->bindParam(":material", $material, PDO::PARAM_INT);
 				$stmt->bindParam(":user", $_SESSION['Userid'], PDO::PARAM_INT);
 				$stmt->execute();
 				$stmt->closeCursor();
@@ -2008,6 +2040,18 @@ ORDER BY `date` DESC;";
         else
 		{
 				//CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
+			//CHANGE THE STATUS TRANSFER, BGAS ISSUED, AND USER ISSUED
+			$sql = "UPDATE  `stock_materials_transfers`
+					SET 
+					`material_id` = ". $material ."
+					WHERE `stock_materials_transfers_id` = ". $id .";";
+			 try
+			{   
+				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+				$stmt = $this->_db->prepare($sql);
+				$stmt->execute();
+				$stmt->closeCursor();
+			
 			$sql = "SELECT stock_material_id, bags, material_name, material_grade
 					FROM stock_materials
 					JOIN materials ON materials.material_id = stock_materials.material_id
@@ -2045,7 +2089,7 @@ ORDER BY `date` DESC;";
 							$stmt->execute();
 							$stmt->closeCursor();
 							echo '<strong>SUCCESS!</strong> The <strong>'. $bags .'</strong>  bags/drumps/pieces of the material:<b> '.$MATERIAL .' - '. $GRADE.' </b>were successfully approved for issue.';
-							 $this->send();
+//							 $this->send();
 							return TRUE;
 						} 
 						catch (PDOException $e) {
@@ -2065,11 +2109,18 @@ ORDER BY `date` DESC;";
 					return FALSE;
 				}
 				$stmt->closeCursor();
+				
+				
 			}
 			catch (PDOException $e) {
 				echo '<strong>ERROR</strong> Could not issue the raw material. Please try again.<br>'. $e->getMessage();
 				return FALSE;
 			} 
+		}
+		catch (PDOException $e) {
+					echo '<strong>ERROR</strong> Could change the material of the transfer from the database. Please try again.<br>'. $e->getMessage(); 
+					return FALSE;
+				} 
 		}
     }
 	
@@ -2150,7 +2201,7 @@ WHERE status_transfer = 0 AND MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AN
 				} 
             }
             $stmt->closeCursor(); 
-        $this->issueAll();
+//        $this->issueAll();
 			return TRUE;
         }
         catch (PDOException $e) {
@@ -2374,6 +2425,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
     }
 	
 	/**
+	/**
      * Loads the table of all the stock Issues of the raw materials
      * This function outputs <tr> tags with stock transfer of raw materials
      * $from is the machine_from. I.e $from is Warehouse (Transfers from the warehouse to Other sections)
@@ -2382,7 +2434,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
     {
         $sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
                     material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
-                    `stock_materials_transfers`.`bags_required`, `stock_materials_transfers`.`bags_approved`, `stock_materials_transfers`.`remarks_approved`,
+                    `stock_materials_transfers`.`bags_required`, `stock_materials_transfers`.`bags_approved`, `stock_materials_transfers`.`remarks_approved`,`stock_materials_transfers`.material_id,
                     u_required.username AS urequired , u_approved.username AS uapproved,`stock_materials_transfers`.`status_transfer`
                 FROM stock_materials_transfers 
     			LEFT JOIN materials ON materials.material_id = `stock_materials_transfers`.material_id
@@ -2407,6 +2459,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                 $FROM = $row['from_t'];
                 $TO = $row['to_t'];
                 $REQUESTEDBY = $row['urequired'];
+                $MATERIALID = $row['material_id'];
                 $MATERIAL = $row['material_name'];
                 $GRADE = $row['material_grade'];
                 $BAGSRE = $row['bags_required'];
@@ -2429,7 +2482,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
 					}
 				}
                 $STATUS = "";
-                $disabled = '" data-toggle="modal" data-target="#modal1" onclick="edit(\''. $ID .'\',\''. $DATE .'\',\''. $FROM.'\',\''. $TO .'\',\''. $MATERIAL.'\',\''. $GRADE .'\',\''. $BAGSRE.'\')"';
+                $disabled = '" data-toggle="modal" data-target="#modal1" onclick="edit(\''. $ID .'\',\''. $DATE .'\',\''. $FROM.'\',\''. $TO .'\',\''. $MATERIALID.'\',\''. $MATERIAL.'\',\''. $GRADE .'\',\''. $BAGSRE.'\')"';
                 if($row['status_transfer']==0)
                 {
                     $STATUS = "<p class='text-muted'>Requested</p>";
@@ -4232,8 +4285,8 @@ ORDER BY report.datereport;";
 					UNION ALL SELECT 
 						`rm_loans`.date_arrived AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + rm_loans.qty AS local,
-						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
+						COALESCE(local_purchases.qty, 0) + SUM(rm_loans.qty) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
 					FROM
@@ -5351,6 +5404,88 @@ ORDER BY report.datereport;";
                     echo '<strong>ERROR: </strong>There is not enough bags/drumps/pieces of the material:<b> '.$MATERIAL .' - '. $GRADE.' </b>on stock. There are <b>'. $BAGSTOCK .' bags/drumps/pieces</b> and you want to send <b>'. $bags .' bags/drumps/pieces</b>. Please try with a lower number of bags/drumps/pieces.';
                     return FALSE;
                 }
+            }
+            else
+            {
+                echo '<strong>ERROR: </strong>There is not bags/drumps/pieces of this material on this stock location.';
+                return FALSE;
+            }
+            $stmt->closeCursor();
+        }
+        catch (PDOException $e) {
+            echo '<strong>ERROR</strong> Could not issue the raw material. Please try again.<br>'. $e->getMessage();
+            return FALSE;
+        } 
+            
+
+    }
+	
+	 public function sentReprocess()
+    {
+        $bags = $to = $from = $material = "";
+        
+        $bags = trim($_POST["bags"]);
+        $bags = stripslashes($bags);
+        $bags = htmlspecialchars($bags);
+        
+		$to = trim($_POST["to"]);
+        $to = stripslashes($to);
+        $to = htmlspecialchars($to);
+		
+		$from = trim($_POST["from"]);
+        $from = stripslashes($from);
+        $from = htmlspecialchars($from);
+		
+		$material = trim($_POST["material2"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+		
+        $date = "NOW()";
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = "'".$newDateString ." 07:00:00'";
+        }
+        
+        $remarks = trim($_POST["remarks"]);
+        $remarks = stripslashes($remarks);
+        $remarks = htmlspecialchars($remarks);
+		
+		//CHECK IF THE BAGS IN STOCK MATERIAL ARE GREATER THAN THE BAGS REQUESTED
+        $sql = "SELECT stock_material_id, bags, material_name, material_grade
+                FROM stock_materials 
+				JOIN materials ON materials.material_id = stock_materials.material_id
+                WHERE stock_materials.material_id = ". $material." AND machine_id = ". $from." ;";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->execute();
+            if($row = $stmt->fetch())
+            {
+                $ID_SM = $row['stock_material_id'];
+                $BAGSTOCK = $row['bags'];
+                $MATERIAL = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                
+                    $newbags = $BAGSTOCK - $bags;
+                    //DECREASES THE BAGS FROM THE STOCK MATERIALS CHANGE THE STATUS TRANSFER, BGAS ISSUED, AND USER ISSUED
+                    $sql = "INSERT INTO  `stock_materials_transfers`(`stock_materials_transfers_id`,`machine_from`,`machine_to`,`material_id`,`date_required`,`bags_required`,`bags_approved`,`bags_issued`,`bags_receipt`,`user_id_required`,`user_id_approved`,`user_id_issued`,`user_id_receipt`,`status_transfer`,`remarks_approved`,`remarks_issued`)VALUES(NULL,". $from .",". $to .", ". $material.",". $date .",". $bags .",". $bags .",". $bags .",NULL,".  $_SESSION['Userid'] .",".  $_SESSION['Userid'] .",".  $_SESSION['Userid'] .",NULL,2,NULL,'". $remarks ."');";
+				
+                    try
+                    {   
+            			$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+                        $stmt = $this->_db->prepare($sql);
+                        $stmt->execute();
+                        $stmt->closeCursor();
+                        echo '<strong>SUCCESS!</strong> The <strong>'. $bags .'</strong>  bags/drumps/pieces of the material:<b> '.$MATERIAL .' - '. $GRADE.' </b>were successfully issued.';
+                        return TRUE;
+                    } 
+                    catch (PDOException $e) {
+                        echo '<strong>ERROR</strong> Could not decrease the number of  bags/drumps/pieces of this material or create the transfer from the database. Please try again.<br>'. $e->getMessage(); 
+                        return FALSE;
+                    }
             }
             else
             {

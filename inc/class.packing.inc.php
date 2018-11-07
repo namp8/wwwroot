@@ -98,7 +98,7 @@ class Packing
     {
         $sql = "SELECT `employees`.`employee_id`,
 					`employees`.employee_name
-				FROM `ups_db`.`employees`
+				FROM `employees`
 				WHERE packing = 1;
 				ORDER BY employee_name";
         if($stmt = $this->_db->prepare($sql))
@@ -1065,12 +1065,13 @@ ORDER BY `packing_bags_sacks_id`";
 				$entro = false;
 				$i = 0;
 				$total = 0;
+				$output = "";
 				while($row = $stmt->fetch())
 				{ 
 					$i++;
 				   if(!$entro)
 					{
-						echo '<tr class="active">
+						$output = $output . '<tr class="active">
 								  <th style="text-align:center">Operator name</th>
 								  <th class="text-right">'. $row['one'] .'</th>
 								  <th></th>
@@ -1085,7 +1086,7 @@ ORDER BY `packing_bags_sacks_id`";
 					{
 						$COLOR = $COLOR . ' - ' .$row['customer_name'];
 					}
-					echo '<tr>
+					$output = $output .'<tr>
 								  <td style="text-align:center">'. $i .'</th>
 								  <td class="text-right">'. number_format($row['gross_weight'],2,'.',',') .'</th>
 								  <td style="text-align:center">'. $this->giveSizeSacks($SIZE)  .'</th>
@@ -1100,6 +1101,7 @@ ORDER BY `packing_bags_sacks_id`";
 								  <th style="text-align:center">Total No. of sacks.</th>
 								  <th class="text-right">'. number_format($i,2,'.',',') .'</th>
 								</tr>';
+				echo $output;
 		}
 		
 	 }
@@ -2002,6 +2004,10 @@ ORDER BY date_fall;";
         {
             $sizename = "1000 ml x 100";
         }
+		else if($size == 3)
+        {
+            $sizename = "6 1/2 Packing";
+        }
         return $sizename;
     }
 	
@@ -2751,6 +2757,554 @@ ORDER BY `date_roll`;";
         </script>'; 
     }
 	
+	public function reportEfficiencyPacking()
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Plant Capacity</th>';
+        echo '<th>Day Sacks</th>';
+        echo '<th>Night Sacks</th>';
+        echo '<th>Total Sacks</th>';
+        echo '<th>United</th>';
+        echo '<th>Ebony</th>';
+        echo '<th>Total Production in Kgs</th>';
+        echo '<th>Eff %</th>';
+        echo '<th>Waste in Kgs</th>';
+        echo '<th>Waste %</th>';
+        echo '<th>Target weight per Sack</th>';
+        echo '<th>Actual weight per Sack</th>';
+        echo '</tr></thead>
+			<tfoot><tr  class="active">
+			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			</tr></tfoot><tbody>'; 
+        
+        $a=array();
+        $b=array();
+        $c=array();
+        $d=array();
+        $e=array();
+		
+		        
+        $newDateString = date("Y-m-d");
+        $newDateString2 = date("Y-m-d");
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of this month');
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of this month');
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+			
+            $sql = "SELECT  DATE_FORMAT(`date_sacks`, '%b/%Y') AS date, DATE_FORMAT(`date_sacks`, '%m/%Y') as date2, ROUND(SUM(weight), 2) AS actual,SUM(number) AS total, targetsack,
+    waste.wastekgs,
+    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night, united.count as united , ebony.count as ebony
+FROM `packing_sacks`
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%m/%Y') AS date, sum(number) as day
+    FROM `packing_sacks`
+    where shift = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%m/%Y')
+    )day_sacks ON day_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%m/%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%m/%Y') AS date, sum(number) as night
+    FROM `packing_sacks`
+    where shift = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%m/%Y')
+    )night_sacks ON night_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%m/%Y')
+	LEFT JOIN
+(SELECT DATE_FORMAT(`date_sacks`, '%m/%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%m/%Y')
+    )united ON united.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%m/%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%m/%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%m/%Y')
+    )ebony ON ebony.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%m/%Y')
+LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`date_waste`, '%m/%Y') AS date,
+            SUM(waste) AS wastekgs
+    FROM
+        `waste`
+    WHERE machine_id = 31 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%m/%Y')
+    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_sacks`, '%m/%Y')
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS capacity, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'target'
+    )
+    target ON target.`from` <= DATE_FORMAT(`date_sacks`, '%m/%Y') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`date_sacks`, '%m/%Y'))
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS targetsack, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'targetsack'
+    )
+    targetsack ON targetsack.`from` <= DATE_FORMAT(`date_sacks`, '%m/%Y') AND (targetsack.`to` IS NULL OR targetsack.`to` > DATE_FORMAT(`date_sacks`, '%m/%Y'))
+WHERE
+    date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(`date_sacks`, '%b/%Y')
+ORDER BY `date_sacks`;";
+            
+            
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of January ' . $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of December ' . $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+              $sql = "SELECT  DATE_FORMAT(`date_sacks`, '%Y') AS date, ROUND(SUM(weight), 2) AS actual,SUM(number) AS total,
+    waste.wastekgs,targetsack,
+    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night, united.count as united , ebony.count as ebony
+FROM `packing_sacks`
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y') AS date, sum(number) as day
+    FROM `packing_sacks`
+    where shift = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
+    )day_sacks ON day_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y') AS date, sum(number) as night
+    FROM `packing_sacks`
+    where shift = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
+    )night_sacks ON night_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
+    )united ON united.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
+    )ebony ON ebony.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y')
+LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`date_waste`, '%Y') AS date,
+            SUM(waste) AS wastekgs
+    FROM
+        `waste`
+    WHERE machine_id = 31 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%Y')
+    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_sacks`, '%Y')
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS capacity, DATE_FORMAT(`settings`.`to`, '%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%Y') AS `from`
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'target'
+    )
+    target ON target.`from` <= DATE_FORMAT(`date_sacks`, '%Y') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`date_sacks`, '%Y'))
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS targetsack, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'targetsack'
+    )
+    targetsack ON targetsack.`from` <= DATE_FORMAT(`date_sacks`, '%Y') AND (targetsack.`to` IS NULL OR targetsack.`to` > DATE_FORMAT(`date_sacks`, '%Y'))
+WHERE
+    date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
+ORDER BY `date_sacks`;";
+            
+        }
+        else
+        {
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = "SELECT DATE_FORMAT(`date_sacks`, '%d/%m/%Y') AS date, ROUND(SUM(weight), 2) AS actual,SUM(number) AS total,
+    waste.wastekgs,targetsack,
+    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night, united.count as united , ebony.count as ebony
+FROM `packing_sacks`
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AS date, sum(number) as day
+    FROM `packing_sacks`
+    where shift = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
+    )day_sacks ON day_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y/%m/%d')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AS date, sum(number) as night
+    FROM `packing_sacks`
+    where shift = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
+    )night_sacks ON night_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y/%m/%d')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
+    )united ON united.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y/%m/%d')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
+    )ebony ON ebony.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y/%m/%d')
+LEFT JOIN
+    (SELECT 
+        DATE_FORMAT(`date_waste`, '%Y/%m/%d') AS date,
+            SUM(waste) AS wastekgs
+    FROM
+        `waste`
+    WHERE machine_id = 31 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%Y/%m/%d')
+    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_sacks`, '%Y/%m/%d')
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS capacity, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'target'
+    )
+    target ON target.`from` <= DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`date_sacks`, '%Y/%m/%d'))
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS targetsack, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'targetsack'
+    )
+    targetsack ON targetsack.`from` <= DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AND (targetsack.`to` IS NULL OR targetsack.`to` > DATE_FORMAT(`date_sacks`, '%Y/%m/%d'))
+WHERE
+    date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
+ORDER BY `date_sacks`;";
+            
+        }
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $CAPACITYROW = $row['capacity'] * $row['days'];
+                $WASTEKG = $row['wastekgs'];
+                if(is_null($row['wastekgs']))
+                {
+                    $WASTEKG = 0;
+                }
+                $ACTUAL = $row['actual'] + $WASTEKG;
+                if(is_null($row['actual']))
+                {
+                    $ACTUAL = 0 + $WASTEKG;
+                    $WASTEEFF = 0;
+                }
+                else
+                {
+                    $WASTEEFF  = round($WASTEKG* 100 / $ACTUAL , 2);
+                }
+				if(!is_null($row['capacity']))
+                {
+					$EFF = round($row['total'] *100/ $CAPACITYROW, 2);
+                }
+				if(!is_null($row['targetsack']))
+                {
+					$TARGETSACK = $row['targetsack'];
+					$SACK = round( $ACTUAL / $row['total'], 2);
+                }
+                echo '<tr>
+                        <td class="text-right">'. $row['date'] .'</td>
+                        <td class="text-right">'. number_format($CAPACITYROW,0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['day'],0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['night'],0,'.',',') .'</td>
+                        <th class="text-right">'. number_format($row['total'],0,'.',',') .'</th>
+                        <td class="text-right">'. number_format($row['united'],0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['ebony'],0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($ACTUAL,2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($EFF,2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($WASTEKG,2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($WASTEEFF,2,'.',',') .'</th>
+                        <td class="text-right">'. number_format($TARGETSACK,2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($SACK,2,'.',',') .'</th>
+                    </tr>';
+                $entrie0 = array( $row['date'], $CAPACITYROW);
+                $entrie1 = array( $row['date'], $row['total']);
+                $entrie3 = array( $row['date'], $WASTEEFF);
+                if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+                {
+                    $entrie0 = array( $row['date2'], $CAPACITYROW);
+                	$entrie1 = array( $row['date2'], $row['total']);
+                	$entrie3 = array( $row['date2'], $WASTEEFF);
+                }
+				array_push($b,$entrie1);
+                array_push($d,$entrie3);
+				array_push($e,$entrie0);
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>";
+        }
+         echo '</tbody>';
+        echo '<script>document.getElementById("chartContainer").style= "height:200px;";</script>';
+        echo '<script>document.getElementById("chartContainer2").style= "height:200px;";</script>';
+         echo '<script> 
+            var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: { 
+                text: "Production Target Achievement"
+            },
+            exportFileName: "Production Target Achievement",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Sacks" },
+            toolTip: {
+                shared: true
+            },
+            legend:{
+                itemclick : function(e){
+				
+					if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+						e.dataSeries.visible = false;
+					} else {
+						e.dataSeries.visible = true;
+					}
+					chart.render();
+				}
+            },';
+        if(!empty($_POST['searchBy']) and  $_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "line",
+		      showInLegend: true,
+		      name: "Packing Sacks",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### Sacks",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$e[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$e[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$e[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		echo ']},
+            {
+                type: "line",
+				showInLegend: true,
+				name: "Target",
+				lineDashType: "dash",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### Sacks",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($e as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1] .'},';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($e as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($e as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo'] }]});
+        chart.render();
+        </script>'; 
+        echo '<script> 
+            var chart1 = new CanvasJS.Chart("chartContainer2", {
+            theme: "light2",
+            title: { 
+                text: "Waste Target Achievement"
+            },
+            exportFileName: "Waste Target Achievement",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Waste %" },
+            toolTip: {
+                shared: true
+            },
+			legend:{
+                itemclick : function(e){
+				
+					if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+						e.dataSeries.visible = false;
+					} else {
+						e.dataSeries.visible = true;
+					}
+					chart1.render();
+				}
+            },';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+              type: "line",
+		      showInLegend: true,
+		      name: "Waste",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.00 ",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d as $key => $value) {
+                
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].' },';
+            }; 
+        }
+        else
+        {
+            foreach($d as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo'] }]});
+        chart1.render(); 
+        </script>'; 
+    }
 	/**
      * Loads the Production Report in the multilayer section
      * This function outputs <tr> tags with the report

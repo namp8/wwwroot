@@ -73,7 +73,7 @@ class Sacks
         $sql = "SELECT `employees`.`employee_id`,
 					`employees`.employee_name
 				FROM `ups_db`.`employees`
-				WHERE sacks = 1;
+				WHERE sacks = 1
 				ORDER BY employee_name";
         if($stmt = $this->_db->prepare($sql))
         {
@@ -1402,7 +1402,7 @@ ORDER BY packing_sacks_id";
 		
 		$totalnet = $KGS = $number = 0;
 		
-		$sacks = "INSERT INTO `packing_sacks`(`packing_sacks_id`,`date_sacks`,`shift`,`number`,`weight`,`user_id`,`customer_id`,`status_sack`) VALUES ";
+		$sacks = "INSERT INTO `packing_sacks`(`packing_sacks_id`,`date_sacks`,`shift`,`number`,`weight`,`user_id`,`customer_id`) VALUES ";
 		foreach ($_POST as $k=>$v)
 		{
 			if (substr( $k, 0, 3 ) === "wt_" and !empty($v)){
@@ -1411,7 +1411,7 @@ ORDER BY packing_sacks_id";
 				$no = trim($_POST["no_".$i]);
 				$number = $number + $no;
 				$totalnet = $totalnet + $v;
-				$sacks = $sacks. " (NULL, '". $date."', ". $shift .", ". $no .", ". $v .", ". $_SESSION['Userid'] .", ". $customer .",0) ,";
+				$sacks = $sacks. " (NULL, '". $date."', ". $shift .", ". $no .", ". $v .", ". $_SESSION['Userid'] .", ". $customer .") ,";
 			}
 		}
 		
@@ -1458,7 +1458,7 @@ ORDER BY packing_sacks_id";
             $stmt->execute();
             while($row = $stmt->fetch())
             {
-				if(!is_null($row['cutting_sacks_id']))
+				if(!is_null($row['cutting_sacks_id']) and ($totalnet > 0))
 				{
 					$TOTAL = $row['net_weight'] - $row['used_weight'];
 					if(($TOTAL > $totalnet) and ($totalnet > 0))
@@ -1507,7 +1507,7 @@ ORDER BY packing_sacks_id";
 				$material = 'EBONY Sacks';
 			}
 			
-			$transfer = " INSERT INTO  `stock_materials_transfers`(`stock_materials_transfers_id`,`machine_from`,`machine_to`,`material_id`,`date_required`,`bags_required`,`bags_approved`,`bags_issued`,`bags_receipt`,`user_id_required`,`user_id_approved`,`user_id_issued`,`user_id_receipt`,`status_transfer`,`remarks_approved`,`remarks_issued`)VALUES(NULL,31,12, (SELECT material_id FROM materials WHERE material_name = '". $material."'),'". $date ."',". $KGS . ",". $KGS . ",". $KGS . ",NULL,". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",NULL,2,'Total No. of Sacks = ". $number ."',NULL);";
+			$transfer = " INSERT INTO  `stock_materials_transfers`(`stock_materials_transfers_id`,`machine_from`,`machine_to`,`material_id`,`date_required`,`bags_required`,`bags_approved`,`bags_issued`,`bags_receipt`,`user_id_required`,`user_id_approved`,`user_id_issued`,`user_id_receipt`,`status_transfer`,`remarks_approved`,`remarks_issued`)VALUES(NULL,31,12, (SELECT material_id FROM materials WHERE material_name = '". $material." (weight)'),'". $date ."',". $KGS . ",". $KGS . ",". $KGS . ",NULL,". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",NULL,2,'Total No. of Sacks = ". $number ."',NULL),(NULL,31,12, (SELECT material_id FROM materials WHERE material_name = '". $material." (pcs)'),'". $date ."',". $number . ",". $number . ",". $number . ",NULL,". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",NULL,2,'Total Weight of Sacks = ". $KGS ."',NULL);";
 			
 			$sql = substr($sacks,0,strlen($sacks)-2). "; ". $update . $transfer ;
 			
@@ -1863,38 +1863,7 @@ ORDER BY packing_sacks_id";
         }
     }
 	
-	public function givePackingSacksStock()
-    {
-        $sql = "SELECT DATE_FORMAT(`date_sacks`, '%Y-%m-%d') as date, number, weight
-                 FROM packing_sacks
-                WHERE status_sack = 0;";
-        if($stmt = $this->_db->prepare($sql))
-        {
-            $stmt->execute();
-            while($row = $stmt->fetch())
-            {
-                $DATE = $row['date'];
-                $GROSS = $row['number'];
-                $NET = $row['weight'];
-                
-                echo '<tr>
-                        <td>'. $DATE .'</td>
-                        <td class="text-right">'. number_format($GROSS,2,'.',',') .'</td>
-                        <td class="text-right">'. number_format($NET,2,'.',',') .'</td>
-                    </tr>';
-                }
-            
-            $stmt->closeCursor();
-        }
-        else
-        {
-            echo "<tr>
-                    <td>Something went wrong.</td>
-                    <td>$db->errorInfo</td>
-                    <td></td>
-                </tr>";
-        }
-    }
+
 	
 	/**
      * Loads the table of all the rolls in the multilayer section
@@ -11472,13 +11441,21 @@ ORDER BY report.datereport;";
         echo '<th>Day Sacks</th>';
         echo '<th>Night Sacks</th>';
         echo '<th>Total Sacks</th>';
+        echo '<th>United</th>';
+        echo '<th>Ebony</th>';
         echo '<th>Total Production in Kgs</th>';
         echo '<th>Eff %</th>';
         echo '<th>Waste in Kgs</th>';
         echo '<th>Waste %</th>';
+        echo '<th>Target weight per Sack</th>';
+        echo '<th>Actual weight per Sack</th>';
         echo '</tr></thead>
 			<tfoot><tr  class="active">
 			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
 			<th style="text-align:right"></th>
 			<th style="text-align:right"></th>
 			<th style="text-align:right"></th>
@@ -11514,9 +11491,9 @@ ORDER BY report.datereport;";
             }
             
 			
-            $sql = "SELECT  DATE_FORMAT(`date_sacks`, '%b/%Y') AS date, DATE_FORMAT(`date_sacks`, '%m/%Y') as date2, ROUND(SUM(weight), 2) AS actual,SUM(number) AS total,
+            $sql = "SELECT  DATE_FORMAT(`date_sacks`, '%b/%Y') AS date, DATE_FORMAT(`date_sacks`, '%m/%Y') as date2, ROUND(SUM(weight), 2) AS actual,SUM(number) AS total, targetsack,
     waste.wastekgs,
-    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night
+    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night, united.count as united , ebony.count as ebony
 FROM `packing_sacks`
 LEFT JOIN
 	(SELECT DATE_FORMAT(`date_sacks`, '%m/%Y') AS date, sum(number) as day
@@ -11530,6 +11507,18 @@ LEFT JOIN
     where shift = 2
     GROUP BY DATE_FORMAT(`date_sacks`, '%m/%Y')
     )night_sacks ON night_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%m/%Y')
+	LEFT JOIN
+(SELECT DATE_FORMAT(`date_sacks`, '%m/%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%m/%Y')
+    )united ON united.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%m/%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%m/%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%m/%Y')
+    )ebony ON ebony.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%m/%Y')
 LEFT JOIN
     (SELECT 
         DATE_FORMAT(`date_waste`, '%m/%Y') AS date,
@@ -11546,6 +11535,13 @@ LEFT JOIN
         WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'target'
     )
     target ON target.`from` <= DATE_FORMAT(`date_sacks`, '%m/%Y') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`date_sacks`, '%m/%Y'))
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS targetsack, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'targetsack'
+    )
+    targetsack ON targetsack.`from` <= DATE_FORMAT(`date_sacks`, '%m/%Y') AND (targetsack.`to` IS NULL OR targetsack.`to` > DATE_FORMAT(`date_sacks`, '%m/%Y'))
 WHERE
     date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
 GROUP BY DATE_FORMAT(`date_sacks`, '%b/%Y')
@@ -11569,8 +11565,8 @@ ORDER BY `date_sacks`;";
             }
             
               $sql = "SELECT  DATE_FORMAT(`date_sacks`, '%Y') AS date, ROUND(SUM(weight), 2) AS actual,SUM(number) AS total,
-    waste.wastekgs,
-    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night
+    waste.wastekgs,targetsack,
+    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night, united.count as united , ebony.count as ebony
 FROM `packing_sacks`
 LEFT JOIN
 	(SELECT DATE_FORMAT(`date_sacks`, '%Y') AS date, sum(number) as day
@@ -11584,6 +11580,18 @@ LEFT JOIN
     where shift = 2
     GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
     )night_sacks ON night_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
+    )united ON united.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
+    )ebony ON ebony.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y')
 LEFT JOIN
     (SELECT 
         DATE_FORMAT(`date_waste`, '%Y') AS date,
@@ -11600,6 +11608,13 @@ LEFT JOIN
         WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'target'
     )
     target ON target.`from` <= DATE_FORMAT(`date_sacks`, '%Y') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`date_sacks`, '%Y'))
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS targetsack, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'targetsack'
+    )
+    targetsack ON targetsack.`from` <= DATE_FORMAT(`date_sacks`, '%Y') AND (targetsack.`to` IS NULL OR targetsack.`to` > DATE_FORMAT(`date_sacks`, '%Y'))
 WHERE
     date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
 GROUP BY DATE_FORMAT(`date_sacks`, '%Y')
@@ -11620,8 +11635,8 @@ ORDER BY `date_sacks`;";
             }
             
             $sql = "SELECT DATE_FORMAT(`date_sacks`, '%d/%m/%Y') AS date, ROUND(SUM(weight), 2) AS actual,SUM(number) AS total,
-    waste.wastekgs,
-    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night
+    waste.wastekgs,targetsack,
+    COUNT(DISTINCT (DATE_FORMAT(`date_sacks`, '%d/%m/%Y'))) AS days, capacity, day_sacks.day, night_sacks.night, united.count as united , ebony.count as ebony
 FROM `packing_sacks`
 LEFT JOIN
 	(SELECT DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AS date, sum(number) as day
@@ -11635,6 +11650,18 @@ LEFT JOIN
     where shift = 2
     GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
     )night_sacks ON night_sacks.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y/%m/%d')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 1
+    GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
+    )united ON united.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y/%m/%d')
+LEFT JOIN
+	(SELECT DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AS date, sum(number) as count
+    FROM `packing_sacks`
+    where customer_id = 2
+    GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
+    )ebony ON ebony.date = DATE_FORMAT(`packing_sacks`.`date_sacks`, '%Y/%m/%d')
 LEFT JOIN
     (SELECT 
         DATE_FORMAT(`date_waste`, '%Y/%m/%d') AS date,
@@ -11651,6 +11678,13 @@ LEFT JOIN
         WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'target'
     )
     target ON target.`from` <= DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`date_sacks`, '%Y/%m/%d'))
+LEFT JOIN
+	(
+		SELECT `settings`.value_setting AS targetsack, `settings`.to, `settings`.from
+        FROM `settings`
+        WHERE `settings`.machine_id = 31 AND `settings`.name_setting = 'targetsack'
+    )
+    targetsack ON targetsack.`from` <= DATE_FORMAT(`date_sacks`, '%Y/%m/%d') AND (targetsack.`to` IS NULL OR targetsack.`to` > DATE_FORMAT(`date_sacks`, '%Y/%m/%d'))
 WHERE
     date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
 GROUP BY DATE_FORMAT(`date_sacks`, '%d/%m/%Y')
@@ -11682,16 +11716,25 @@ ORDER BY `date_sacks`;";
                 {
 					$EFF = round($row['total'] *100/ $CAPACITYROW, 2);
                 }
+				if(!is_null($row['targetsack']))
+                {
+					$TARGETSACK = $row['targetsack'];
+					$SACK = round( $ACTUAL / $row['total'], 2);
+                }
                 echo '<tr>
                         <td class="text-right">'. $row['date'] .'</td>
                         <td class="text-right">'. number_format($CAPACITYROW,0,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['day'],0,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['night'],0,'.',',') .'</td>
                         <th class="text-right">'. number_format($row['total'],0,'.',',') .'</th>
+                        <td class="text-right">'. number_format($row['united'],0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['ebony'],0,'.',',') .'</td>
                         <td class="text-right">'. number_format($ACTUAL,2,'.',',') .'</td>
                         <td class="text-right">'. number_format($EFF,2,'.',',') .'</td>
                         <td class="text-right">'. number_format($WASTEKG,2,'.',',') .'</td>
                         <th class="text-right">'. number_format($WASTEEFF,2,'.',',') .'</th>
+                        <td class="text-right">'. number_format($TARGETSACK,2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($SACK,2,'.',',') .'</th>
                     </tr>';
                 $entrie0 = array( $row['date'], $CAPACITYROW);
                 $entrie1 = array( $row['date'], $row['total']);

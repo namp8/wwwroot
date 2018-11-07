@@ -122,9 +122,9 @@
                             
                             <li class="divider"></li><center>Production</center>
                             <li><a class="four" href="../slitting/rolls.php"><i class="fa fa-battery-empty" aria-hidden="true"></i><span>&nbsp Rolls</span></a></li>
-                            <li><a class="four" href="../slitting/rolls_stock.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Final rolls </span></a></li>
+                            <li><a class="four" href="../slitting/rolls_stock.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Rolls on floor </span></a></li>
                             <li><a class="four" href="#"><i class="fa fa-exchange" aria-hidden="true"></i><span>&nbsp Rolls Tracker </span></a></li>
-                        
+                        	<li><a class="five" href="../slitting/waste.php"><i class="fa fa-trash-o" aria-hidden="true"></i><span>&nbsp Waste</span></a></li>
                             <li class="divider"></li>
                             <li><a class="one" href="../slitting/remarks.php"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i><span>&nbsp Short Fall</span></a></li>
 						</ul>

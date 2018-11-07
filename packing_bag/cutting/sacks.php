@@ -229,6 +229,7 @@
 										<ul class="dropdown-menu">
 											<li><a onclick="selectSize(1,'5000 ml x 100' )">5000 ml x 100</a></li>
 											<li><a onclick="selectSize(2,'1000 ml x 100' )">1000 ml x 100</a></li>
+											<li><a onclick="selectSize(3,'6 1/2 Packing' )">6 1/2 Packing</a></li>
 										</ul>
 									</div>
 								</div>

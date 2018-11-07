@@ -133,10 +133,19 @@
                     <label for="form">To</label>
                     <input type="text" class="form-control" id="to" name="to" disabled>
                 </div>
-                <div class="form-group">
-                    <label for="material">Material</label>
-                    <input type="text" class="form-control" id="material" name="material" disabled>
+                <div class="form-group" id="materialbtn">
+                <label for="material">Material <span class="text-danger">*</span></label><br>
+                <div class="btn-group">
+					<input type="hidden" class="form-control" id="material" name="material">
+                    <button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_material">&nbsp&nbsp<span class="caret"></span></button>
+                    <ul class="dropdown-menu" role="menu" id="dropdown_material">
+                        <li><input type="text" placeholder="Search material.." class="searchDropdown" id="searchMaterial" onkeyup="filterMaterials()" width="100%"></li>
+                        <?php
+    $stock->materialsconsumablesDropdown();
+?>
+                    </ul>
                 </div>
+            </div>
                 <div class="form-group">
                     <label for="total">Total Bags/Drumps approved <span class="text-danger">*</span></label>
                     <input type="number" class="form-control" min="0" step="0.001" id="bags" name="bags" required>
@@ -156,17 +165,39 @@
     </div>
 
     <script>
-        function edit(id, date, from, to, material, grade, bags) {
+        function edit(id, date, from, to, idmaterial, material, grade, bags) {
             document.getElementById("id_transfer").value = id;
             document.getElementById("date").value = date;
             document.getElementById("from").value = from;
             document.getElementById("to").value = to;
-            document.getElementById("material").value = material + " - " + grade;
+            document.getElementById("material").value = idmaterial;
+            document.getElementById("btn_material").innerHTML = material + " - " + grade;
             document.getElementById("bags").value = bags;
             
             document.getElementById("alertMessage").removeAttribute("class");
             document.getElementById("alertMessage").setAttribute("class","alert hide");
+			
         }
+		
+        function selectMaterial(id, name, grade) {
+            document.getElementById("btn_material").innerHTML = name + " - " + grade+ " &nbsp&nbsp<span class='caret'></span> ";
+            document.getElementById("material").value = id;
+			
+        }
+        function filterMaterials() {
+			var input, filter, ul, li, a, i;
+			input = document.getElementById("searchMaterial");
+			filter = input.value.toUpperCase();
+			div = document.getElementById("dropdown_material");
+			a = div.getElementsByTagName("a");
+			for (i = 0; i < a.length; i++) {
+				if (a[i].id.toUpperCase().includes(filter)) {
+					a[i].style.display = "";
+				} else {
+					a[i].style.display = "none";
+				}
+			}
+		}
     </script>
 
     <script>

@@ -308,11 +308,11 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-md-6 form-group">
+								<div class="col-md-4 form-group">
 									<label for="size">Thickness (µ) <span class="text-danger">*</span></label><br />
 									<input type="number" class="form-control" step="1" min="1" id="thickness" name="thickness" value="45" required>
 								</div>
-								<div class="col-md-6 form-group">
+								<div class="col-md-4 form-group">
 									<label for="size">Size <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="size" name="size" value="2" required>
 									<div class="dropdown">
@@ -320,6 +320,18 @@
 										<ul class="dropdown-menu">
 											<li><a onclick="selectSize(1,'680')">680 mm</a></li>
 											<li><a onclick="selectSize(2,'1010')">1010 mm</a></li>
+										</ul>
+									</div>
+								</div>
+								
+								<div class="col-md-4 form-group">
+									<label for="size">Production <span class="text-danger">*</span></label><br />
+									<input type="hidden" class="form-control" id="sample" name="sample" value="0" required>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_sample" style="height:30px;">Normal&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a onclick="selectSample(0,'Normal')">Normal</a></li>
+											<li><a onclick="selectSample(1,'Sample')">Sample</a></li>
 										</ul>
 									</div>
 								</div>
@@ -487,19 +499,16 @@
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("shift").value = id;
-					if (id == 1) {
-						var d = new Date();
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					} else {
-						var d = new Date();
-						d.setDate(d.getDate() - 1);
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					}
 
 				}
 
+				
+				function selectSample(id, name) {
+					document.getElementById("btn_sample").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("sample").value = id;
+
+				}
+				
 				function selectSize(id, name) {
 					document.getElementById("btn_size").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("size").value = id;

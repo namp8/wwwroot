@@ -80,18 +80,18 @@
             <div class="panel panel-info">
                 <div class="panel-heading" id="titleReport"> </div>
                 <div class="panel-body">
-                    <div class="col-md-6" id="divChart1">
+                   <div class="col-12" id="divChart1">
                         <i aria-hidden="true" id="iconChart1"></i>
                         <div id="chartContainer">
 
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <i aria-hidden="true" id="iconChart2"></i>
                         <div id="chartContainer2" >
 
                         </div>
-                    </div>  
+                    </div> 
                         <div class="table-responsive">
                         
                             

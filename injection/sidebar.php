@@ -26,7 +26,9 @@
                             <li><a class="four" href="production_stock.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Production on floor </span></a></li>
                             <li><a class="five" href="waste.php"><i class="fa fa-trash-o" aria-hidden="true"></i><span>&nbsp Production Waste</span></a></li>
 							<li class="divider"></li><center>Packing</center>
-							<li><a class="four" href="sacks.php"><i class="fa fa-battery-empty" aria-hidden="true"></i><span>&nbsp Sacks Packed</span></a></li>
+							<li><a class="four" href="sacks.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Sacks Packed</span></a></li>
+							<li class="divider"></li><center>Weighing</center>
+							<li><a class="four" href="sacksweight.php"><i class="fa fa-clone" aria-hidden="true"></i><span>&nbsp Sacks Weighted</span></a></li>
                             <li class="divider"></li>
                             <li><a class="one" href="remarks.php"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i><span>&nbsp Short Fall</span></a></li>
                         </ul>

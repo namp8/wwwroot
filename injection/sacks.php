@@ -82,6 +82,7 @@
 						<thead>
 							<tr class="active">
                             <th>Finished Product</th>
+                            <th>Type</th>
                             <th>Semifinished product 1</th>
                             <th>Semifinished product 2</th>
                             <th>Semifinished product 3</th>
@@ -109,6 +110,7 @@ $injection->giveSacksProduction(0);
 						<thead>
 							<tr class="active">
                             <th>Finished Product</th>
+                            <th>Type</th>
                             <th>Semifinished product 1</th>
                             <th>Semifinished product 2</th>
                             <th>Semifinished product 3</th>
@@ -137,6 +139,7 @@ $injection->giveSacksProduction(1);
 						<thead>
 							<tr class="active">
                             <th>Finished Product</th>
+                            <th>Type</th>
                             <th>Semifinished product 1</th>
                             <th>Semifinished product 2</th>
                             <th>Semifinished product 3</th>
@@ -197,6 +200,18 @@ $injection->giveSacksProduction(2);
 											<?php
 						$injection->finishedFullDropdown();
 					?>
+										</ul>
+									</div>
+								</div>
+								
+								<div class="col-md-6 form-group">
+									<label for="shift">Type <span class="text-danger">*</span></label><br />
+									<input type="hidden" class="form-control" id="cols" name="cols" value="0" required>
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_cols" style="height:30px;">Transparent&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu">
+											<li><a onclick="selectCols(0,'Transparent')">Transparent</a></li>
+											<li><a onclick="selectCols(1,'Colors')">Colors</a></li>
 										</ul>
 									</div>
 								</div>
@@ -304,17 +319,13 @@ $injection->giveSacksProduction(2);
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("shift").value = id;
-					if (id == 1) {
-						var d = new Date();
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					} else {
-						var d = new Date();
-						d.setDate(d.getDate() - 1);
-						var month = d.getMonth() + 1;
-						document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-					}
+					
 
+				}
+				
+				function selectCols(id, name) {
+					document.getElementById("btn_cols").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("cols").value = id;
 				}
 				
 				function selectType1(id, name) {

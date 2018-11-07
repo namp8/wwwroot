@@ -786,7 +786,7 @@ FROM `printing_rolls`
 INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
 INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packing_rolls_id
         WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND `printing_rolls`.`packing_bags` = 1
-		order by rollno";
+		ORDER BY CAST(SUBSTRING(rollno,7,2) AS UNSIGNED)";
 
         if($x != 0)
         {
@@ -831,7 +831,7 @@ FROM `printing_rolls`
 INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
 INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packing_rolls_id
         WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ." AND `printing_rolls`.`shift` = ". $x ."  AND `printing_rolls`.`packing_bags`= 1
-		order by rollno";
+		ORDER BY CAST(SUBSTRING(rollno,7,2) AS UNSIGNED)";
         }
         
         $total1 = $total2 = $total3 = $total4 = $total5 = $total6 = 0;

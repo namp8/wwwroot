@@ -71,12 +71,8 @@
 
     <div class="row text-right" style="padding-bottom:15px;">
         <div class="dropdown" >
-            <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Edit Formula&nbsp&nbsp <i class="fa fa-caret-down" style="display: inline;"></i></button>
-            <ul class="dropdown-menu dropdown-menu-right">
-                <li><a onclick="add()" data-toggle="modal" data-target="#modal1">Add Material</a></li>
-                <li><a onclick="update()" data-toggle="modal" data-target="#modal1">Update Material weight</a></li>
-                <li><a onclick="deleteFormula()" data-toggle="modal" data-target="#modal1">Delete Material</a></li>
-            </ul>
+            <button class="btn btn-info" type="button" onclick="add()" data-toggle="modal" data-target="#modal1">Add Material </button>
+           
          </div>
     </div>
 
@@ -95,6 +91,7 @@
                                     <th>Material</th>
                                     <th>Grade</th>
                                     <th>%</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -123,6 +120,7 @@
                                     <th>Material</th>
                                     <th>Grade</th>
                                     <th>%</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -151,6 +149,7 @@
                                     <th>Material</th>
                                     <th>Grade</th>
                                     <th>%</th>
+                                    <th></th>
                             </thead>
                             <tbody>
                                 <?php
@@ -182,6 +181,7 @@
                                     <th>Material</th>
                                     <th>Grade</th>
                                     <th>%</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -211,6 +211,7 @@
                                     <th>Material</th>
                                     <th>Grade</th>
                                     <th>%</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -258,11 +259,11 @@
                 <div class="dropdown" >
                     <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_layer">A&nbsp&nbsp<span class="caret"></span></button>
                     <ul class="dropdown-menu">
-                        <li><a onclick="selectLayer(1,'A')">A</a></li>
-                        <li><a onclick="selectLayer(2,'B')">B</a></li>
-                        <li><a onclick="selectLayer(3,'C')">C</a></li>
-                        <li><a onclick="selectLayer(4,'D')">D</a></li>
-                        <li><a onclick="selectLayer(5,'E')">E</a></li>
+                        <li><a onclick="selectLayer(1)">A</a></li>
+                        <li><a onclick="selectLayer(2)">B</a></li>
+                        <li><a onclick="selectLayer(3)">C</a></li>
+                        <li><a onclick="selectLayer(4)">D</a></li>
+                        <li><a onclick="selectLayer(5)">E</a></li>
                     </ul>
                 </div>
             </div>
@@ -432,27 +433,49 @@
             document.getElementById("bagsForm").style.display = "";
         }
 
-        function update() {
-
+        
+        function update(layer,materialid, materialname, materialgrade) {
+			selectLayer(layer);
+			selectMaterial(materialid, materialname, materialgrade);
             document.getElementById("action").value = 2;
             document.getElementById("buttonForm").innerHTML = "Update";
             document.getElementById("buttonForm").setAttribute("class","btn btn-info");  
             document.getElementById("panelTitle").innerHTML = "Update Material weight";
             document.getElementById("kgForm").style.display = "";
-            document.getElementById("bagsForm").style.display = "";
+			$(modal1).modal();
         }
 
-        function deleteFormula() {
+        function deleteFormula(layer,materialid, materialname, materialgrade) {
             document.getElementById("action").value = 3;
             document.getElementById("buttonForm").innerHTML = "Delete";
             document.getElementById("buttonForm").setAttribute("class","btn btn-danger");  
             document.getElementById("panelTitle").innerHTML = "Delete material";
             document.getElementById("kgForm").style.display = "none";
-            document.getElementById("bagsForm").style.display = "none";
+			$(modal1).modal();
         }
 
 
-        function selectLayer(id, name) {
+        function selectLayer(id) {
+			if(id == 1)
+			{
+				name = 'A';
+			}
+			else if(id == 2)
+			{
+				name = 'B';
+			}
+			else if(id == 3)
+			{
+				name = 'C';
+			}
+			else if(id == 4)
+			{
+				name = 'D';
+			}
+			else if(id == 5)
+			{
+				name = 'E';
+			}
             document.getElementById("btn_layer").innerHTML = name+" &nbsp&nbsp<span class='caret'></span> ";
             document.getElementById("layer").value = id;
         }

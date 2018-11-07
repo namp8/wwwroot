@@ -416,7 +416,7 @@ ORDER BY `injection_formulas`.`material_grade`, `injection_formulas`.type;";
 (`injection_sack_formula`,`material_id`,`cycle`,`cavities`,`target`,`unit_weight`,`from`,`to`,`actual`,`remarks`)
 VALUES
 (NULL,'". $material."','". $cycle."','". $cavities."', '". $target."', '". $part ."', CURRENT_DATE() ,NULL,1, '". $remarks."');";
-		echo '<script>alert("'.$sql.'");</script>';
+		
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -481,7 +481,7 @@ VALUES
 (`injection_sacks_id`,`finishproduct`,`semifinished1`,`semifinished2`,`semifinished3`,`pieces`,`weight`,`user_id`,`from`,`to`,`actual`,`remarks`)
 VALUES
 (NULL,'". $finished."','". $semifinished1."',". $semifinished2.", ". $semifinished3.", '". $pieces ."', '". $sack ."', ". $_SESSION['Userid'] .", CURRENT_DATE() ,NULL,1, '". $remarks."');";
-		echo '<script>alert("'.$sql.'");</script>';
+		
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -818,7 +818,7 @@ JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
 JOIN materials ON materials.material_id = `injection_production`.`material_id`
 LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
 	WHERE ". $date ." GROUP BY `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
-    ORDER BY material_name ";
+    ORDER BY machine_name ";
 
         if($shift != 0)
         {
@@ -833,7 +833,7 @@ FROM `injection_production`
 JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
 JOIN materials ON materials.material_id = `injection_production`.`material_id`
 LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
-	WHERE ". $date ." AND SHIFT = ". $shift ." ORDER BY material_name";
+	WHERE ". $date ." AND SHIFT = ". $shift ." ORDER BY machine_name ";
         }
         
 		$total1 = $total2 = $total3 = $total4 = $total5 = 0;
@@ -898,7 +898,7 @@ LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id
 	
 	public function createSacksProduction()
     { 
-		$shift = $finished = $type1 = $type2 =$type3 = $sacks = "";
+		$shift = $finished = $type1 = $type2 =$type3 = $sacks = $cols = "";
 		
         $shift = trim($_POST["shift"]);
         $shift = stripslashes($shift);
@@ -908,6 +908,10 @@ LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id
         $finished = stripslashes($finished);
         $finished = htmlspecialchars($finished);
 	
+		$cols = trim($_POST["cols"]);
+        $cols = stripslashes($cols);
+        $cols = htmlspecialchars($cols);
+		
 		$type1 = trim($_POST["type1"]);
         $type1 = stripslashes($type1);
         $type1 = htmlspecialchars($type1);
@@ -1222,8 +1226,7 @@ WHERE `status_production` = 0 AND type_id  ". $type3sql ." AND material_id = (SE
 			
 			//INSERT
 			$sql = "INSERT INTO `injection_sacks_production`
-(`injection_sacks_production_id`,`date_production`,`shift`,`finishproduct`,`semifinished1`,`semifinished2`,`semifinished3`,`sacks`,`user_id`,`status_production`,`used`) VALUES (NULL,'". $date."',". $shift .",". $finished .",". $type1 .",". $type2 .", ". $type3 .",". $sacks .",". $_SESSION['Userid'] .",0,0.00); ". $update; 
-			echo '<script>alert("'.$sql.'");</script>';
+(`injection_sacks_production_id`,`date_production`,`shift`,`finishproduct`,`semifinished1`,`semifinished2`,`semifinished3`,`sacks`,`user_id`,`status_production`,`used`,`cols`) VALUES (NULL,'". $date."',". $shift .",". $finished .",". $type1 .",". $type2 .", ". $type3 .",". $sacks .",". $_SESSION['Userid'] .",0,0.00,". $cols ."); ". $update; 
 			try
 			{   
 				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -1256,29 +1259,29 @@ WHERE `status_production` = 0 AND type_id  ". $type3sql ." AND material_id = (SE
         $date = "date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString ." 23:59:59'";
 
         $sql = "SELECT `injection_sacks_production`.`injection_sacks_production_id`,
-    `injection_sacks_production`.`date_production`,
+    `injection_sacks_production`.`date_production`,`injection_sacks_production`.`cols`,
     `injection_sacks_production`.`shift`,materials.material_name as finishname, 
     semi1.material_name as semi1, color1.material_name as color1, 
     semi2.material_name as semi2, color2.material_name as color2, 
     semi3.material_name as semi3, color3.material_name as color3,
-    `injection_sacks_production`.`sacks`
+    sum(`injection_sacks_production`.`sacks`) as sacks
 FROM `injection_sacks_production`
 JOIN injection_sacks ON injection_sacks_production.finishproduct = injection_sacks.finishproduct
 JOIN materials ON materials.material_id = injection_sacks_production.finishproduct 
 JOIN materials semi1 ON semi1.material_id = injection_sacks.semifinished1
-JOIN materials color1 ON color1.material_id = injection_sacks_production.semifinished1
+LEFT JOIN materials color1 ON color1.material_id = injection_sacks_production.semifinished1
 LEFT JOIN materials semi2 ON semi2.material_id = injection_sacks.semifinished2
 LEFT JOIN materials color2 ON color2.material_id = injection_sacks_production.semifinished2 
 LEFT JOIN materials semi3 ON semi3.material_id = injection_sacks.semifinished3
 LEFT JOIN materials color3 ON color3.material_id = injection_sacks_production.semifinished3
 	WHERE ". $date ."  
-	GROUP BY `date_production`, injection_sacks_production.finishproduct, injection_sacks_production.semifinished1, injection_sacks_production.semifinished2, injection_sacks_production.semifinished3
+	GROUP BY `date_production`, injection_sacks_production.finishproduct,`injection_sacks_production`.`cols`,  injection_sacks_production.semifinished1, injection_sacks_production.semifinished2, injection_sacks_production.semifinished3
     ORDER BY finishname ";
 
         if($shift != 0)
         {
             $sql = "SELECT `injection_sacks_production`.`injection_sacks_production_id`,
-    `injection_sacks_production`.`date_production`,
+    `injection_sacks_production`.`date_production`,`injection_sacks_production`.`cols`,
     `injection_sacks_production`.`shift`,materials.material_name as finishname, 
     semi1.material_name as semi1, color1.material_name as color1, 
     semi2.material_name as semi2, color2.material_name as color2, 
@@ -1288,7 +1291,7 @@ FROM `injection_sacks_production`
 JOIN injection_sacks ON injection_sacks_production.finishproduct = injection_sacks.finishproduct
 JOIN materials ON materials.material_id = injection_sacks_production.finishproduct 
 JOIN materials semi1 ON semi1.material_id = injection_sacks.semifinished1
-JOIN materials color1 ON color1.material_id = injection_sacks_production.semifinished1
+LEFT JOIN materials color1 ON color1.material_id = injection_sacks_production.semifinished1
 LEFT JOIN materials semi2 ON semi2.material_id = injection_sacks.semifinished2
 LEFT JOIN materials color2 ON color2.material_id = injection_sacks_production.semifinished2 
 LEFT JOIN materials semi3 ON semi3.material_id = injection_sacks.semifinished3
@@ -1336,9 +1339,15 @@ LEFT JOIN materials color3 ON color3.material_id = injection_sacks_production.se
 				{
 					$semi3 = '';
 				}
+				$cols = 'Transparent';
+				if($row['cols']==1)
+				{
+					$cols = 'Colors';
+				}
 				$total1 = $total1 + $row['sacks'];
                 echo '<tr>
                         <td>'.  $row['finishname'] .'</td> 
+                        <td>'.  $cols .'</td>                  
                         <td>'.  $semi1 .'</td>                   
                         <td>'.  $semi2 .'</td>                     
                         <td>'.  $semi3 .'</td>                         
@@ -1349,6 +1358,7 @@ LEFT JOIN materials color3 ON color3.material_id = injection_sacks_production.se
             $stmt->closeCursor();
             echo '
 				<tfoot><tr class="active">
+						<th></th>
 						<th></th>
 						<th></th>
 						<th></th>
@@ -1514,6 +1524,287 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift`, `waste`.machine_id;";
                 </tr>";
         }
     }
+	/**
+    * Checks and inserts the sacks
+    *
+    * @return boolean true if can insert false if not
+    */
+    public function createSacksWeight()
+    {
+        
+       	$shift = $finished = $cols = "";
+		
+        $shift = trim($_POST["shift"]);
+        $shift = stripslashes($shift);
+        $shift = htmlspecialchars($shift);
+		
+		$finished = trim($_POST["finished"]);
+        $finished = stripslashes($finished);
+        $finished = htmlspecialchars($finished);
+	
+		$cols = trim($_POST["cols"]);
+        $cols = stripslashes($cols);
+        $cols = htmlspecialchars($cols);
+		
+        //DATE
+        $date = date("Y-m-d");
+        if($shift == 2)
+        {
+            $date = date("Y-m-d", time() - 60 * 60 * 24);
+        }
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+		
+		$totalnet = $totalSacks = $number = 0;
+		
+		$sacks = "INSERT INTO `injection_sacks_weight`
+(`injection_sacks_weight_id`,`date_sacks`,`shift`,`number`,`weight`,`user_id`,`finishproduct`,`cols`)
+VALUES";
+		foreach ($_POST as $k=>$v)
+		{
+			if (substr( $k, 0, 3 ) === "wt_" and !empty($v)){
+				$i = explode("_",$k)[1];
+				
+				$no = trim($_POST["no_".$i]);
+				$number = $number + $no;
+				$totalSacks = $totalSacks + $no;
+				$totalnet = $totalnet + $v;
+				$sacks = $sacks. " (NULL, '". $date."', ". $shift .", ". $no .", ". $v .", ". $_SESSION['Userid'] .", ". $finished .", ". $cols .") ,";
+			}
+		}
+		
+		
+		$update = "";
+		
+		
+		$sql = "SELECT `injection_sacks_production_id`, SUM(`sacks`) as total, SUM(used) as used
+FROM `injection_sacks_production`
+WHERE `status_production` = 0 AND cols= ". $cols." AND finishproduct = ". $finished ."
+";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['injection_sacks_production_id']))
+				{
+					$TOTAL = $row['total'] - $row['used'];
+					if($TOTAL<$number)
+					{
+						echo '<strong>ERROR</strong> The sacks were not added to the production. Because there is not enought injection sacks production in stock. <br> There are <strong>'. $TOTAL .'</strong> kgs in stock, and you need <strong>'. $number .'</strong> sacks.  Please try again after submit the sacks for the production.';
+						return false;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The sack was not added to the production. ecause there is not enought injection sacks production in stock. <br>  Please try again after submit the sacks for the production.';
+						return false;
+				   }
+            }
+		}
+		
+		$sql = "SELECT `injection_sacks_production_id`, `sacks`, used
+				FROM `injection_sacks_production`
+				WHERE `status_production` = 0 AND cols= ". $cols." AND finishproduct = ". $finished ."
+				ORDER BY `date_production` DESC, `injection_sacks_production_id`
+				LIMIT 10;";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['injection_sacks_production_id']))
+				{
+					$TOTAL = $row['sacks'] - $row['used'];
+					if(($TOTAL > $number) and ($number > 0))
+					{
+						if($number + $row['used'] == $row['sacks'])
+						{
+							
+							$update = $update . "
+						UPDATE `injection_sacks_production` SET
+                        `used` = `used`+". $number .", `status_production` = 1
+						WHERE `injection_sacks_production_id` = ". $row['injection_sacks_production_id']."; ";
+						}
+						else
+						{
+							
+							$update = $update . "
+						UPDATE `injection_sacks_production` SET
+                        `used` = `used`+". $number .", `status_production` = 0
+						WHERE `injection_sacks_production_id` = ". $row['injection_sacks_production_id']."; ";
+						}
+						$number = 0;
+						$stmt->closeCursor();
+					}
+					else if(($TOTAL <= $number) and ($number > 0))
+					{
+						$update = $update . "
+						UPDATE `injection_sacks_production` SET
+                        `used` = `used`+". $TOTAL .", `status_production` = 1
+						WHERE `injection_sacks_production_id` = ". $row['injection_sacks_production_id'].";";
+						$number = $number - $TOTAL;
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR 3</strong> The sack was not added to the production. ecause there is not enought injection sacks production in stock. <br>  Please try again after submit the sacks for the production.';
+						return false;
+				   }
+            }
+		
+					
+			$transfer = " INSERT INTO  `stock_materials_transfers`(`stock_materials_transfers_id`,`machine_from`,`machine_to`,`material_id`,`date_required`,`bags_required`,`bags_approved`,`bags_issued`,`bags_receipt`,`user_id_required`,`user_id_approved`,`user_id_issued`,`user_id_receipt`,`status_transfer`,`remarks_approved`,`remarks_issued`)VALUES(NULL,6,12, '". $finished ."','". $date ."',". $totalSacks . ",". $totalSacks . ",". $totalSacks . ",NULL,". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",". $_SESSION['Userid'] . ",NULL,2,'Total Weight of Sacks = ". $totalnet ."',NULL);";
+			
+			$sql = substr($sacks,0,strlen($sacks)-2). "; ". $update . $transfer ;
+			
+			try {   
+				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+				$stmt = $this->_db->prepare($sql);
+				$stmt->execute();
+				$stmt->closeCursor();
+				
+				echo '<strong>SUCCESS!</strong> The sacks were successfully added to the database for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>';
+				return TRUE;
+					
+			}
+			catch (PDOException $e) {
+				echo '<strong>ERROR</strong> Could not insert the sacks into the database. Please try again.<br>'. $e->getMessage();
+				return FALSE;
+			}
+			}
+		}
+	
+	
+	public function giveSacksWeight($shift)
+    {
+        $newDateString = date("Y-m-d");
+        if(!empty($_POST['dateSearch']))
+        {
+           $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+           $newDateString = $myDateTime->format('Y-m-d');
+        }
+        $date = "date_sacks BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString ." 23:59:59'";
+
+        $sql = "SELECT `material_name`, `cols`, `number`,`weight`
+FROM `injection_sacks_weight`
+JOIN materials ON materials.material_id = finishproduct 
+WHERE ". $date ."
+ORDER BY injection_sacks_weight_id";
+
+        if($shift != 0)
+        {
+            $sql = "SELECT `material_name`, `cols`, `number`,`weight`
+FROM `injection_sacks_weight`
+JOIN materials ON materials.material_id = finishproduct 
+WHERE ". $date ." AND shift = ". $shift ."
+ORDER BY injection_sacks_weight_id";
+        }
+        
+        $total1 = $total2 = 0;
+		$material = "";
+                
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {   
+				$cols = 'Transparent';
+				if($row['cols']==1)
+				{
+					$cols = 'Colors';
+				}
+				if($material != $row['material_name']. " - " . $cols )
+				{
+					if($total1 > 0)
+					{
+					$avg = $total2 / $total1;	
+					echo '</tbody>
+					  <tfoot>
+						<tr class="active">
+						  <th style="text-align:center">Total Weight</th>
+						  <th class="text-right">'. number_format($total2,2,'.',',') .'</th>
+						</tr>
+						<tr >
+						  <th style="text-align:center">No. of sacks</th>
+						  <th class="text-right">'. number_format($total1,0,'.',',') .'</th>
+						</tr>
+						<tr >
+						  <th style="text-align:center">Average weight</th>
+						  <th class="text-right">'. number_format($avg,2,'.',',') .'</th>
+						</tr>
+					  </tfoot>
+					  </table>
+						</div>
+						</div>';
+					}
+        			$total1 = $total2 = 0;
+					$material = $row['material_name']. " - " . $cols;
+					echo '<div class="col-md-3">
+						<h4>'. $material .'</h4>
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+								<thead>
+									<tr class="active">
+										<th width="70%">No. of sacks</th>
+										<th>Weight</th>
+									</tr>
+								</thead>
+								<tbody>';
+				}
+				
+					
+                $total1 = $total1 + $row['number'];
+                $total2 = $total2 + $row['weight'];
+                echo '<tr>
+                        <td>'.  number_format($row['number'],0,'.',',') .'</td>                    
+                        <td class="text-right">'. number_format($row['weight'],2,'.',',') .'</td>
+                        
+                       </tr>';
+            }
+			if($total1 > 0)
+					{
+					$avg = $total2 / $total1;	
+					echo '</tbody>
+					  <tfoot>
+						<tr class="active">
+						  <th style="text-align:center">Total Weight</th>
+						  <th class="text-right">'. number_format($total2,2,'.',',') .'</th>
+						</tr>
+						<tr >
+						  <th style="text-align:center">No. of sacks</th>
+						  <th class="text-right">'. number_format($total1,0,'.',',') .'</th>
+						</tr>
+						<tr >
+						  <th style="text-align:center">Average weight</th>
+						  <th class="text-right">'. number_format($avg,2,'.',',') .'</th>
+						</tr>
+					  </tfoot>
+					  </table>
+						</div>
+						</div>';
+					}
+			
+            $stmt->closeCursor();
+            
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                    <td></td>
+                </tr>";
+        }
+        
+    }
 	
 	 public function giveShiftname($shift)
     {
@@ -1535,12 +1826,13 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift`, `waste`.machine_id;";
         echo '<thead><tr  class="active">';
         echo '<th>Date</th>';
         echo '<th>Machine</th>';
-        echo '<th>Machine Capacity</th>';
-        echo '<th>Orders Target</th>';
+        echo '<th>Part Name</th>';
+        echo '<th>Target</th>';
         echo '<th>Actual Production</th>';
         echo '<th>% Eff</th>';
+        echo '<th>Raw Material Used</th>';
         echo '<th>Waste in Kgs</th>';
-        echo '<th>Target Waste %</th>';
+        echo '<th>Target Waste</th>';
         echo '<th>Waste %</th>';
         echo '</tr></thead>
 			<tfoot><tr  class="active">
@@ -1553,9 +1845,11 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift`, `waste`.machine_id;";
 			<th style="text-align:right"></th>
 			<th style="text-align:right"></th>
 			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
 			</tr></tfoot><tbody>'; 
         
         $a=array();
+        $c=array();
         $b1=array();
         $b2=array();
         $b3=array();
@@ -1564,7 +1858,8 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift`, `waste`.machine_id;";
         $b6=array();
         $b7=array();
         $b8=array();
-        $c=array();
+        $b9=array();
+        $b10=array();
         $d1=array();
         $d2=array();
         $d3=array();
@@ -1573,7 +1868,8 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift`, `waste`.machine_id;";
         $d6=array();
         $d7=array();
         $d8=array();
-        $e=array();
+        $d9=array();
+        $d10=array();
 		
 		        
         $newDateString = date("Y-m-d");
@@ -1663,57 +1959,42 @@ ORDER BY `date_roll`, sacks_rolls.machine_id  ;";
                $newDateString2 = $myDateTime->format('Y-m-d');
             }
             
-              $sql = "SELECT 
-    DATE_FORMAT(`date_roll`, '%Y') AS date, machine_name, sacks_rolls.machine_id,
-    ROUND(SUM(net_weight), 2) AS actual,
-    waste.wastekgs,
-    COUNT(DISTINCT (DATE_FORMAT(`date_roll`, '%d/%m/%Y'))) AS days,
-    target, target_waste, capacity
-FROM
-    sacks_rolls
-LEFT JOIN machines ON sacks_rolls.machine_id = machines.machine_id
+              $sql = "SELECT  DATE_FORMAT(`injection_production`.`date_production`, '%Y') AS date, machine_name,
+    materials.material_name, materials.material_grade, types.material_name as type, 
+   `injection_production`.`cavities`,waste_target.target_waste,
+    SUM(`injection_production`.`produced_pcs`) as produced_pcs,
+    SUM(`injection_production`.`good_pcs`) as good_pcs,
+    SUM(`injection_production`.`net_weight`) as net_weight, waste.wastekgs,`injection_production`.`machine_id`,target.target
+FROM `injection_production`
+JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
+JOIN materials ON materials.material_id = `injection_production`.`material_id`
+LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
 LEFT JOIN
     (SELECT 
-        DATE_FORMAT(`date_waste`, '%Y') AS date,
-            SUM(waste) AS wastekgs, machine_id
+        DATE_FORMAT(`date_waste`, '%Y') AS date, SUM(waste) AS wastekgs, waste.machine_id
     FROM
         `waste`
-	NATURAL JOIN machines
-    WHERE location_id = 7 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-    GROUP BY DATE_FORMAT(`date_waste`, '%Y'), machine_id
-    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_roll`, '%Y') AND waste.machine_id = sacks_rolls.machine_id
-	LEFT JOIN
-    (SELECT 
-        DATE_FORMAT(`target_orders`.`date`, '%Y') AS date,
-            SUM(target_order) AS target, machine_id
-    FROM
-        `target_orders`
-   	NATURAL JOIN machines
-    WHERE location_id = 7 
-        AND date BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-    GROUP BY DATE_FORMAT(`target_orders`.`date`, '%Y'), machine_id
-    ORDER BY `target_orders`.`date`) targets ON targets.date = DATE_FORMAT(`date_roll`, '%Y') AND targets.machine_id = sacks_rolls.machine_id
+	JOIN machines ON machines.machine_id = waste.`machine_id`
+    WHERE location_id = 6 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%Y'), machine_id) waste ON waste.date = DATE_FORMAT(`injection_production`.`date_production`, '%Y') AND waste.machine_id = `injection_production`.`machine_id`
+LEFT JOIN
+	(
+		SELECT AVG(`injection_sacks_formulas`.`target`), DATE_FORMAT(`to`, '%Y') AS `to` , DATE_FORMAT(`from`, '%Y') AS `from` `injection_sacks_formulas`.`material_id`
+        FROM `injection_sacks_formulas`
+		GROUP BY DATE_FORMAT(from, '%m/%Y')
+    )
+     target ON  target.material_id = `injection_production`.`material_id` AND target.`from` <= DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d'))
 	LEFT JOIN
 	(
-		SELECT AVG(`settings`.value_setting) AS target_waste, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`
+		SELECT `settings`.value_setting AS target_waste, `settings`.to, `settings`.from
         FROM `settings`
-        WHERE `settings`.machine_id = 8 AND `settings`.name_setting = 'waste'
-		GROUP BY DATE_FORMAT(`settings`.from, '%Y')
+        WHERE `settings`.machine_id = 6 AND `settings`.name_setting = 'waste'
     )
-    waste_target ON waste_target.`from` <= DATE_FORMAT(`date_roll`, '%Y') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`date_roll`, '%Y'))
-	LEFT JOIN
-	(
-		SELECT AVG(`settings`.value_setting) AS capacity, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`, `settings`.machine_id
-        FROM `settings`
-		NATURAL JOIN machines
-    	WHERE location_id = 7 
-		GROUP BY DATE_FORMAT(`settings`.from, '%Y'), `settings`.machine_id
-    )
-    capacity ON  capacity.machine_id = sacks_rolls.machine_id AND capacity.`from` <= DATE_FORMAT(`date_roll`, '%Y') AND (capacity.`to` IS NULL OR capacity.`to` > DATE_FORMAT(`date_roll`, '%Y'))
-WHERE
-    date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-GROUP BY DATE_FORMAT(`date_roll`, '%Y'), sacks_rolls.machine_id 
-ORDER BY `date_roll`, sacks_rolls.machine_id ;";
+    waste_target ON waste_target.`from` <= DATE_FORMAT(`injection_production`.`date_production`, '%Y') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`injection_production`.`date_production`, '%Y'))
+
+	WHERE date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_production`, '%Y'), `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
+    ORDER BY `injection_production`.`date_production` ";
             
         }
         else
@@ -1729,55 +2010,41 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
                $newDateString2 = $myDateTime->format('Y-m-d');
             }
             
-            $sql = "SELECT 
-    DATE_FORMAT(`date_roll`, '%d/%m/%Y') AS date, machine_name, sacks_rolls.machine_id,
-    ROUND(SUM(net_weight), 2) AS actual,
-    waste.wastekgs,
-    COUNT(DISTINCT (DATE_FORMAT(`date_roll`, '%d/%m/%Y'))) AS days,
-    target, target_waste, capacity
-FROM
-    sacks_rolls
-LEFT JOIN machines ON sacks_rolls.machine_id = machines.machine_id
+            $sql = "SELECT  DATE_FORMAT(`injection_production`.`date_production`, '%d/%m/%Y') AS date, machine_name,
+    materials.material_name, materials.material_grade, types.material_name as type, 
+   `injection_production`.`cavities`,waste_target.target_waste,
+    SUM(`injection_production`.`produced_pcs`) as produced_pcs,
+    SUM(`injection_production`.`good_pcs`) as good_pcs,
+    SUM(`injection_production`.`net_weight`) as net_weight, waste.wastekgs,`injection_production`.`machine_id`,target.target
+FROM `injection_production`
+JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
+JOIN materials ON materials.material_id = `injection_production`.`material_id`
+LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
 LEFT JOIN
     (SELECT 
-        DATE_FORMAT(`date_waste`, '%Y/%m/%d') AS date,
-            SUM(waste) AS wastekgs, machine_id
+        DATE_FORMAT(`date_waste`, '%Y/%m/%d') AS date, SUM(waste) AS wastekgs, waste.machine_id
     FROM
         `waste`
-	NATURAL JOIN machines
-    WHERE location_id = 7 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-    GROUP BY DATE_FORMAT(`date_waste`, '%Y/%m/%d'), machine_id
-    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND waste.machine_id = sacks_rolls.machine_id
-	LEFT JOIN
-    (SELECT 
-        DATE_FORMAT(`target_orders`.`date`, '%Y/%m/%d') AS date,
-            SUM(target_order) AS target, machine_id
-    FROM
-        `target_orders`
-   	NATURAL JOIN machines
-    WHERE location_id = 7 
-        AND date BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-    GROUP BY DATE_FORMAT(`target_orders`.`date`, '%Y/%m/%d'), machine_id
-    ORDER BY `target_orders`.`date`) targets ON targets.date = DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND targets.machine_id = sacks_rolls.machine_id
+	JOIN machines ON machines.machine_id = waste.`machine_id`
+    WHERE location_id = 6 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%Y/%m/%d'), machine_id) waste ON waste.date = DATE_FORMAT(`injection_production`.`date_production`, '%Y/%m/%d') AND waste.machine_id = `injection_production`.`machine_id`
+LEFT JOIN
+	(
+		SELECT `injection_sacks_formulas`.`target`, `injection_sacks_formulas`.`to`,`injection_sacks_formulas`.`from`, `injection_sacks_formulas`.`material_id`
+        FROM `injection_sacks_formulas`
+    )
+     target ON  target.material_id = `injection_production`.`material_id` AND target.`from` <= DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d'))
 	LEFT JOIN
 	(
 		SELECT `settings`.value_setting AS target_waste, `settings`.to, `settings`.from
         FROM `settings`
-        WHERE `settings`.machine_id = 8 AND `settings`.name_setting = 'waste'
+        WHERE `settings`.machine_id = 6 AND `settings`.name_setting = 'waste'
     )
-    waste_target ON waste_target.`from` <= DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`date_roll`, '%Y/%m/%d'))
-	LEFT JOIN
-	(
-		SELECT `settings`.value_setting AS capacity, `settings`.to, `settings`.from, `settings`.machine_id
-        FROM `settings`
-		NATURAL JOIN machines
-    	WHERE location_id = 7 
-    )
-    capacity ON  capacity.machine_id = sacks_rolls.machine_id AND capacity.`from` <= DATE_FORMAT(`date_roll`, '%Y/%m/%d') AND (capacity.`to` IS NULL OR capacity.`to` > DATE_FORMAT(`date_roll`, '%Y/%m/%d'))
-WHERE
-    date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-GROUP BY DATE_FORMAT(`date_roll`, '%d/%m/%Y'), sacks_rolls.machine_id 
-ORDER BY `date_roll`, sacks_rolls.machine_id ;";
+    waste_target ON waste_target.`from` <= DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d'))
+
+	WHERE date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY `injection_production`.`date_production`, `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
+    ORDER BY `injection_production`.`date_production` ";
             
         }
         if($stmt = $this->_db->prepare($sql))
@@ -1785,16 +2052,14 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
             $stmt->execute();
             while($row = $stmt->fetch())
             {
-                $CAPACITYROW = $row['capacity'] * $row['days'];
-				$TARGET = $row['target'];
-				$TARGETWASTE = $row['target_waste'];
+               
                 $WASTEKG = $row['wastekgs'];
                 if(is_null($row['wastekgs']))
                 {
                     $WASTEKG = 0;
                 }
-                $ACTUAL = $row['actual'] + $WASTEKG;
-                if(is_null($row['actual']))
+                $ACTUAL = $row['net_weight'] + $WASTEKG;
+                if(is_null($row['net_weight']))
                 {
                     $ACTUAL = 0 + $WASTEKG;
                     $WASTEEFF = 0;
@@ -1803,111 +2068,83 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
                 {
                     $WASTEEFF  = round($WASTEKG* 100 / $ACTUAL , 2);
                 }
-				if(is_null($row['target']) and !is_null($row['capacity']))
-                {
-                    $TARGET = $CAPACITYROW;
-					$EFF = round($ACTUAL *100/ $CAPACITYROW, 2);
-                }
-				else if(is_null($row['capacity']))
-                {
-                    $TARGET = $CAPACITYROW;
-					$EFF = 100;
-                }
-                else
-                {
-					$EFF = round($ACTUAL *100/ $TARGET, 2);
-                }
+				$TARGET = $row['target'];
+				$TARGETWASTE = $row['target_waste'];
+				$EFF = round($row['good_pcs'] *100/ $TARGET, 2);
                 echo '<tr>
                         <td class="text-right">'. $row['date'] .'</td>
                         <td class="text-right">'. $row['machine_name'] .'</td>
-                        <td class="text-right">'. number_format($CAPACITYROW,2,'.',',') .'</td>
-                        <td class="text-right">'. number_format($TARGET,2,'.',',') .'</td>
-                        <td class="text-right">'. number_format($ACTUAL,2,'.',',') .'</td>
+                        <td class="text-right">'. $row['material_name'] .' - '.  $row['material_grade'] .'</td>
+                        <td class="text-right">'. number_format($TARGET,0,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['good_pcs'],0,'.',',') .'</td>
                         <th class="text-right">'. number_format($EFF,2,'.',',') .'</th>
+                        <th class="text-right">'. number_format($row['net_weight'],2,'.',',') .'</th>
                         <td class="text-right">'. number_format($WASTEKG,2,'.',',') .'</td>
                         <td class="text-right">'. number_format($TARGETWASTE,2,'.',',') .'</td>
                         <th class="text-right">'. number_format($WASTEEFF,2,'.',',') .'</th>
                     </tr>';
-                $entrie0 = array( $row['date'], $CAPACITYROW);
                 $entrie = array( $row['date'], $TARGET);
-                $entrie1 = array( $row['date'], $ACTUAL);
-                $entrie2 = array( $row['date'], $TARGETWASTE);
-                $entrie3 = array( $row['date'], $WASTEEFF);
+                $entrie0 = array( $row['date'], $TARGETWASTE);
+                $entrie1 = array( $row['date'], $row['good_pcs']);
+                $entrie2 = array( $row['date'], $WASTEEFF);
                 if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
                 {
-                    $entrie0 = array( $row['date2'], $CAPACITYROW);
 					$entrie = array( $row['date2'], $TARGET);
-                    $entrie1 = array( $row['date2'],$ACTUAL);
-                    $entrie2 = array( $row['date2'], $TARGETWASTE);
-                    $entrie3 = array( $row['date2'], $WASTEEFF);
+                    $entrie1 = array( $row['date2'],$row['good_pcs']);
+                    $entrie2 = array( $row['date2'], $WASTEEFF);
                 }
                 array_push($a,$entrie);
-				if($row['machine_id'] == 13)
+                array_push($c,$entrie0);
+				if($row['machine_id'] == 35)
 				{
                 	array_push($b1,$entrie1);
+                	array_push($d1,$entrie2);
 				}
-				else if($row['machine_id'] == 14)
+				else if($row['machine_id'] == 36)
 				{
                 	array_push($b2,$entrie1);
+                	array_push($d2,$entrie2);
 				}
-				else if($row['machine_id'] == 15)
+				else if($row['machine_id'] == 37)
 				{
                 	array_push($b3,$entrie1);
+                	array_push($d3,$entrie2);
 				}
-				else if($row['machine_id'] == 16)
+				else if($row['machine_id'] == 38)
 				{
                 	array_push($b4,$entrie1);
+                	array_push($d4,$entrie2);
 				}
-				else if($row['machine_id'] == 17)
+				else if($row['machine_id'] == 39)
 				{
                 	array_push($b5,$entrie1);
+                	array_push($d5,$entrie2);
 				}
-				else if($row['machine_id'] == 18)
+				else if($row['machine_id'] == 40)
 				{
                 	array_push($b6,$entrie1);
+                	array_push($d6,$entrie2);
 				}
-				else if($row['machine_id'] == 19)
+				else if($row['machine_id'] == 41)
 				{
                 	array_push($b7,$entrie1);
+                	array_push($d7,$entrie2);
 				}
-				else if($row['machine_id'] == 20)
+				else if($row['machine_id'] == 42)
 				{
                 	array_push($b8,$entrie1);
+                	array_push($d8,$entrie2);
 				}
-                array_push($c,$entrie2);
-				if($row['machine_id'] == 13)
+				else if($row['machine_id'] == 43)
 				{
-                	array_push($d1,$entrie3);
+                	array_push($b9,$entrie1);
+                	array_push($d9,$entrie2);
 				}
-				else if($row['machine_id'] == 14)
+				else if($row['machine_id'] == 44)
 				{
-                	array_push($d2,$entrie3);
+                	array_push($b10,$entrie1);
+                	array_push($d10,$entrie2);
 				}
-				else if($row['machine_id'] == 15)
-				{
-                	array_push($d3,$entrie3);
-				}
-				else if($row['machine_id'] == 16)
-				{
-                	array_push($d4,$entrie3);
-				}
-				else if($row['machine_id'] == 17)
-				{
-                	array_push($d5,$entrie3);
-				}
-				else if($row['machine_id'] == 18)
-				{
-                	array_push($d6,$entrie3);
-				}
-				else if($row['machine_id'] == 19)
-				{
-                	array_push($d7,$entrie3);
-				}
-				else if($row['machine_id'] == 20)
-				{
-                	array_push($d8,$entrie3);
-				}
-                array_push($e,$entrie0);
             }
             $stmt->closeCursor();
         }
@@ -1934,7 +2171,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
             exportFileName: "Production Target Achievement",
             exportEnabled: true,
             animationEnabled: true,
-            axisY: {includeZero: false, title: "KGS" },
+            axisY: {includeZero: false, title: "Good Pcs" },
             toolTip: {
                 shared: true
             },
@@ -1965,7 +2202,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
             {
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 1",';
+		      name: "Injection - 1",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -1979,7 +2216,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2020,7 +2257,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 2",';
+		      name: "Injection - 2",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2034,7 +2271,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2075,7 +2312,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 3",';
+		      name: "Injection - 3",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2089,7 +2326,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2130,7 +2367,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 4",';
+		      name: "Injection - 4",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2144,7 +2381,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2185,7 +2422,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 5",';
+		      name: "Injection - 5",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2199,7 +2436,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2240,7 +2477,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 6",';
+		      name: "Injection - 6",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2254,7 +2491,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2295,7 +2532,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 7",';
+		      name: "Injection - 7",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2309,7 +2546,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2350,7 +2587,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 8",';
+		      name: "Injection - 8",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2364,7 +2601,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,###.00 Kgs",
+        echo ' yValueFormatString: "#,### Pcs",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2392,6 +2629,114 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         else
         {
             foreach($b8 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Injection - 9",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### Pcs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b9 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b9 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b9 as $key=>$value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Injection - 10",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### Pcs",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($b10 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($b10 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]<$a[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($b10 as $key=>$value) {
                 $var = (int) explode("/", $value[0])[1]-1;
                 $marker = 'markerType: "triangle",  markerColor: "green"';
                 if($value[1]<$a[$key][1])
@@ -2443,48 +2788,8 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         echo 'data: [
             {
                 type: "line",
-		showInLegend: true,
-		name: "Target",
-		lineDashType: "dash",';
-        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
-        {  
-            echo 'xValueFormatString: "MMM YYYY",';
-        }
-        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
-        {   
-            
-            echo 'xValueFormatString: "YYYY",';
-        }
-        else
-        {
-            echo 'xValueFormatString: "DD MMM",';
-        }
-        echo ' yValueFormatString: "#,##0.0",
-                dataPoints: [ ';
-        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
-        {  
-            foreach($c as $value) {
-                $var = (int) explode("/", $value[0])[0]-1;
-                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1] .'},';
-            }; 
-        }
-        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
-        {   
-            foreach($c as $value) {
-                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
-            }; 
-        }
-        else
-        {
-            foreach($c as $value) {
-                $var = (int) explode("/", $value[0])[1]-1;
-                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
-            }; 
-        }
-        echo ']},{
-                type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 1 ",';
+		      name: "Injection - 1 ",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2498,7 +2803,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.00 ",
+        echo ' yValueFormatString: "#,##0.00",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2538,7 +2843,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		 echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 2",';
+		      name: "Injection - 2",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2552,7 +2857,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.0 ",
+        echo ' yValueFormatString: "#,##0.00",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2593,7 +2898,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 3",';
+		      name: "Injection - 3",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2607,7 +2912,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.0 ",
+        echo ' yValueFormatString: "#,##0.00",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2648,7 +2953,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 4",';
+		      name: "Injection - 4",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2662,7 +2967,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.0 ",
+        echo ' yValueFormatString: "#,##0.00",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2703,7 +3008,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 5",';
+		      name: "Injection - 5",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2717,7 +3022,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.0 ",
+        echo ' yValueFormatString: "#,##0.00",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2758,7 +3063,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 6",';
+		      name: "Injection - 6",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2772,7 +3077,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.0 ",
+        echo ' yValueFormatString: "#,##0.00 ",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2813,7 +3118,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 7",';
+		      name: "Injection - 7",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2827,7 +3132,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.0 ",
+        echo ' yValueFormatString: "#,##0.00",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2868,7 +3173,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 		echo ']},{
                 type: "line",
 		      showInLegend: true,
-		      name: "Extruder - 8",';
+		      name: "Injection - 8",';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
@@ -2882,7 +3187,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         {
             echo 'xValueFormatString: "DD MMM",';
         }
-        echo ' yValueFormatString: "#,##0.0 ",
+        echo ' yValueFormatString: "#,##0.00",
                 dataPoints: [ ';
         if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
@@ -2910,6 +3215,114 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
         else
         {
             foreach($d8 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Injection - 9",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.00",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d9 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d9 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d9 as $key => $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+		echo ']},{
+                type: "line",
+		      showInLegend: true,
+		      name: "Injection - 10",';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,##0.00",
+                dataPoints: [ ';
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {  
+            foreach($d10 as $key => $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {   
+            foreach($d10 as $key => $value) {
+                $marker = 'markerType: "triangle",  markerColor: "green"';
+                if($value[1]>$c[$key][1])
+                {
+                    $marker = 'markerType: "cross", markerColor: "tomato"';
+                }
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].', '.$marker.' },';
+            }; 
+        }
+        else
+        {
+            foreach($d10 as $key => $value) {
                 $var = (int) explode("/", $value[0])[1]-1;
                 $marker = 'markerType: "triangle",  markerColor: "green"';
                 if($value[1]>$c[$key][1])

@@ -304,21 +304,6 @@
 					
 					
 					
-					// TOTAL 2
-					pageTotal2 = api
-						.column(2, {
-							page: 'current'
-						})
-						.data()
-						.reduce(function(a, b) {
-							return intVal(a) + intVal(b);
-						}, 0);
-					$(api.column(2).footer()).html(
-						''+ pageTotal2.toLocaleString(undefined, {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2
-})
-					);
 					
 					
 					// Total 3
@@ -379,9 +364,25 @@
 })
 					);
 					
+					// TOTAL 2
+					pageTotal7 = api
+						.column(7, {
+							page: 'current'
+						})
+						.data()
+						.reduce(function(a, b) {
+							return intVal(a) + intVal(b);
+						}, 0);
+					$(api.column(7).footer()).html(
+						''+ pageTotal7.toLocaleString(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+})
+					);
+					
 					// Total 6
 					var columnData = api
-						.column( 7 )
+						.column( 8 )
 						.data();
 
 					var theColumnTotal = columnData
@@ -398,18 +399,18 @@
 							}
 							return (a + b).toFixed(2);
 						}, 0 );
-					pageTotal7 = theColumnTotal / columnData.count();
-					$(api.column(7).footer()).html(
-						 pageTotal7.toLocaleString(undefined, {
+					pageTotal8 = theColumnTotal / columnData.count();
+					$(api.column(8).footer()).html(
+						 pageTotal8.toLocaleString(undefined, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2
 })+ '%'
 					);
 					
 					// Total Bags
-					pageTotal8 = pageTotal6/pageTotal4*100;
-					$(api.column(8).footer()).html(
-						 pageTotal8.toLocaleString(undefined, {
+					pageTotal9 = pageTotal7/pageTotal6*100;
+					$(api.column(9).footer()).html(
+						 pageTotal9.toLocaleString(undefined, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2
 })+ '%'
