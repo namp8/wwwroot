@@ -2798,7 +2798,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                 $GRADE = $row['material_grade'];
                 $BAGSRE = $row['bags_required'];
                 $BAGSAP = $row['bags_approved'];
-                $KGSAP = $row['bags_approved']*$row['kgs_bag'];
+                $KGSIS = $row['bags_issued']*$row['kgs_bag'];
                 $BAGSIS = $row['bags_issued'];
 				$APP = '">'.number_format((float) $BAGSAP,2,'.',',');
 				if($BAGSAP != $BAGSRE)
@@ -2855,14 +2855,14 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                         <td><button class="btn btn-link'. $disabled .'">Send</button></td>
                         <td>'. $DATE .'</td>
                         <td>'. $TO .'</td>
-                        <td><b>'. $MATERIAL .'</b>&nbsp - &nbsp'. $GRADE .'</td>
+                        <td><b>'. $MATERIAL .'</b>&nbsp - &nbsp'. $GRADE .'</td><td class="text-right '. $ISS .'</td>
+                        <td class="text-right">'. number_format((float) $KGSIS,2,'.',',') .'</td>
+                        <td>'. $ISSUEDBY .'</td>
                         <td class="text-right">'. number_format((float) $BAGSRE,2,'.',',') .'</td>
                         <td>'. $REQUESTEDBY .'</td>
                         <td class="text-right '. $APP .'</td>
-                        <td class="text-right">'. number_format((float) $KGSAP,2,'.',',') .'</td>
                         <td>'. $APPROVEDBY .'</td>
-                        <td class="text-right '. $ISS .'</td>
-                        <td>'. $ISSUEDBY .'</td>
+                        
                         <td>'. $STATUS .'</td>
                         <td>'. $REMARKSAP .'</td>
                         <td>'. $REMARKSIS .'</td>

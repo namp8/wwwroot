@@ -104,13 +104,13 @@
                                 <th>Date</th>
                                 <th>To</th>
                                 <th>Material</th>
+                                <th>Bags/Drumps Issued</th>
+                                <th>Kgs Issued</th>
+                                <th>Issued By</th>
                                 <th>Bags/Drumps Required</th>
                                 <th>Requested By</th>
                                 <th>Bags/Drumps Approved</th>
-                                <th>Kgs Approved</th>
                                 <th>Approved By</th>
-                                <th>Bags/Drumps Issued</th>
-                                <th>Issued By</th>
                                 <th>Status</th>
                                 <th>Approved Remarks</th>
                                 <th>Issued Remarks</th>

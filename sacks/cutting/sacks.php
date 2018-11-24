@@ -437,11 +437,11 @@
 						   {	
 							   echo "if(moment().weekday()==1)
 								{
-									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-2, 'days').millisecond(0).second(0).minute(0).hour(0));
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-4, 'days').millisecond(0).second(0).minute(0).hour(0));
 								}
 								else
 								{
-									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-1, 'days').millisecond(0).second(0).minute(0).hour(0));
+									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-3, 'days').millisecond(0).second(0).minute(0).hour(0));
 								}";
 						   }
 					?>	

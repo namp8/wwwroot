@@ -1550,7 +1550,7 @@ ORDER BY packing_sacks_id";
         }
         
         
-       $machine = $machinecode = $shift = $thickness = $size = "";
+       $machine = $machinecode =  $thickness = $size = "";
 		
         $machine = trim($_POST["machine"]);
         $machine = stripslashes($machine);
@@ -1589,9 +1589,6 @@ ORDER BY packing_sacks_id";
 			$machinecode = "H";
 		}
 		
-        $shift = trim($_POST["shift"]);
-        $shift = stripslashes($shift);
-        $shift = htmlspecialchars($shift);
 		
 		$size = trim($_POST["size"]);
         $size = stripslashes($size);
@@ -1601,12 +1598,40 @@ ORDER BY packing_sacks_id";
         $thickness = stripslashes($thickness);
         $thickness = htmlspecialchars($thickness);
 		
+		$film1 = trim($_POST["film1"]);
+        $film1 = stripslashes($film1);
+        $film1 = htmlspecialchars($film1);
+		if(empty($_POST['film1']))
+		{
+			$film1 = 0;
+		}
+		
+		$block1 = trim($_POST["block1"]);
+        $block1 = stripslashes($block1);
+        $block1 = htmlspecialchars($block1);
+		if(empty($_POST['block1']))
+		{
+			$block1 = 0;
+		}
+		
+		$film2 = trim($_POST["film2"]);
+        $film2 = stripslashes($film2);
+        $film2 = htmlspecialchars($film2);
+		if(empty($_POST['film2']))
+		{
+			$film2 = 0;
+		}
+		
+		$block2 = trim($_POST["block2"]);
+        $block2 = stripslashes($block2);
+        $block2 = htmlspecialchars($block2);
+		if(empty($_POST['block2']))
+		{
+			$block2 = 0;
+		}
+		
         //DATE
         $date = date("Y-m-d");
-        if($shift == 2)
-        {
-            $date = date("Y-m-d", time() - 60 * 60 * 24);
-        }
         if(!empty($_POST['date']))
         {
             $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
@@ -1636,17 +1661,30 @@ ORDER BY packing_sacks_id";
 		
 		$rolls = "INSERT INTO `sacks_rolls`
 	(`sacks_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`thickness`,`user_id`,`machine_id`,`status_roll`)
-		VALUES";
+		VALUES  ";
 		foreach ($_POST as $k=>$v)
 		{
-			if (substr( $k, 0, 3 ) === "wt_" and !empty($v)){
+			if (substr( $k, 0, 4 ) === "wt1_" and !empty($v)){
 				$count = $count + 1;
 				$rollno = $newDateString."-".$machinecode."-".$count;
 				$net = $v - $CONE;
 				$totalnet = $totalnet + $net;
-				$rolls = $rolls. " (NULL, '". $date."', '".$rollno."', ". $shift .", ". $size .", ". $v .", ". $net .", ". $thickness .", ". $_SESSION['Userid'] .", ". $machine .", 0) ,";
+				$rolls = $rolls. " (NULL, '". $date."', '".$rollno."', 1, ". $size .", ". $v .", ". $net .", ". $thickness .", ". $_SESSION['Userid'] .", ". $machine .", 0) ,";
+				
+				echo '<script>alert("ENTRO");</script>;';
+			}
+			if (substr( $k, 0, 4 ) === "wt2_" and !empty($v)){
+				$count = $count + 1;
+				$rollno = $newDateString."-".$machinecode."-".$count;
+				$net = $v - $CONE;
+				$totalnet = $totalnet + $net;
+				$rolls = $rolls. " (NULL, '". $date."', '".$rollno."', 2, ". $size .", ". $v .", ". $net .", ". $thickness .", ". $_SESSION['Userid'] .", ". $machine .", 0) ,";
 			}
 		}
+		
+		$totalnet = $totalnet + $film1 + $block1 + $film2 + $block2;
+	
+		
 		
 		$update = "";
 		
@@ -1687,19 +1725,29 @@ ORDER BY packing_sacks_id";
 				   }
             }
 			
+			$waste = "";
+			if(!empty($_POST['wt1_1']))
+			{
+				$waste = "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`) VALUES (NULL,'". $date."', 1,". $machine .", ". $film1 .", ". $_SESSION['Userid'] .", 1), (NULL,'". $date."', 1,". $machine .", ". $block1 .", ". $_SESSION['Userid'] .", 2); ";
+			}
+			if(!empty($_POST['wt2_2']))
+			{
+				$waste = $waste . "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`) VALUES (NULL,'". $date."', 2,". $machine .", ". $film2 .", ". $_SESSION['Userid'] .", 1), (NULL,'". $date."', 2,". $machine .", ". $block2 .", ". $_SESSION['Userid'] .", 2); ";
+			}
 			
-			$sql = substr($rolls,0,strlen($rolls)-2). "; ". $update;
+			$sql = substr($rolls,0,strlen($rolls)-2). ";". $waste . $update ;
+			echo '<script>alert("'. $sql.'");</script>;';
 			try {   
 				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 				$stmt = $this->_db->prepare($sql);
 				$stmt->execute();
 				$stmt->closeCursor();
-				echo '<strong>SUCCESS!</strong> The rolls were successfully added to the database for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>';
+				echo '<strong>SUCCESS!</strong> The production was successfully added to the database';
 				return TRUE;
 			}
 			catch (PDOException $e) {
 				if ($e->getCode() == 23000) {
-					echo '<strong>ERROR</strong> The rolls numbers have already being register for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>.<br>';
+					echo '<strong>ERROR</strong> The rolls numbers have already being register for the shift.<br>';
 				} 
 				else {
 					echo '<strong>ERROR</strong> Could not insert the rolls into the database. Please try again.<br>'. $e->getMessage();
