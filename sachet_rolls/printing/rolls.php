@@ -469,18 +469,23 @@
                 function selectShift(id, name) {
                     document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
                     document.getElementById("shift").value = id;
-                    if (id == 1) {
-                        var d = new Date();
-                        var month = d.getMonth() + 1;
-                        document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-                    } else {
-                        var d = new Date();
-                        d.setDate(d.getDate() - 1);
-                        var month = d.getMonth() + 1;
-                        document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-                    }
 
                 }
+				
+				function filterCustomers() {
+					var input, filter, ul, li, a, i;
+					input = document.getElementById("searchCustomer");
+					filter = input.value.toUpperCase();
+					div = document.getElementById("dropdown_customer");
+					a = div.getElementsByTagName("a");
+					for (i = 0; i < a.length; i++) {
+						if (a[i].id.toUpperCase().startsWith(filter)) {
+							a[i].style.display = "";
+						} else {
+							a[i].style.display = "none";
+						}
+					}
+				}
 
                 function selectRoll(i, id, no, gross, net) {
 					if(i == 1)

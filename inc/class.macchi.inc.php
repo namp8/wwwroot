@@ -1524,7 +1524,7 @@ NATURAL JOIN customers
 //        $sql = "SELECT `date_waste`,`waste`.`shift`,`waste`.`waste`,username
 //                FROM  `waste` NATURAL JOIN users
 //                WHERE machine_id=5 AND MONTH(date_waste) = MONTH(CURRENT_DATE()) AND YEAR(date_waste) = YEAR(CURRENT_DATE()) ORDER BY date_waste DESC;";
-		$sql = "SELECT `date_waste`,`waste`.`shift`,`waste`.`waste`,username
+		$sql = "SELECT `date_waste`,`waste`.`shift`,`waste`.`waste`,username, type
                 FROM  `waste` NATURAL JOIN users
                 WHERE machine_id=5 
 				ORDER BY date_waste DESC;";
@@ -1536,11 +1536,22 @@ NATURAL JOIN customers
                 $DATE = $row['date_waste'];
                 $USER = $row['username'];
                 $WASTE = $row['waste'];
+                $TYPE = $row['type'];
+				if($TYPE == 1)
+				{
+					 $TYPE = 'Water Pouch';
+				}
+				else
+				{
+					$TYPE = 'Shrink Film';
+				}
+				
                 $SHIFT = $this->giveShiftname($row['shift']);
                 
                 echo '<tr>
                         <td>'. $DATE .'</td>
                         <td>'. $SHIFT .'</td>
+                        <td>'. $TYPE .'</td>
                         <td>'. $USER .'</td>
                         <th class="text-right">'. number_format($WASTE,1,'.',',') .'</th>
                     </tr>';

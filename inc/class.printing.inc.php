@@ -1087,11 +1087,19 @@ INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packin
         $time = trim($_POST["time"]);
         $time = stripslashes($time);
         $time = htmlspecialchars($time);
+		
+		$date = "CURRENT_DATE()";
+		if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
 
         
         $sql = "INSERT INTO  `shortfalls`(`shortfall_id`,`machine_id`,`date_fall`,`downtime`,`reason`,`action_plan`)
         VALUES
-        (NULL,:machine,current_date(),:time,:reason,:action);";
+        (NULL,:machine,'". $date . "',:time,:reason,:action);";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -1359,7 +1367,8 @@ INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packin
     {
         $sql = "SELECT `customers`.`customer_id`,`customers`.`customer_name`
         FROM  `customers`
-		WHERE sachet_rolls=1;";
+		WHERE sachet_rolls=1
+		ORDER BY customer_name;";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();

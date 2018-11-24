@@ -354,82 +354,81 @@
 										<tbody>
 											<tr>
 												<td>1 <span class="text-danger">*</span></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_1" required></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_1" id="wt_1" onkeyup="calculateTotal()" required></td>
 												<td>2</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_2"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_2" id="wt_2" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>3</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_3"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_3" id="wt_3" onkeyup="calculateTotal()" ></td>
 												<td>4</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_4"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_4" id="wt_4" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>5</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_5"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_5" id="wt_5" onkeyup="calculateTotal()" ></td>
 												<td>6</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_6"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_6" id="wt_6" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>7</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_7"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_7" id="wt_7" onkeyup="calculateTotal()" ></td>
 												<td>8</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_8"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_8" id="wt_8" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>9</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_9"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_9" id="wt_9" onkeyup="calculateTotal()" ></td>
 												<td>10</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_10"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_10" id="wt_10" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>11</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_11"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_11" id="wt_11" onkeyup="calculateTotal()"></td>
 												<td>12</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_12"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_12" id="wt_12" onkeyup="calculateTotal()"></td>
 											</tr>
 											<tr>
 												<td>13</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_13"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_13" id="wt_13" onkeyup="calculateTotal()"></td>
 												<td>14</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_14"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_14" id="wt_14" onkeyup="calculateTotal()"></td>
 											</tr>
 											<tr>
 												<td>15</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_15"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_15" id="wt_15" onkeyup="calculateTotal()"></td>
 												<td>16</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_16"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_16" id="wt_16" onkeyup="calculateTotal()"></td>
 											</tr>
-											
 											<tr>
 												<td>17</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_17"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_17" id="wt_17" onkeyup="calculateTotal()"></td>
 												<td>18</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_18"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_18" id="wt_18" onkeyup="calculateTotal()"></td>
 											</tr>
-											
 											<tr>
 												<td>19</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_19"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_19" id="wt_19" onkeyup="calculateTotal()"></td>
 												<td>20</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_20"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_20" id="wt_20" onkeyup="calculateTotal()"></td>
 											</tr>
-											
 											<tr>
 												<td>21</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_21"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_21" id="wt_21" onkeyup="calculateTotal()" ></td>
 												<td>22</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_22"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_22" id="wt_22" onkeyup="calculateTotal()"></td>
 											</tr>
 											<tr>
 												<td>23</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_23"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_23" id="wt_23" onkeyup="calculateTotal()"></td>
 												<td>24</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_24"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_24" id="wt_24" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>25</td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_25"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" max="50" name="wt_25" id="wt_25" onkeyup="calculateTotal()"></td>
+												<td>Total</td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0"  id="total"  readonly></td>
 											</tr>
 										</tbody>
 									</table>
@@ -579,6 +578,18 @@
     
 ?>
 			<script>
+				function calculateTotal() {
+					var total = +0;
+					for(i = 1; i<26; i++)
+					{
+						if(document.getElementById("wt_"+i).value !== null && document.getElementById("wt_"+i).value !== '')
+						{
+							total += Number(document.getElementById("wt_"+i).value);
+						}
+					}
+					document.getElementById("total").value = total.toLocaleString();
+				}
+				
 				 function selectCustomer1(id, name) {
                     document.getElementById("btn_customer").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
                     document.getElementById("customer").value = id;
@@ -602,6 +613,21 @@
 					input = document.getElementById("searchEmployee1");
 					filter = input.value.toUpperCase();
 					div = document.getElementById("dropdown_employee1");
+					a = div.getElementsByTagName("a");
+					for (i = 0; i < a.length; i++) {
+						if (a[i].id.toUpperCase().startsWith(filter)) {
+							a[i].style.display = "";
+						} else {
+							a[i].style.display = "none";
+						}
+					}
+				}
+				
+				function filterCustomers() {
+					var input, filter, ul, li, a, i;
+					input = document.getElementById("searchCustomer");
+					filter = input.value.toUpperCase();
+					div = document.getElementById("dropdown_customer");
 					a = div.getElementsByTagName("a");
 					for (i = 0; i < a.length; i++) {
 						if (a[i].id.toUpperCase().startsWith(filter)) {

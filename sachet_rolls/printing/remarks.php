@@ -88,7 +88,7 @@
                 <div class="form-group">
                     <label for="date">Date</label>
                     <div class='input-group date' id='datetimepicker'>
-                        <input type='text' class="form-control" id="date" name="date" disabled/>
+                        <input type='text' class="form-control" id="date" name="date" />
                         <span class="input-group-addon">
                         <span class="fa fa-calendar"></span>
                         </span>
@@ -139,6 +139,13 @@
         }
           
         $(document).ready(function() {
+			 $('#datetimepicker').datetimepicker({
+                        format: 'DD/MM/YYYY'
+                    });
+
+
+                    $('#datetimepicker').data("DateTimePicker").maxDate(new Date());
+					
              var d = new Date();
                 var month = d.getMonth()+1;
                 document.getElementById("date").value = d.getDate() + "/" + month +"/"+ d.getFullYear();

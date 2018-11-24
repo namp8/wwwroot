@@ -58,6 +58,7 @@
                         <tr class="active">
                                 <th>Date</th>
                                 <th>Shift</th>
+                                <th>Job</th>
                                 <th>User</th>
                                 <th>Waste</th>
                             </tr>
@@ -130,16 +131,7 @@
             function selectShift(id, name) {
                 document.getElementById("btn_shift").innerHTML = name+" &nbsp&nbsp<span class='caret'></span> ";
                 document.getElementById("shift").value = id;
-                if (id == 1) {
-                    var d = new Date();
-                    var month = d.getMonth() + 1;
-                    document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-                } else {
-                    var d = new Date();
-                    d.setDate(d.getDate() - 1);
-                    var month = d.getMonth() + 1;
-                    document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
-                }
+                
             }
 			
 			function selectJob(id, name) {

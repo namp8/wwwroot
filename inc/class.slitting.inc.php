@@ -65,7 +65,8 @@ class Slitting
     {
         $sql = "SELECT `customers`.`customer_id`,`customers`.`customer_name`
         FROM  `customers`
-		WHERE sachet_rolls = 1;";
+		WHERE sachet_rolls = 1
+		ORDER BY customer_name;";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();

@@ -4968,6 +4968,73 @@ ORDER BY report.datereport;";
         }
     }
 	
+	public function stockMaterialsMasterBatchRequest($to)
+    {
+		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
+                    material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
+                    `stock_materials_transfers`.`bags_required`, u_required.username, `stock_materials_transfers`.`status_transfer`
+                FROM stock_materials_transfers 
+				JOIN materials ON materials.material_id = stock_materials_transfers.material_id
+                INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
+                INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
+                INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id AND to_table.location_id =  ". $to ."
+				WHERE (`material` = 1 OR `master_batch` = 1) AND (( MONTH(date_required) >= MONTH(CURRENT_DATE())-1 AND YEAR(date_required) = YEAR(CURRENT_DATE())) OR status_transfer = 0)
+                ORDER BY `date_required` DESC, status_transfer, stock_materials_transfers_id DESC;";
+		
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $DATE = $row['date_t'];
+                $USER = $row['username'];
+                $FROM = $row['from_t'];
+                $TO = $row['to_t'];
+                $MATERIAL = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGS = $row['bags_required'];
+                $STATUS = "";
+                if($row['status_transfer']==0)
+                {
+                    $STATUS = "<p class='text-muted'>Requested</p>";
+                }
+                else if($row['status_transfer']==1)
+                {
+                    $STATUS = "<p class='text-warning'>Approved</p>";
+                }
+                else if($row['status_transfer']==2)
+                {
+                    $STATUS = "<p class='text-info'>Issued</p>";
+                }
+                else if($row['status_transfer']==3)
+                {
+                    $STATUS = "<b class='text-success'> Received </b>";
+                }
+                 
+                 
+                echo '<tr>
+                        <td>'. $DATE .'</td>
+                        <td>'. $FROM .'</td>
+                        <td>'. $TO .'</td>
+                        <td><b>'. $MATERIAL .'</b>&nbsp'. $GRADE .'</td>                        
+                        <td class="text-right">'. number_format((float) $BAGS,1,'.',',') .'</td>
+                        <td>'. $USER .'</td>
+                        <td>'. $STATUS .'</td>
+                    </tr>';
+                }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
 	public function stockInkRequest($to)
     {
 		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,

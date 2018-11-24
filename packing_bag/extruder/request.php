@@ -85,7 +85,7 @@
 						</tfoot>
                         <tbody>
 <?php  
-    $stock->stockMaterialsRequest(2);
+    $stock->stockMaterialsMasterBatchRequest(2);
 ?>
                         </tbody>
                     </table>
