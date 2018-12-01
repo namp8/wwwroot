@@ -461,12 +461,12 @@ LEFT JOIN
     `waste` slitting_waste ON `waste`.date_waste = slitting_waste.date_waste
         AND `waste`.machine_id = slitting_waste.machine_id
         AND `waste`.shift = slitting_waste.shift
-        AND slitting_waste.type = 2 
+        AND slitting_waste.type = 2 AND `waste`.product = slitting_waste.product
 LEFT JOIN
     `waste` trim_waste ON `waste`.date_waste = trim_waste.date_waste
         AND `waste`.machine_id = trim_waste.machine_id
         AND `waste`.shift = trim_waste.shift
-        AND trim_waste.type = 3 
+        AND trim_waste.type = 3 AND `waste`.product = trim_waste.product
 WHERE
 	`waste`.type = 1 AND location_id = ". $location." AND MONTH(`waste`.date_waste) >= MONTH(CURRENT_DATE())-1 AND YEAR(`waste`.date_waste) = YEAR(CURRENT_DATE())
 ORDER BY `waste`.date_waste DESC,  `waste`.`shift` DESC, `waste`.machine_id;";
@@ -496,6 +496,7 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift` DESC, `waste`.machine_id;";
         else
         {
             echo "<tr>
+                    <td>Something went wrong.</td>
                     <td>Something went wrong.</td>
                     <td>$db->errorInfo</td>
                     <td></td>
@@ -543,10 +544,22 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift` DESC, `waste`.machine_id;";
             $date = $newDateString;
         }
         
-        
+        $product = 0;
+		$sql = "SELECT MAX(product) AS product
+				FROM waste
+				WHERE machine_id = ". $machine ." AND date_waste = '". $date."'	AND shift = ". $shift ."";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $product = $row['product'];
+            }
+        }
+		$product = $product + 1;
             
 		//INSERT THE WASTE IN THE DAY DECREASES THE  KGS FROM THE  MULTILAYER_BATCHES_STOCK 
-		$sql = "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`) VALUES (NULL,'". $date."', ". $shift .",". $machine .", ". $print .", ". $_SESSION['Userid'] .", 1), (NULL,'". $date."', ". $shift .",". $machine .", ". $slitting .", ". $_SESSION['Userid'] .", 2), (NULL,'". $date."', ". $shift .",". $machine .", ". $trim .", ". $_SESSION['Userid'] .", 3);";
+		$sql = "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`,`product`) VALUES (NULL,'". $date."', ". $shift .",". $machine .", ". $print .", ". $_SESSION['Userid'] .", 1, ". $product ."), (NULL,'". $date."', ". $shift .",". $machine .", ". $slitting .", ". $_SESSION['Userid'] .", 2, ". $product ."), (NULL,'". $date."', ". $shift .",". $machine .", ". $trim .", ". $_SESSION['Userid'] .", 3, ". $product .");";
 		try
 		{   
 			$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
