@@ -1216,16 +1216,13 @@ ORDER BY packing_sacks_id";
             }
         }
         
-       $machine = $machinecode = $shift  = $employee1  = $employee2  ="";
+       $machine = $machinecode  = $employee1  = $employee2  ="";
 		
         $machine = trim($_POST["machine"]);
         $machine = stripslashes($machine);
         $machine = htmlspecialchars($machine);
 		
-		
-        $shift = trim($_POST["shift"]);
-        $shift = stripslashes($shift);
-        $shift = htmlspecialchars($shift);
+
 		
 		$employee1 = trim($_POST["employee1"]);
         $employee1 = stripslashes($employee1);
@@ -1244,12 +1241,58 @@ ORDER BY packing_sacks_id";
 			$employee2 = 'NULL';
 		}
 		
+		
+		$employee3 = trim($_POST["employee3"]);
+        $employee3 = stripslashes($employee3);
+        $employee3 = htmlspecialchars($employee3);
+		if(empty($_POST['employee3']))
+        {
+			$employee3 = 'NULL';
+		}
+		
+		
+		$employee4 = trim($_POST["employee4"]);
+        $employee4 = stripslashes($employee4);
+        $employee4 = htmlspecialchars($employee4);
+		if(empty($_POST['employee4']))
+        {
+			$employee4 = 'NULL';
+		}
+		
+		$film1 = trim($_POST["film1"]);
+        $film1 = stripslashes($film1);
+        $film1 = htmlspecialchars($film1);
+		if(empty($_POST['film1']))
+		{
+			$film1 = 0;
+		}
+		
+		$block1 = trim($_POST["block1"]);
+        $block1 = stripslashes($block1);
+        $block1 = htmlspecialchars($block1);
+		if(empty($_POST['block1']))
+		{
+			$block1 = 0;
+		}
+		
+		$film2 = trim($_POST["film2"]);
+        $film2 = stripslashes($film2);
+        $film2 = htmlspecialchars($film2);
+		if(empty($_POST['film2']))
+		{
+			$film2 = 0;
+		}
+		
+		$block2 = trim($_POST["block2"]);
+        $block2 = stripslashes($block2);
+        $block2 = htmlspecialchars($block2);
+		if(empty($_POST['block2']))
+		{
+			$block2 = 0;
+		}
+		
         //DATE
         $date = date("Y-m-d");
-        if($shift == 2)
-        {
-            $date = date("Y-m-d", time() - 60 * 60 * 24);
-        }
         if(!empty($_POST['date']))
         {
             $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
@@ -1262,14 +1305,23 @@ ORDER BY packing_sacks_id";
 		$sacks = "INSERT INTO `cutting_sacks`(`cutting_sacks_id`,`date_sacks`,`shift`,`gross_weight`,`net_weight`,`user_id`,`machine_id`,`employee_id`,`employee_id2`) VALUES";
 		foreach ($_POST as $k=>$v)
 		{
-			if (substr( $k, 0, 3 ) === "wt_" and !empty($v)){
+			if (substr( $k, 0, 4 ) === "wt1_" and !empty($v)){
 				$net = $v - $SACKWT;
 				$label = $net * $LABELWT / $PACKETWT; 
 				$net = $net - $label;
 				$totalnet = $totalnet + $net;
-				$sacks = $sacks. " (NULL, '". $date."', ". $shift .", ". $v .", ". $net .", ". $_SESSION['Userid'] .", ". $machine .", ". $employee1 .", ". $employee2 .") ,";
+				$sacks = $sacks. " (NULL, '". $date."', 1, ". $v .", ". $net .", ". $_SESSION['Userid'] .", ". $machine .", ". $employee1 .", ". $employee2 .") ,";
+			}
+			else if (substr( $k, 0, 4 ) === "wt2_" and !empty($v)){
+				$net = $v - $SACKWT;
+				$label = $net * $LABELWT / $PACKETWT; 
+				$net = $net - $label;
+				$totalnet = $totalnet + $net;
+				$sacks = $sacks. " (NULL, '". $date."', 2, ". $v .", ". $net .", ". $_SESSION['Userid'] .", ". $machine .", ". $employee3 .", ". $employee4 .") ,";
 			}
 		}
+		
+		$totalnet = $totalnet + $film1 + $block1 + $film2 + $block2;
 		
 		$update = "";
 		
@@ -1350,15 +1402,23 @@ ORDER BY packing_sacks_id";
 				   }
             }
 		
+			$waste = "";
+			if(!empty($_POST['wt1_1']))
+			{
+				$waste = "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`) VALUES (NULL,'". $date."', 1,". $machine .", ". $film1 .", ". $_SESSION['Userid'] .", 1), (NULL,'". $date."', 1,". $machine .", ". $block1 .", ". $_SESSION['Userid'] .", 2); ";
+			}
+			if(!empty($_POST['wt2_2']))
+			{
+				$waste = $waste . "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`) VALUES (NULL,'". $date."', 2,". $machine .", ". $film2 .", ". $_SESSION['Userid'] .", 1), (NULL,'". $date."', 2,". $machine .", ". $block2 .", ". $_SESSION['Userid'] .", 2); ";
+			}
 			
-			
-			$sql = substr($sacks,0,strlen($sacks)-2). "; ". $update;
+			$sql = substr($sacks,0,strlen($sacks)-2). "; ". $waste . $update ;
 			try {   
 				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 				$stmt = $this->_db->prepare($sql);
 				$stmt->execute();
 				$stmt->closeCursor();
-				echo '<strong>SUCCESS!</strong> The sacks were successfully added to the database for the shift: <strong>'. $this->giveShiftname($shift) .'</strong>';
+				echo '<strong>SUCCESS!</strong> The sacks were successfully added to the database for the day';
 				return TRUE;
 			}
 			catch (PDOException $e) {
@@ -1736,7 +1796,6 @@ ORDER BY packing_sacks_id";
 			}
 			
 			$sql = substr($rolls,0,strlen($rolls)-2). ";". $waste . $update ;
-			echo '<script>alert("'. $sql.'");</script>;';
 			try {   
 				$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 				$stmt = $this->_db->prepare($sql);
