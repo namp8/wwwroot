@@ -73,6 +73,7 @@
                                 <th>Date</th>
                                 <th>Shift</th>
                                 <th>Machine</th>
+                                <th>Customer</th>
                                 <th>User</th>
                                 <th>Print Waste</th>
                                 <th>Slitting Waste</th>
@@ -138,6 +139,20 @@
 				<input type="hidden" class="form-control" id="machine" name="machine" value="1" required>
 				<input type="text" class="form-control" step="1" min="1" id="machineName"  value="" disabled>
 			</div>
+			<div class="form-group">
+                                    <label for="customer">Customer</label><br />
+                                    <input type="hidden" class="form-control" id="customer" name="customer">
+                                    <div class="dropdown">
+                                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_customer">&nbsp&nbsp<span class="caret"></span></button>
+                                        <ul class="dropdown-menu" id="dropdown_customer">
+                                            <li><input type="text" placeholder="Search customer.." class="searchDropdown" id="searchCustomer" onkeyup="filterCustomers()" width="100%"></li>
+                                            <?php
+    $slitting->customersDropdown(1);
+ ?>
+                                        </ul>
+                                    </div>
+                                    
+             </div>
             <div class="form-group">
                 <label for="total">Print waste <span class="text-danger">*</span></label>
                 <input type="number" class="form-control" min="0" step="0.01" id="print" name="print" value="0" required>
@@ -161,6 +176,11 @@
     </div>
 
         <script>
+			
+				 function selectCustomer1(id, name) {
+                    document.getElementById("btn_customer").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+                    document.getElementById("customer").value = id;
+                }
             function selectShift(id, name) {
                 document.getElementById("btn_shift").innerHTML = name+" &nbsp&nbsp<span class='caret'></span> ";
                 document.getElementById("shift").value = id;

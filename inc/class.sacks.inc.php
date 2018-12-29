@@ -68,7 +68,7 @@ class Sacks
         }
     }
 	
-	 public function operators1Dropdown()
+	 public function operatorsDropdown($x)
     {
         $sql = "SELECT `employees`.`employee_id`,
 					`employees`.employee_name
@@ -82,7 +82,7 @@ class Sacks
             {
                 $ID = $row['employee_id'];
                 $NAME = $row['employee_name'];
-                echo  '<li><a id="'. $NAME .'" onclick="selectEmployee1(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
+                echo  '<li><a id="'. $NAME .'" onclick="selectEmployee'.$x.'(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
             }
             $stmt->closeCursor();
         }
@@ -92,29 +92,6 @@ class Sacks
         }
     }
 	
-	 public function operators2Dropdown()
-    {
-        $sql = "SELECT `employees`.`employee_id`,
-					`employees`.employee_name
-				FROM `ups_db`.`employees`
-				WHERE sacks = 1;
-				ORDER BY employee_name";
-        if($stmt = $this->_db->prepare($sql))
-        {
-            $stmt->execute();
-            while($row = $stmt->fetch())
-            {
-                $ID = $row['employee_id'];
-                $NAME = $row['employee_name'];
-                echo  '<li><a id="'. $NAME .'" onclick="selectEmployee2(\''. $ID .'\',\''. $NAME .'\')">'. $NAME .'</a></li>'; 
-            }
-            $stmt->closeCursor();
-        }
-        else
-        {
-            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
-        }
-    }
 	
 	/**
      * Loads the dropdown of all the materials

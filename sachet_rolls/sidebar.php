@@ -87,8 +87,9 @@
 							<li><a class="two" href="printing/receive.php"><i class="fa fa-share" aria-hidden="true"></i><span>&nbsp Receive</span></a></li>
 							<li><a class="two" href="printing/stock.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Stock</span></a></li>
                             
-                            <li class="divider"></li><center>Multilayer</center>
+                            <li class="divider"></li><center>Rolls</center>
                             <li><a class="three" href="multilayer/rolls_stock.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Multilayer rolls </span></a></li>
+                            <li><a class="three" href="printing/macchi_rolls.php"><i class="fa fa-cubes" aria-hidden="true"></i><span>&nbsp Macchi rolls </span></a></li>
                             
                             <li class="divider"></li><center>Production</center>
                             <li><a class="four" href="printing/rolls.php"><i class="fa fa-battery-empty" aria-hidden="true"></i><span>&nbsp Rolls</span></a></li>

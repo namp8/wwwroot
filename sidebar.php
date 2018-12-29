@@ -51,18 +51,21 @@
 		<li role="separator" class="divider"></li>
 		';
 	}
+    if($users->admin())
+	{
+		echo '<li><a href="/settings/home.php"><i class="fa fa-gears" aria-hidden="true"></i><span>Settings</span></a></li>
+		<li role="separator" class="divider"></li>
+		';
+	}
 ?>	
 		
 		
+
 		
-		
-<!--
-		<li><a href="/settings/home.php"><i class="fa fa-gears" aria-hidden="true"></i><span>Settings</span></a></li>
-		<li role="separator" class="divider"></li>
 
 		<li role="separator" class="divider"></li>
 		<li role="separator" class="divider"></li>
--->
+
 <!--
 		<li>
 			<a href="#"><i class="fa fa-fw fa-bell"></i><span>Alerts</span></a>

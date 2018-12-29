@@ -60,6 +60,215 @@ class General
         }
 	}
 	
+	//CUSTOMERS
+	public function giveCustomers()
+	{
+		$sql = "SELECT `customers`.`customer_id`,
+					`customers`.`customer_name`,
+					`customers`.`sachet_rolls`,
+					`customers`.`packing_bags`,
+					`customers`.`shrink_film`
+				FROM `ups_db`.`customers`;";
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				$sachet = $bags = $shrink = false;
+				$SACHET = '';
+				if($row['sachet_rolls'] == 1)
+				{
+					$SACHET = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$sachet = true;
+				}
+				$BAGS = '';
+				if($row['packing_bags'] == 1)
+				{
+					$BAGS = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$bags = true;
+				}
+				$SHRINK = '';
+				if($row['shrink_film'] == 1)
+				{
+					$SHRINK = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$shrink = true;
+				}
+                echo '<tr>
+                    <td>'. $row['customer_name'] .'</td>
+                    <td>'. $SACHET .'</td>
+                    <td>'. $BAGS .'</td>
+                    <td>'. $SHRINK .'</td>
+					<td><button class="btn btn-xs btn-warning" type="button" onclick="edit(\''. $row['customer_id'] .'\',\''. $row['customer_name'] .'\',\''. $sachet .'\',\''. $bags .'\',\''. $shrink .'\')"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+					<button class="btn btn-xs btn-danger" type="button" onclick="deleteCustomer(\''. $row['customer_id'] .'\',\''. $row['customer_name'] .'\')">X</button></td>
+                </tr>';
+            }
+            $stmt->closeCursor();
+            
+        }  
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+	}
+	
+    public function createCustomer()
+    {
+        $name = "";
+        $sachet = $bags = $shrink = 0;
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+		if(isset($_POST["product"]))
+		{
+			$array = $_POST["product"];
+			foreach($array as $product)
+			{
+				if($product == "sachet")
+				{
+					$sachet = 1;
+				}
+				else if($product == "bags")
+				{
+					$bags = 1;
+				}
+				else if($product == "shrink")
+				{
+					$shrink = 1;
+				}
+			}
+		}
+		else
+		{
+			echo '<strong>ERROR</strong> You did not choose any products. Please try again.'; 
+			return FALSE;
+		}
+        
+        $sql = "INSERT INTO `customers`(`customer_id`,`customer_name`,`sachet_rolls`,`packing_bags`,`shrink_film`) VALUES (NULL,:name,:sachet,:bags,:shrink);";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":name", $name, PDO::PARAM_STR);
+            $stmt->bindParam(":sachet", $sachet, PDO::PARAM_INT);
+            $stmt->bindParam(":bags", $bags, PDO::PARAM_INT);
+            $stmt->bindParam(":shrink", $shrink, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The customer was successfully added to the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> There is customer in the system with the same name. Try updating it<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not insert the customer into the database. Please try again.<br>'. $e->getMessage();
+            }
+            return FALSE;
+        } 
+
+    }
+	
+	public function updateCustomer()
+    {
+        $id = $name = "";
+        $sachet = $bags = $shrink = 0;
+		
+		$id = trim($_POST["id_customer"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+		if(isset($_POST["product"]))
+		{
+			$array = $_POST["product"];
+			foreach($array as $product)
+			{
+				if($product == "sachet")
+				{
+					$sachet = 1;
+				}
+				else if($product == "bags")
+				{
+					$bags = 1;
+				}
+				else if($product == "shrink")
+				{
+					$shrink = 1;
+				}
+			}
+		}
+		else
+		{
+			echo '<strong>ERROR</strong> You did not choose any products. Please try again.'; 
+			return FALSE;
+		}
+        
+        $sql = "UPDATE`customers`
+				SET
+				`customer_name` = :name,
+				`sachet_rolls` = :sachet,
+				`packing_bags` = :bags,
+				`shrink_film` = :shrink
+				WHERE `customer_id` = :id;";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->bindParam(":name", $name, PDO::PARAM_STR);
+            $stmt->bindParam(":sachet", $sachet, PDO::PARAM_INT);
+            $stmt->bindParam(":bags", $bags, PDO::PARAM_INT);
+            $stmt->bindParam(":shrink", $shrink, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The customer was successfully updated the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> There is customer in the system with the same name. Try updating it<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not update the customer into the database. Please try again.<br>'. $e->getMessage();
+            }
+            return FALSE;
+        } 
+
+    }
+	
+	public function deleteCustomer()
+    {
+        $id = $name = "";
+		
+		$id = trim($_POST["id_customer"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+        
+        $sql = "DELETE FROM `customers`
+				WHERE `customer_id` = :id;";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The customer was successfully deleted from the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+              echo '<strong>ERROR</strong> Could not delete the customer from the database. The reason is that the customer has products or orders associated to it.<br>'. $e->getMessage();
+            return FALSE;
+        } 
+
+    }
+	
 	///SHORTFALLS 
 	
 	/**

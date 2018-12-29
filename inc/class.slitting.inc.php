@@ -448,7 +448,7 @@ VALUES";
 		$sql = "SELECT 
     machine_name,
     `waste`.`date_waste`,
-    `waste`.`shift`,
+    `waste`.`shift`, `customers`.`customer_name`,
     `waste`.`waste` as print, slitting_waste.waste as slitting, trim_waste.waste as trim,
     username
 FROM
@@ -457,6 +457,8 @@ NATURAL JOIN
     users
 NATURAL JOIN
     machines
+LEFT JOIN
+	`customers` ON `waste`.product = customer_id
 LEFT JOIN
     `waste` slitting_waste ON `waste`.date_waste = slitting_waste.date_waste
         AND `waste`.machine_id = slitting_waste.machine_id
@@ -477,12 +479,14 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift` DESC, `waste`.machine_id;";
             {
                 $DATE = $row['date_waste'];
                 $USER = $row['username'];
+                $CUSTOMER = $row['customer_name'];
                 $SHIFT = $this->giveShiftname($row['shift']);
                 $TOTAL = $row['print'] + $row['slitting']+ $row['trim'];
                 echo '<tr>
                         <td>'. $DATE .'</td>
                         <td>'. $SHIFT .'</td>
                         <td>'. $row['machine_name'] .'</td>
+                        <td>'. $CUSTOMER .'</td>
                         <td>'. $USER .'</td>
                         <td class="text-right">'. number_format($row['print'],2,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['slitting'],2,'.',',') .'</td>
@@ -527,7 +531,13 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift` DESC, `waste`.machine_id;";
         $trim = stripslashes($trim);
         $trim = htmlspecialchars($trim); 
 		
-		
+		$customer = trim($_POST["customer"]);
+        $customer = stripslashes($customer);
+        $customer = htmlspecialchars($customer);
+		if(empty($_POST['customer']))
+        {
+			$customer = 'NULL';
+		}
 		
 		$total = $trim + $print + $slitting;
         
@@ -544,22 +554,9 @@ ORDER BY `waste`.date_waste DESC,  `waste`.`shift` DESC, `waste`.machine_id;";
             $date = $newDateString;
         }
         
-        $product = 0;
-		$sql = "SELECT MAX(product) AS product
-				FROM waste
-				WHERE machine_id = ". $machine ." AND date_waste = '". $date."'	AND shift = ". $shift ."";
-        if($stmt = $this->_db->prepare($sql))
-        {
-            $stmt->execute();
-            while($row = $stmt->fetch())
-            {
-                $product = $row['product'];
-            }
-        }
-		$product = $product + 1;
             
 		//INSERT THE WASTE IN THE DAY DECREASES THE  KGS FROM THE  MULTILAYER_BATCHES_STOCK 
-		$sql = "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`,`product`) VALUES (NULL,'". $date."', ". $shift .",". $machine .", ". $print .", ". $_SESSION['Userid'] .", 1, ". $product ."), (NULL,'". $date."', ". $shift .",". $machine .", ". $slitting .", ". $_SESSION['Userid'] .", 2, ". $product ."), (NULL,'". $date."', ". $shift .",". $machine .", ". $trim .", ". $_SESSION['Userid'] .", 3, ". $product .");";
+		$sql = "INSERT INTO  `waste`(`waste_id`,`date_waste`,`shift`,`machine_id`,`waste`,`user_id`,`type`,`product`) VALUES (NULL,'". $date."', ". $shift .",". $machine .", ". $print .", ". $_SESSION['Userid'] .", 1, ". $customer ."), (NULL,'". $date."', ". $shift .",". $machine .", ". $slitting .", ". $_SESSION['Userid'] .", 2, ". $customer ."), (NULL,'". $date."', ". $shift .",". $machine .", ". $trim .", ". $_SESSION['Userid'] .", 3, ". $customer .");";
 		try
 		{   
 			$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );

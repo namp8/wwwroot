@@ -156,7 +156,7 @@ class Macchi
                         <td><b>'. $NAME .'</b></td>
                         <td>'. $GRADE .'</td>
                         <td class="text-right">'. number_format($PERCENTAGE,1,'.',',') .'</td>
-                        <td><button class="btn btn-xs btn-warning" type="button" onclick="update(\''. $LAYER .'\',\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">E</button><button class="btn btn-xs btn-danger" type="button" onclick="deleteFormula(\''. $LAYER .'\',\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">X</button></td>
+                        <td><button class="btn btn-xs btn-warning" type="button" onclick="update(\''. $LAYER .'\',\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-xs btn-danger" type="button" onclick="deleteFormula(\''. $LAYER .'\',\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">X</button></td>
                     </tr>';
                     $materialArray=array($NAME,$GRADE,$PERCENTAGE);
                     array_push($a,$materialArray);
@@ -308,9 +308,18 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
+		
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
         
         $sql = "INSERT INTO  `macchi_formulas`(`macchi_formula_id`,`material_id`, `layer`,`percentage`,`from`,`to`,`actual`,
-		`remarks`,`product`) VALUES(NULL,:material, :layer,:percentage, CURRENT_DATE(),NULL,1, :remarks,:product);";
+		`remarks`,`product`) VALUES(NULL,:material, :layer,:percentage, '". $date."',NULL,1, :remarks,:product);";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -360,12 +369,22 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 		
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
+		
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+        
         
         $sql = "UPDATE  `macchi_formulas`
-                SET `to` = CURRENT_DATE, `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+                SET `to` = '". $date."', `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
                 WHERE `material_id` = '".$material ."' AND `layer` ='".$layer ."' AND `actual` = 1 AND `product` = ". $product .";
 				INSERT INTO `macchi_formulas`(`macchi_formula_id`,`material_id`, `layer`,`percentage`,`from`,`to`,`actual`,
-				`remarks`,`product`) VALUES(NULL,:material, :layer,:percentage, CURRENT_DATE(),NULL,1, :remarks,:product);";
+				`remarks`,`product`) VALUES(NULL,:material, :layer,:percentage, '". $date."' ,NULL,1, :remarks,:product);";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -406,8 +425,18 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
         
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+        
+		
         $sql = "UPDATE  `macchi_formulas`
-                SET `to` = CURRENT_DATE, `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+                SET `to` = '". $date."', `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
                 WHERE `material_id` = '".$material ."' AND `layer` ='".$layer ."' AND `actual` = 1 AND `product` = ". $product .";";
         try
         {   

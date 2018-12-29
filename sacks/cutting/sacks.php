@@ -236,7 +236,7 @@
 										<ul class="dropdown-menu" role="menu" id="dropdown_employee1">
 											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee1" onkeyup="filterEmployee1()" width="100%"></li>
 											<?php
-	$sacks->operators1Dropdown();
+	$sacks->operatorsDropdown(1);
 ?>
 										</ul>
 									</div>
@@ -250,7 +250,7 @@
 										<ul class="dropdown-menu" role="menu" id="dropdown_employee2">
 											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee2" onkeyup="filterEmployee2()" width="100%"></li>
 											<?php
-	$sacks->operators2Dropdown();
+	$sacks->operatorsDropdown(2);
 ?>
 										</ul>
 									</div>
@@ -367,13 +367,13 @@
 								
 								<div class="col-md-6 form-group">
 									<label for="shift">Operator 1 <span class="text-danger">*</span></label><br />
-									<input type="hidden" class="form-control" id="employee1" name="employee3" >
+									<input type="hidden" class="form-control" id="employee3" name="employee3" >
 									<div class="btn-group">
-										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee1">&nbsp&nbsp<span class="caret"></span></button>
+										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee3">&nbsp&nbsp<span class="caret"></span></button>
 										<ul class="dropdown-menu" role="menu" id="dropdown_employee1">
 											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee1" onkeyup="filterEmployee1()" width="100%"></li>
 											<?php
-	$sacks->operators1Dropdown();
+	$sacks->operatorsDropdown(3);
 ?>
 										</ul>
 									</div>
@@ -381,13 +381,13 @@
 								
 								<div class="col-md-6 form-group">
 									<label for="shift">Operator 2 </label><br />
-									<input type="hidden" class="form-control" id="employee2" name="employee4" >
+									<input type="hidden" class="form-control" id="employee4" name="employee4" >
 									<div class="btn-group">
-										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee2">&nbsp&nbsp<span class="caret"></span></button>
+										<button class="btn btn-default btn-block dropdown-toggle" type="button" data-toggle="dropdown" id="btn_employee4">&nbsp&nbsp<span class="caret"></span></button>
 										<ul class="dropdown-menu" role="menu" id="dropdown_employee2">
 											<li><input type="text" placeholder="Search employee.." class="searchDropdown" id="searchEmployee2" onkeyup="filterEmployee2()" width="100%"></li>
 											<?php
-	$sacks->operators2Dropdown();
+	$sacks->operatorsDropdown(4);
 ?>
 										</ul>
 									</div>
@@ -566,6 +566,15 @@
 				function selectEmployee2(id, name) {
 					document.getElementById("btn_employee2").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("employee2").value = id;
+				}
+				function selectEmployee3(id, name) {
+					document.getElementById("btn_employee3").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("employee3").value = id;
+				}
+				
+				function selectEmployee4(id, name) {
+					document.getElementById("btn_employee4").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
+					document.getElementById("employee4").value = id;
 				}
 
 				function filterEmployee1() {

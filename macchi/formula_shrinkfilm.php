@@ -253,6 +253,15 @@
         <form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
           <div class="modal-body">
             <input type="hidden" class="form-control" id="action" name="action" value=0>
+			   <div class="form-group">
+									<label for="date">Date <span class="text-danger">*</span></label>
+									<div class='input-group date' id='datetimepicker'>
+										<input type='text' class="form-control" id="date" name="date" required/>
+										<span class="input-group-addon">
+                        <span class="fa fa-calendar"></span>
+										</span>
+									</div>
+								</div>
             <div class="form-group">
                 <label for="layer">Layer <span class="text-danger">*</span></label><br />
                 <input type="hidden" class="form-control" id="layer" name="layer" value=1 required>
@@ -300,6 +309,13 @@
 
     <script>
         window.onload = function() {
+			
+			$('#datetimepicker').datetimepicker({
+						format: 'DD/MM/YYYY'
+					});
+				var d = new Date();
+					var month = d.getMonth() + 1;
+					document.getElementById("date").value = d.getDate() + "/" + month + "/" + d.getFullYear();
 
             var chart = new CanvasJS.Chart("chartContainer", {
                 theme: "light2",
