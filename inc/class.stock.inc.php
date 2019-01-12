@@ -4676,6 +4676,7 @@ ORDER BY report.datereport;";
 						$stmt2->execute();
 						while($row2 = $stmt2->fetch())
 						{
+							
 							$DATE = $row2['datereport'];
 							$MATERIAL = $row2['material_name'];
 							$GRADE = $row2['material_grade'];
@@ -4685,6 +4686,36 @@ ORDER BY report.datereport;";
 							$OTHER = $row2['other'];
 							$ISSUED = $row2['issued'];
 							$CLOSING = $row2['closing'];
+							
+							if($DATE == date("Y-m-d"))
+							{
+								$sql3 = "SELECT `stock_materials`.`stock_material_id`,`stock_materials`.`material_id`, `stock_materials`.`machine_id`,`stock_materials`.`bags` 
+								FROM `stock_materials`
+								WHERE material_id = ".$material." AND machine_id = 1;";
+								if($stmt3 = $this->_db->prepare($sql3))
+								{
+									$stmt3->execute();
+									while($row3 = $stmt3->fetch())
+									{
+										if($row3['bags'] != $CLOSING)
+										{
+											$sql4 = "UPDATE `stock_materials` SET`bags` = :bags
+											WHERE `stock_material_id` = :id;";
+											try
+											{   
+												$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+												$stmt4 = $this->_db->prepare($sql4);
+												$stmt4->bindParam(":id", $row3['stock_material_id'], PDO::PARAM_INT);
+												$stmt4->bindParam(":bags", $CLOSING, PDO::PARAM_INT);
+												$stmt4->execute();
+												$stmt4->closeCursor();
+											} catch (PDOException $e) {
+												echo '<strong>ERROR</strong> There is an error running the report, please try to execute it again.<br>'. $e->getMessage();
+											} 
+										}
+									}
+								}
+							}
 
 							
 							$DIFF = '<td class="text-right">'. number_format((float) $row2['difference'],0,'.',',') .'</td>';

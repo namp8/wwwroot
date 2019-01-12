@@ -409,16 +409,16 @@ $materials->materialsKgDropdown();
 						'' + pageTotal4.toLocaleString()
 					);
 					
-					pageTotal6 = api
-						.column(6, {
+					pageTotal7 = api
+						.column(7, {
 							page: 'current'
 						})
 						.data()
 						.reduce(function(a, b) {
 							return intVal(a) + intVal(b);
 						}, 0);
-					$(api.column(6).footer()).html(
-						'' + pageTotal6.toLocaleString()
+					$(api.column(7).footer()).html(
+						'' + pageTotal7.toLocaleString()
 					);
 					pageTotal9 = api
 						.column(9, {
