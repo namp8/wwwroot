@@ -9,7 +9,7 @@
     include_once "../inc/class.general.inc.php";
     $general = new General($db);
 
-	if(!$users->admin())
+if(!$users->access('settings'))
 	{
 		echo "<meta http-equiv='refresh' content='0;/index.php'>";
         exit;
@@ -79,7 +79,7 @@
             <div class="panel-heading">Customers</div>
             <div class="panel-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <table class="table table-bordered table-hover table-xs" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr class="active">
                                 <th>Name</th>
@@ -149,6 +149,8 @@
            	document.getElementById("sachet").checked = false;
             document.getElementById("bags").checked = false;
             document.getElementById("shrink").checked = false;
+			
+            document.getElementById("name").readOnly = false;
         }
 		
         function edit(id,name,sachet,bags,shrink) {
@@ -163,6 +165,7 @@
            	document.getElementById("sachet").checked = sachet;
             document.getElementById("bags").checked = bags;
             document.getElementById("shrink").checked = shrink;
+            document.getElementById("name").readOnly = false;
 			$(modal1).modal();
         }
 
@@ -175,7 +178,7 @@
 			
 			document.getElementById("id_customer").value = id;
             document.getElementById("name").value = name;
-            document.getElementById("name").readonly = true;
+            document.getElementById("name").readOnly = true;
 			
 			$(modal1).modal();
         }
@@ -183,7 +186,11 @@
     </script>
 <script>
         $(document).ready(function() {
-            $("#dataTable").DataTable();
+            $("#dataTable").DataTable({
+				"order": [],
+				"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]]
+				
+			});
         });
     </script>
 

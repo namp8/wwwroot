@@ -61,6 +61,62 @@ class General
 	}
 	
 	//CUSTOMERS
+	public function giveOperators()
+	{
+		$sql = "SELECT `employees`.`employee_id`,
+    `employees`.`employee_name`,
+    `employees`.`sacks`,
+    `employees`.`injection`,
+    `employees`.`macchi`,
+    `employees`.`multilayer`,
+    `employees`.`printing`,
+    `employees`.`packing`,
+    `employees`.`slitting`
+FROM `employees`;
+";
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				$sachet = $bags = $shrink = false;
+				$SACHET = '';
+				if($row['sachet_rolls'] == 1)
+				{
+					$SACHET = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$sachet = true;
+				}
+				$BAGS = '';
+				if($row['packing_bags'] == 1)
+				{
+					$BAGS = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$bags = true;
+				}
+				$SHRINK = '';
+				if($row['shrink_film'] == 1)
+				{
+					$SHRINK = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$shrink = true;
+				}
+                echo '<tr>
+                    <td>'. $row['customer_name'] .'</td>
+                    <td>'. $SACHET .'</td>
+                    <td>'. $BAGS .'</td>
+                    <td>'. $SHRINK .'</td>
+					<td><button class="btn btn-xs btn-warning" type="button" onclick="edit(\''. $row['customer_id'] .'\',\''. $row['customer_name'] .'\',\''. $sachet .'\',\''. $bags .'\',\''. $shrink .'\')"><i class="fa fa-pencil" aria-hidden="true"></i></button>
+					<button class="btn btn-xs btn-danger" type="button" onclick="deleteCustomer(\''. $row['customer_id'] .'\',\''. $row['customer_name'] .'\')">X</button></td>
+                </tr>';
+            }
+            $stmt->closeCursor();
+            
+        }  
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+	}
+	
+	//CUSTOMERS
 	public function giveCustomers()
 	{
 		$sql = "SELECT `customers`.`customer_id`,
@@ -68,7 +124,7 @@ class General
 					`customers`.`sachet_rolls`,
 					`customers`.`packing_bags`,
 					`customers`.`shrink_film`
-				FROM `ups_db`.`customers`;";
+				FROM `customers`;";
 		if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();
@@ -264,6 +320,753 @@ class General
             return TRUE;
         } catch (PDOException $e) {
               echo '<strong>ERROR</strong> Could not delete the customer from the database. The reason is that the customer has products or orders associated to it.<br>'. $e->getMessage();
+            return FALSE;
+        } 
+
+    }
+	//OPERATORS
+	public function giveOperatorsList()
+	{
+		$sql = "SELECT `employees`.`employee_id`,
+					`employees`.`employee_name`,
+					`employees`.`sacks`,
+					`employees`.`injection`,
+					`employees`.`macchi`,
+					`employees`.`multilayer`,
+					`employees`.`printing`,
+					`employees`.`packing`,
+					`employees`.`slitting`
+				FROM `employees`
+				ORDER BY `employee_name`;";
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				$sacks = $injection = $macchi = $multilayer = $printing = $packing  = $slitting = false;
+				
+				
+				$SACKS = '';
+				if($row['sacks'] == 1)
+				{
+					$SACKS = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$sacks = true;
+				}
+				
+				$INJECTION = '';
+				if($row['injection'] == 1)
+				{
+					$INJECTION = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$injection = true;
+				}
+				
+				$MACCHI = '';
+				if($row['macchi'] == 1)
+				{
+					$MACCHI = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$macchi = true;
+				}
+				
+				$MULTILAYER = '';
+				if($row['multilayer'] == 1)
+				{
+					$MULTILAYER = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$multilayer = true;
+				}
+				
+				$PRINTING = '';
+				if($row['printing'] == 1)
+				{
+					$PRINTING = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$printing = true;
+				}
+				
+				$PACKING = '';
+				if($row['packing'] == 1)
+				{
+					$PACKING = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$packing = true;
+				}
+				
+				$SLITTING = '';
+				if($row['slitting'] == 1)
+				{
+					$SLITTING = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$slitting = true;
+				}
+				
+                echo '<tr>
+					<td><button class="btn btn-xs btn-warning" type="button" onclick="edit(\''. $row['employee_id'] .'\',\''. $row['employee_name'] .'\',\''. $sacks .'\',\''. $multilayer .'\',\''. $printing .'\',\''. $slitting .'\',\''. $injection .'\',\''. $macchi .'\',\''. $packing .'\')"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
+					<td><button class="btn btn-xs btn-danger" type="button" onclick="deleteOperator(\''. $row['employee_id'] .'\',\''. $row['employee_name'] .'\')">X</button></td>
+                    <td>'. $row['employee_name'] .'</td>
+                    <td>'. $SACKS .'</td>
+					<td>'. $MULTILAYER .'</td>
+					<td>'. $PRINTING .'</td>
+					<td>'. $SLITTING .'</td>
+					<td>'. $INJECTION .'</td>
+					<td>'. $MACCHI .'</td>
+					<td>'. $PACKING .'</td>
+					
+                </tr>';
+            }
+            $stmt->closeCursor();
+            
+        }  
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+	}
+	public function createOperator()
+    {
+        $name = "";
+        $sacks = $injection = $macchi = $multilayer = $printing = $packing = $slitting = 0;
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+		if(isset($_POST["view"]))
+		{
+			$array = $_POST["view"];
+			foreach($array as $view)
+			{
+				if($view == "Sacks")
+				{
+					$sacks = 1;
+				}
+				else if($view == "Multilayer")
+				{
+					$multilayer = 1;
+				}
+				else if($view == "Printing")
+				{
+					$printing = 1;
+				}
+				else if($view == "Slitting")
+				{
+					$slitting = 1;
+				}
+				else if($view == "Injection")
+				{
+					$injection = 1;
+				}
+				else if($view == "Macchi")
+				{
+					$macchi = 1;
+				}
+				else if($view == "Packing")
+				{
+					$packing = 1;
+				}
+			}
+		}
+		else
+		{
+			echo '<strong>ERROR</strong> You did not choose any section. Please try again.'; 
+			return FALSE;
+		}
+        
+        $sql = "INSERT INTO `employees`
+(`employee_id`,`employee_name`,`sacks`,`injection`,`macchi`,`multilayer`,`printing`,`packing`,`slitting`)
+VALUES (NULL,:name,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:slitting);";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":name", $name, PDO::PARAM_STR);
+            $stmt->bindParam(":sacks", $sacks, PDO::PARAM_INT);
+            $stmt->bindParam(":injection", $injection, PDO::PARAM_INT);
+            $stmt->bindParam(":macchi", $macchi, PDO::PARAM_INT);
+            $stmt->bindParam(":multilayer", $multilayer, PDO::PARAM_INT);
+            $stmt->bindParam(":printing", $printing, PDO::PARAM_INT);
+            $stmt->bindParam(":packing", $packing, PDO::PARAM_INT);
+            $stmt->bindParam(":slitting", $slitting, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The operator was successfully added to the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> There is a operator in the system with the same name. Try updating it<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not insert the operator into the database. Please try again.<br>'. $e->getMessage();
+            }
+            return FALSE;
+        } 
+
+    }
+	public function updateOperator()
+    {
+        $id = $name = "";
+		
+		$sacks = $injection = $macchi = $multilayer = $printing = $packing = $slitting = 0;
+		
+		$id = trim($_POST["id_operator"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+		if(isset($_POST["view"]))
+		{
+			$array = $_POST["view"];
+			foreach($array as $view)
+			{
+				if($view == "Sacks")
+				{
+					$sacks = 1;
+				}
+				else if($view == "Multilayer")
+				{
+					$multilayer = 1;
+				}
+				else if($view == "Printing")
+				{
+					$printing = 1;
+				}
+				else if($view == "Slitting")
+				{
+					$slitting = 1;
+				}
+				else if($view == "Injection")
+				{
+					$injection = 1;
+				}
+				else if($view == "Macchi")
+				{
+					$macchi = 1;
+				}
+				else if($view == "Packing")
+				{
+					$packing = 1;
+				}
+			}
+		}
+		else
+		{
+			echo '<strong>ERROR</strong> You did not choose any section. Please try again.'; 
+			return FALSE;
+		}
+        
+        $sql = "UPDATE `employees`
+				SET
+				`employee_name` = :name,
+				`sacks` = :sacks,
+				`injection` = :injection,
+				`macchi` = :macchi,
+				`multilayer` = :multilayer,
+				`printing` = :printing,
+				`packing` = :packing,
+				`slitting` = :slitting
+				WHERE `employee_id` = :id;";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->bindParam(":name", $name, PDO::PARAM_STR);
+            $stmt->bindParam(":sacks", $sacks, PDO::PARAM_INT);
+            $stmt->bindParam(":injection", $injection, PDO::PARAM_INT);
+            $stmt->bindParam(":macchi", $macchi, PDO::PARAM_INT);
+            $stmt->bindParam(":multilayer", $multilayer, PDO::PARAM_INT);
+            $stmt->bindParam(":printing", $printing, PDO::PARAM_INT);
+            $stmt->bindParam(":packing", $packing, PDO::PARAM_INT);
+            $stmt->bindParam(":slitting", $slitting, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The operator was successfully updated the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> There is operator in the system with the same name. Try updating it<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not update the operator into the database. Please try again.<br>'. $e->getMessage();
+            }
+            return FALSE;
+        } 
+
+    }
+	
+	//USERS
+	public function giveUsers()
+	{
+		$sql = "SELECT `users`.`user_id`,
+				`users`.`username`,
+				`users`.`admin`,
+				`users`.`warehouse_purchases`,
+				`users`.`warehouse_approve`,
+				`users`.`warehouse_issue`,
+				`users`.`warehouse_stock`,
+				`users`.`warehouse_reports`,
+				`users`.`settings`,
+				`users`.`sacks`,
+				`users`.`injection`,
+				`users`.`macchi`,
+				`users`.`multilayer`,
+				`users`.`printing`,
+				`users`.`packing`,
+				`users`.`warehouse`,
+				`users`.`slitting`
+			FROM `users`
+			WHERE `disable` = 0
+			ORDER BY `username`;";
+		if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				$admin = $purchases = $approve = $issue = $stock = $reports = $settings = $sacks = $injection = $macchi = $multilayer = $printing = $packing = $warehouse = $slitting = false;
+				
+				$ADMIN = '';
+				if($row['admin'] == 1)
+				{
+					$ADMIN = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$admin = true;
+				}
+				
+				$PURCHASES = '';
+				if($row['warehouse_purchases'] == 1)
+				{
+					$PURCHASES = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$purchases = true;
+				}
+				
+				$APPROVE = '';
+				if($row['warehouse_approve'] == 1)
+				{
+					$APPROVE = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$approve = true;
+				}
+				
+				$ISSUE = '';
+				if($row['warehouse_issue'] == 1)
+				{
+					$ISSUE = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$issue = true;
+				}
+				
+				$STOCK = '';
+				if($row['warehouse_stock'] == 1)
+				{
+					$STOCK = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$stock = true;
+				}
+				
+				$REPORTS = '';
+				if($row['warehouse_reports'] == 1)
+				{
+					$REPORTS = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$reports = true;
+				}
+				
+				$SETTINGS = '';
+				if($row['settings'] == 1)
+				{
+					$SETTINGS = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$settings = true;
+				}
+				
+				$SACKS = '';
+				if($row['sacks'] == 1)
+				{
+					$SACKS = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$sacks = true;
+				}
+				
+				$INJECTION = '';
+				if($row['injection'] == 1)
+				{
+					$INJECTION = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$injection = true;
+				}
+				
+				$MACCHI = '';
+				if($row['macchi'] == 1)
+				{
+					$MACCHI = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$macchi = true;
+				}
+				
+				$MULTILAYER = '';
+				if($row['multilayer'] == 1)
+				{
+					$MULTILAYER = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$multilayer = true;
+				}
+				
+				$PRINTING = '';
+				if($row['printing'] == 1)
+				{
+					$PRINTING = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$printing = true;
+				}
+				
+				$PACKING = '';
+				if($row['packing'] == 1)
+				{
+					$PACKING = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$packing = true;
+				}
+				
+				$WAREHOUSE = '';
+				if($row['warehouse'] == 1)
+				{
+					$WAREHOUSE = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$warehouse = true;
+				}
+				
+				$SLITTING = '';
+				if($row['slitting'] == 1)
+				{
+					$SLITTING = '<i class="fa fa-check text-success" aria-hidden="true"></i>';
+					$slitting = true;
+				}
+				
+                echo '<tr>
+					<td><button class="btn btn-xs btn-warning" type="button" onclick="edit(\''. $row['user_id'] .'\',\''. $row['username'] .'\',\''. $admin .'\',\''. $settings .'\',\''. $sacks .'\',\''. $multilayer .'\',\''. $printing .'\',\''. $slitting .'\',\''. $injection .'\',\''. $macchi .'\',\''. $packing .'\',\''. $warehouse .'\',\''. $purchases .'\',\''. $approve .'\',\''. $issue .'\',\''. $stock.'\',\''. $reports.'\')"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
+					<td><button class="btn btn-xs btn-danger" type="button" onclick="deleteUser(\''. $row['user_id'] .'\',\''. $row['username'] .'\')">X</button></td>
+                    <td>'. $row['username'] .'</td>
+                    <td>'. $ADMIN .'</td>
+                    <td>'. $SETTINGS .'</td>
+                    <td>'. $SACKS .'</td>
+					<td>'. $MULTILAYER .'</td>
+					<td>'. $PRINTING .'</td>
+					<td>'. $SLITTING .'</td>
+					<td>'. $INJECTION .'</td>
+					<td>'. $MACCHI .'</td>
+					<td>'. $PACKING .'</td>
+					<td>'. $WAREHOUSE .'</td>
+					<td>'. $PURCHASES .'</td>
+					<td>'. $APPROVE .'</td>
+					<td>'. $ISSUE .'</td>
+					<td>'. $STOCK .'</td>
+					<td>'. $REPORTS .'</td>
+					
+                </tr>';
+            }
+            $stmt->closeCursor();
+            
+        }  
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+	}
+	
+	public function createUser()
+    {
+        $name = $password =  "";
+        $admin = $purchases = $approve = $issue = $stock = $reports = $settings = $sacks = $injection = $macchi = $multilayer = $printing = $packing = $warehouse = $slitting = 0;
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+		$password = trim($_POST["password"]);
+        $password = stripslashes($password);
+        $password = htmlspecialchars($password);
+		
+		if(isset($_POST["view"]))
+		{
+			$array = $_POST["view"];
+			foreach($array as $view)
+			{
+				if($view == "Admin")
+				{
+					$admin = 1;
+				}
+				else if($view == "Sacks")
+				{
+					$sacks = 1;
+				}
+				else if($view == "Multilayer")
+				{
+					$multilayer = 1;
+				}
+				else if($view == "Printing")
+				{
+					$printing = 1;
+				}
+				else if($view == "Slitting")
+				{
+					$slitting = 1;
+				}
+				else if($view == "Injection")
+				{
+					$injection = 1;
+				}
+				else if($view == "Macchi")
+				{
+					$macchi = 1;
+				}
+				else if($view == "Packing")
+				{
+					$packing = 1;
+				}
+				else if($view == "Warehouse")
+				{
+					$warehouse = 1;
+				}
+				else if($view == "Settings")
+				{
+					$settings = 1;
+				}
+				else if($view == "Purchases")
+				{
+					$purchases = 1;
+				}
+				else if($view == "Approve")
+				{
+					$approve = 1;
+				}
+				else if($view == "Issue")
+				{
+					$issue = 1;
+				}
+				else if($view == "Stock")
+				{
+					$stock = 1;
+				}
+				else if($view == "Reports")
+				{
+					$reports = 1;
+				}
+			}
+		}
+		else
+		{
+			echo '<strong>ERROR</strong> You did not choose any view. Please try again.'; 
+			return FALSE;
+		}
+        
+        $sql = "INSERT INTO `users` (`user_id`,`username`,`password`,`admin`,`warehouse_purchases`,`warehouse_approve`,`warehouse_issue`,`warehouse_stock`,`warehouse_reports`,`settings`,`sacks`,`injection`,`macchi`,`multilayer`,`printing`,`packing`,`warehouse`,`slitting`,`disable`)
+		VALUES (NULL,:name,MD5(:password),:admin,:purchases,:approve,:issue,:stock,:reports,:settings,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:warehouse,:slitting,0);";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":name", $name, PDO::PARAM_STR);
+            $stmt->bindParam(":password", $password, PDO::PARAM_STR);
+            $stmt->bindParam(":admin", $admin, PDO::PARAM_INT);
+            $stmt->bindParam(":purchases", $purchases, PDO::PARAM_INT);
+            $stmt->bindParam(":approve", $approve, PDO::PARAM_INT);
+            $stmt->bindParam(":issue", $issue, PDO::PARAM_INT);
+            $stmt->bindParam(":stock", $stock, PDO::PARAM_INT);
+            $stmt->bindParam(":reports", $reports, PDO::PARAM_INT);
+            $stmt->bindParam(":settings", $settings, PDO::PARAM_INT);
+            $stmt->bindParam(":sacks", $sacks, PDO::PARAM_INT);
+            $stmt->bindParam(":injection", $injection, PDO::PARAM_INT);
+            $stmt->bindParam(":macchi", $macchi, PDO::PARAM_INT);
+            $stmt->bindParam(":multilayer", $multilayer, PDO::PARAM_INT);
+            $stmt->bindParam(":printing", $printing, PDO::PARAM_INT);
+            $stmt->bindParam(":packing", $packing, PDO::PARAM_INT);
+            $stmt->bindParam(":warehouse", $warehouse, PDO::PARAM_INT);
+            $stmt->bindParam(":slitting", $slitting, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The user was successfully added to the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> There is a user in the system with the same username. Try updating it<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not insert the user into the database. Please try again.<br>'. $e->getMessage();
+            }
+            return FALSE;
+        } 
+
+    }
+	public function updateUser()
+    {
+        $id = $name = "";
+		
+		$admin = $purchases = $approve = $issue = $stock = $reports = $settings = $sacks = $injection = $macchi = $multilayer = $printing = $packing = $warehouse = $slitting = 0;
+		
+		$id = trim($_POST["id_user"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+		$password = trim($_POST["password"]);
+        $password = stripslashes($password);
+        $password = htmlspecialchars($password);
+		
+		if(isset($_POST["view"]))
+		{
+			$array = $_POST["view"];
+			foreach($array as $view)
+			{
+				if($view == "Admin")
+				{
+					$admin = 1;
+				}
+				else if($view == "Sacks")
+				{
+					$sacks = 1;
+				}
+				else if($view == "Multilayer")
+				{
+					$multilayer = 1;
+				}
+				else if($view == "Printing")
+				{
+					$printing = 1;
+				}
+				else if($view == "Slitting")
+				{
+					$slitting = 1;
+				}
+				else if($view == "Injection")
+				{
+					$injection = 1;
+				}
+				else if($view == "Macchi")
+				{
+					$macchi = 1;
+				}
+				else if($view == "Packing")
+				{
+					$packing = 1;
+				}
+				else if($view == "Warehouse")
+				{
+					$warehouse = 1;
+				}
+				else if($view == "Settings")
+				{
+					$settings = 1;
+				}
+				else if($view == "Purchases")
+				{
+					$purchases = 1;
+				}
+				else if($view == "Approve")
+				{
+					$approve = 1;
+				}
+				else if($view == "Issue")
+				{
+					$issue = 1;
+				}
+				else if($view == "Stock")
+				{
+					$stock = 1;
+				}
+				else if($view == "Reports")
+				{
+					$reports = 1;
+				}
+			}
+		}
+		else
+		{
+			echo '<strong>ERROR</strong> You did not choose any view. Please try again.'; 
+			return FALSE;
+		}
+        
+        $sql = "UPDATE `users`
+				SET
+				`username` = :name,
+				`password` = MD5(:password),
+				`admin` = :admin,
+				`warehouse_purchases` = :purchases,
+				`warehouse_approve` = :approve,
+				`warehouse_issue` = :issue,
+				`warehouse_stock` = :stock,
+				`warehouse_reports` = :reports,
+				`settings` = :settings,
+				`sacks` = :sacks,
+				`injection` = :injection,
+				`macchi` = :macchi,
+				`multilayer` = :multilayer,
+				`printing` = :printing,
+				`packing` = :packing,
+				`warehouse` = :warehouse,
+				`slitting` = :slitting
+				WHERE `user_id` = :id;";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->bindParam(":name", $name, PDO::PARAM_STR);
+            $stmt->bindParam(":password", $password, PDO::PARAM_STR);
+            $stmt->bindParam(":admin", $admin, PDO::PARAM_INT);
+            $stmt->bindParam(":purchases", $purchases, PDO::PARAM_INT);
+            $stmt->bindParam(":approve", $approve, PDO::PARAM_INT);
+            $stmt->bindParam(":issue", $issue, PDO::PARAM_INT);
+            $stmt->bindParam(":stock", $stock, PDO::PARAM_INT);
+            $stmt->bindParam(":reports", $reports, PDO::PARAM_INT);
+            $stmt->bindParam(":settings", $settings, PDO::PARAM_INT);
+            $stmt->bindParam(":sacks", $sacks, PDO::PARAM_INT);
+            $stmt->bindParam(":injection", $injection, PDO::PARAM_INT);
+            $stmt->bindParam(":macchi", $macchi, PDO::PARAM_INT);
+            $stmt->bindParam(":multilayer", $multilayer, PDO::PARAM_INT);
+            $stmt->bindParam(":printing", $printing, PDO::PARAM_INT);
+            $stmt->bindParam(":packing", $packing, PDO::PARAM_INT);
+            $stmt->bindParam(":warehouse", $warehouse, PDO::PARAM_INT);
+            $stmt->bindParam(":slitting", $slitting, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The user was successfully updated the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> There is user in the system with the same username. Try updating it<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not update the user into the database. Please try again.<br>'. $e->getMessage();
+            }
+            return FALSE;
+        } 
+
+    }
+	public function deleteUser()
+    {
+        $id = $name = "";
+		
+		$id = trim($_POST["id_user"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+		
+        $name = trim($_POST["name"]);
+        $name = stripslashes($name);
+        $name = htmlspecialchars($name);
+		
+        
+        $sql = "DELETE FROM `users`
+				WHERE `user_id` = :id;";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The user was successfully deleted from the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+				$sql = "UPDATE `users`
+						SET`password` = 'disable',`disable` = 1
+						WHERE `user_id` = :id;";
+				try
+				{   
+					$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+					$stmt = $this->_db->prepare($sql);
+					$stmt->bindParam(":id", $id, PDO::PARAM_INT);
+					$stmt->execute();
+					$stmt->closeCursor();
+					echo '<strong>ERROR</strong> Could not delete the user from the database. The reason is that the user has entries associated to it. The user was disabled from the system<br>';
+				} 
+				catch (PDOException $e) {
+				  echo '<strong>ERROR</strong> Could not delete the user from the database.<br>'. $e->getMessage();
+				} 
+				
             return FALSE;
         } 
 

@@ -1,4 +1,17 @@
-
+.table-xs > tbody > tr > td,
+.table-xs > tbody > tr > th,
+.table-xs > tfoot > tr > td,
+.table-xs > tfoot > tr > th {
+    padding: 1px;
+	text-align: center;
+	font-size: 12px;
+}
+.table-xs > thead > tr > td,
+.table-xs > thead > tr > th {
+    padding: 5px;
+	text-align: center;
+	font-size: 12px;
+}
 
 .table-responsive {
   display: block;
@@ -164,11 +177,6 @@ h2 {
   margin-bottom: 20px;
   padding-bottom: 9px;
   border-bottom: 1px solid #eee;
-}
-
-a
-{
-    
 }
 
 #header {

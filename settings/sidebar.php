@@ -14,7 +14,13 @@
 			<a href="home.php"><i class="fa fa-home" aria-hidden="true"></i><span>Settings</span></a>
 		</li><li role="separator" class="divider"></li>';
 		echo '<li>
+			<a href="users.php"><i class="fa fa-user" aria-hidden="true"></i><span>Users</span></a>
+		</li><li role="separator" class="divider"></li>';
+		echo '<li>
 			<a href="customer.php"><i class="fa fa-user" aria-hidden="true"></i><span>Customers</span></a>
+		</li><li role="separator" class="divider"></li>';
+		echo '<li>
+			<a href="operators.php"><i class="fa fa-user" aria-hidden="true"></i><span>Operators</span></a>
 		</li><li role="separator" class="divider"></li>';
 		echo '
 		<li data-toggle="collapse" href="#multilayer_submenu" aria-expanded="true" aria-controls="multilayer_submenu">
@@ -26,10 +32,10 @@
 			<ul id="multilayer_submenu" class="sub-menu collapse">
 				<li><a href="materials.php">Raw Material</a></li>
 				<li><a href="inks.php">Ink and Solvents</a></li>
-				<li><a href="masterbatch.php">Master batch</a></li>
+				<li><a href="master_batch.php">Master batch</a></li>
 				<li><a href="consumables.php">Consumable Items</a></li>
 				<li><a href="semifinished.php">Semi finished products</a></li>
-				<li><a href="spareparts.php">Spare Parts</a></li>
+				<li><a href="spare_parts.php">Spare Parts</a></li>
 			</ul>
 		</li>
 		<!-- /warehouse -->

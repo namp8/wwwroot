@@ -1708,7 +1708,6 @@ ORDER BY packing_sacks_id";
 				$totalnet = $totalnet + $net;
 				$rolls = $rolls. " (NULL, '". $date."', '".$rollno."', 1, ". $size .", ". $v .", ". $net .", ". $thickness .", ". $_SESSION['Userid'] .", ". $machine .", 0) ,";
 				
-				echo '<script>alert("ENTRO");</script>;';
 			}
 			if (substr( $k, 0, 4 ) === "wt2_" and !empty($v)){
 				$count = $count + 1;
@@ -1730,7 +1729,7 @@ ORDER BY packing_sacks_id";
 					`stock_materials`.`bags`, kgs_bag, material_name, material_grade
 				FROM `stock_materials`
 				RIGHT JOIN `materials` ON  `materials`.material_id = `stock_materials`.material_id
-				WHERE `machine_id` = 7;";
+				WHERE `machine_id` = 7 AND materials.sacks = 1;";
 		
         if($stmt = $this->_db->prepare($sql))
          {
