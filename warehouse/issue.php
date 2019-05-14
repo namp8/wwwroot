@@ -94,7 +94,7 @@
 
 
         <div class="panel panel-info">
-            <div class="panel-heading"> Historic Issues of the month</div>
+            <div class="panel-heading"> Historic Issues of the year</div>
             <div class="panel-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
@@ -121,12 +121,12 @@
 								<th></th>
 								<th></th>
 								<th></th>
+								<th>Total Issued</th>
+								<th style="text-align:right"></th>
+								<th></th>
 								<th>Total Required</th>
 								<th style="text-align:right"></th>
 								<th>Total Approved</th>
-								<th style="text-align:right"></th>
-								<th></th>
-								<th>Total Issued</th>
 								<th style="text-align:right"></th>
 								<th></th>
 								<th></th>

@@ -36,7 +36,7 @@ class Stock
 			$this->_db = new PDO($dsn, DB_USER, DB_PASS);
 		}
 	}
-
+	
 	/**
      * Access to warehouse pages
 	 * 1 =  purchases, 2= approve, 3= issue, 4= stock, 5= reports
@@ -2866,6 +2866,317 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                 </tr>";
         }
     }
+	public function stockMovements()
+    {
+		$sql = "SELECT stock_materials_transfers_id, from_table.machine_name AS from_t, to_table.machine_name AS to_t,
+                    material_name, material_grade, DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y/%m/%d %H:%i') AS date_t, 
+                    `stock_materials_transfers`.`bags_required`, kgs_bag, `stock_materials_transfers`.`bags_approved`,`stock_materials_transfers`.`bags_issued`, 
+    `stock_materials_transfers`.`bags_receipt`,`stock_materials_transfers`.`remarks_approved`,`stock_materials_transfers`.`remarks_issued`,
+                    u_required.username AS urequired , u_approved.username AS uapproved ,u_issued.username AS uissued,u_received.username AS ureceived, `stock_materials_transfers`.`status_transfer`
+                FROM stock_materials_transfers 
+    			LEFT JOIN materials ON materials.material_id = `stock_materials_transfers`.material_id
+                INNER JOIN users u_required ON stock_materials_transfers.user_id_required = u_required.user_id
+                LEFT JOIN users u_approved ON stock_materials_transfers.user_id_approved = u_approved.user_id
+                LEFT JOIN users u_issued ON stock_materials_transfers.user_id_issued = u_issued.user_id
+                LEFT JOIN users u_received ON stock_materials_transfers.user_id_receipt = u_received.user_id
+                INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
+                INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id
+                WHERE machine_from = 1  AND YEAR(date_required) = YEAR(CURRENT_DATE())
+				ORDER BY status_transfer, `date_required` DESC;";
+		
+		
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['stock_materials_transfers_id'];
+                $DATE = $row['date_t'];
+                $APPROVEDBY = $row['uapproved'];
+				if($row['uapproved'] == null)
+                {
+                    $APPROVEDBY = "";
+                }
+                $ISSUEDBY = $row['uissued'];
+                if($row['uissued'] == null)
+                {
+                    $ISSUEDBY = "";
+                }
+				$RECEBY = $row['ureceived'];
+                if($row['ureceived'] == null)
+                {
+                    $RECEDBY = "";
+                }
+                $FROM = $row['from_t'];
+                $TO = $row['to_t'];
+                $REQUESTEDBY = $row['urequired'];
+                $APPROVEDBY = $row['uapproved'];
+                $MATERIAL = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                $BAGSRE = $row['bags_required'];
+                $BAGSAP = $row['bags_approved'];
+                $BAGSIS = $row['bags_issued'];
+                $BAGSREC = $row['bags_receipt'];
+				
+                $REMARKSAP = $row['remarks_approved'];
+                if($row['remarks_approved'] == null)
+                {
+                    $REMARKSAP = "";
+                }
+                $REMARKSIS = $row['remarks_issued'];
+                if($row['remarks_issued'] == null)
+                {
+                    $REMARKSIS = "";
+                }
+				
+				if($row['bags_approved'] == null)
+				{
+					$APP = '"> 0.00';
+				}
+				else
+				{
+					$APP = '">'.number_format((float) $BAGSAP,2,'.',',');
+					if($BAGSAP != $BAGSRE)
+					{
+						$APP = 'text-danger">'.number_format((float) $BAGSAP,2,'.',',').'';
+					}
+				}
+				
+				if($row['bags_issued'] == null)
+                {
+                    $ISS = '"> 0.00';
+                }
+				else
+				{
+					$ISS = '">'.number_format((float) $BAGSIS,2,'.',',');
+					if($BAGSIS != $BAGSAP)
+					{
+						$ISS = 'text-danger">'.number_format((float) $BAGSIS,2,'.',',').'';
+					}
+				}
+				if($row['bags_receipt'] == null)
+                {
+                    $RECE = '"> 0.00';
+                }
+				else
+				{
+					$RECE = '">'.number_format((float) $BAGSREC,2,'.',',');
+					if($BAGSREC != $BAGSIS)
+					{
+						$RECE = 'text-danger">'.number_format((float) $BAGSREC,2,'.',',').'';
+					}
+				}
+				
+                $STATUS = "";
+                if($row['status_transfer']==0)
+                {
+                    $STATUS = "<p class='text-muted'>Requested</p>";
+                }
+                else if($row['status_transfer']==1)
+                {
+                    $STATUS = "<p class='text-warning'>Approved</p>";
+                }
+                else if($row['status_transfer']==2)
+                {
+                    $STATUS = "<p class='text-info'>Issued</p>";
+                }
+                else if($row['status_transfer']==3)
+                {
+                    $STATUS = "<b class='text-success'> Received </b>";
+                }
+                 
+                 
+                 
+                echo '<tr>
+                        <td></td>
+                        <td>'. $DATE .'</td>
+                        <td>'. $TO .'</td>
+                        <td><b>'. $MATERIAL .'</b>&nbsp - &nbsp'. $GRADE .'</td>
+                        <td class="text-right">'. number_format((float) $BAGSRE,2,'.',',') .'</td>
+                        <td>'. $REQUESTEDBY .'</td>
+                        <td class="text-right '. $APP .'</td>
+                        <td>'. $APPROVEDBY .'</td>
+						<td class="text-right '. $ISS .'</td>
+                        <td>'. $ISSUEDBY .'</td>
+						<td class="text-right '. $RECE .'</td>
+                        <td>'. $ISSUEDBY .'</td>
+                        <td>'. $STATUS .'</td>
+                        <td>'. $REMARKSAP .'</td>
+                        <td>'. $REMARKSIS .'</td>
+                    </tr>';
+                }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
+	public function stockBalances()
+    {
+		$sql = "SELECT `stock_balance`.`stock_balance_id`,`stock_balance`.`oldbags`,`stock_balance`.`newbags`,`stock_balance`.`difference`,`stock_balance`.`remarks`, `stock_balance`.`material_id` , machine_name,material_name, material_grade, DATE_FORMAT(`stock_balance`.`date_balance`, '%d/%m/%Y') AS date_t, username
+		FROM `stock_balance` 
+		INNER JOIN materials ON materials.material_id = `stock_balance`.`material_id`
+		INNER JOIN users ON `stock_balance`.`user_id` = users.user_id
+		INNER JOIN machines ON `stock_balance`.`machine_id` = machines.machine_id
+		WHERE YEAR(date_balance) = YEAR(CURRENT_DATE()) 
+		ORDER BY `date_balance` DESC;";
+		
+		
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['stock_balance_id'];
+                $DATE = $row['date_t'];
+                $MACHINE = $row['machine_name'];
+                $USER = $row['username'];
+                $MATERIAL = $row['material_name'];
+                $GRADE = $row['material_grade'];
+                echo '<tr>
+					<td>'. $DATE .'</td>
+                        <td>'. $MACHINE .'</td>
+                        <td><b>'. $MATERIAL .'</b>&nbsp - &nbsp'. $GRADE .'</td>
+                        <td class="text-right">'. number_format((float) $row['oldbags'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format((float) $row['newbags'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format((float) $row['difference'],2,'.',',') .'</td>
+                        <td>'. $USER.'</td>
+                        <td>'. $row['remarks'] .'</td>';
+				if($this->administrators())
+				{
+					echo '<td><button class="btn btn-xs btn-warning" type="button" onclick="edit(\''. $ID .'\',\''. $DATE .'\',\''. $MACHINE .'\',\''. $row['material_id'] .'\',\''. $MATERIAL .' - '. $GRADE .'\',\''. $row['oldbags'] .'\',\''. $row['newbags'] .'\',\''. $row['difference'] .'\',\''. $row['remarks'] .'\')"><i class="fa fa-pencil" aria-hidden="true"></i></button></td>
+					<td><button class="btn btn-xs btn-danger" type="button" onclick="deleteBalance(\''. $ID .'\',\''. $DATE .'\',\''. $MACHINE .'\',\''. $row['material_id'] .'\',\''. $MATERIAL .' - '. $GRADE .'\',\''. $row['oldbags'] .'\',\''. $row['newbags'] .'\',\''. $row['difference'] .'\',\''. $row['remarks'] .'\')">X</button></td>';
+				}
+				echo '</tr>';
+          }
+            
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	public function updateBalance()
+    {
+        $id = $material = "";
+		
+		$id = trim($_POST["id_balance"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+		
+		
+		$material = trim($_POST["id_material"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+		
+		$date = $oldbags = $newbags = $difference = $remarks= "";
+        
+		$date = "NOW()";
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = "'".$newDateString ." 07:00:00'";
+        }
+		        
+        $newbags = trim($_POST["newbags"]);
+        $newbags = stripslashes($newbags);
+        $newbags = htmlspecialchars($newbags);
+        
+        $oldbags = trim($_POST["oldbags"]);
+        $oldbags = stripslashes($oldbags);
+        $oldbags = htmlspecialchars($oldbags);
+        
+        $difference = trim($_POST["difference"]);
+        $difference = stripslashes($difference);
+        $difference = htmlspecialchars($difference);
+        
+        $remarks = stripslashes($_POST["remarks"]);
+        $remarks = htmlspecialchars($remarks);
+		
+        
+        $sql = "UPDATE `ups_db`.`stock_balance`
+				SET
+				`date_balance` = ". $date .",
+				`oldbags` = :oldbags,
+				`newbags` = :newbags,
+				`difference` = :difference,
+				`remarks` = :remarks
+				WHERE `stock_balance_id` = :id;";
+		try
+		{   
+			$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			$stmt = $this->_db->prepare($sql);
+			$stmt->bindParam(":id", $id, PDO::PARAM_INT);
+			$stmt->bindParam(":oldbags", $oldbags, PDO::PARAM_STR);
+			$stmt->bindParam(":newbags", $newbags, PDO::PARAM_STR);
+			$stmt->bindParam(":difference", $difference, PDO::PARAM_STR);
+			$stmt->bindParam(":remarks", $remarks, PDO::PARAM_STR);
+			$stmt->execute();
+			$stmt->closeCursor();
+			
+			$this->CalculatestockMaterial($material);
+			echo '<br><strong>SUCCESS!</strong> The balance was successfully updated in the database.<br>';
+			return true;
+		} 
+		catch (PDOException $e) {
+		  echo '<strong>ERROR</strong> Could not update the balance from the database.<br>'. $e->getMessage();
+			return false;
+		} 
+		
+
+    }
+	
+	public function deleteBalance()
+    {
+        $id = "";
+		
+		$id = trim($_POST["id_balance"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+		
+		$material = trim($_POST["id_material"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+        
+        $sql = "DELETE FROM `stock_balance`
+				WHERE `stock_balance`.`stock_balance_id` = :id;";
+		try
+		{   
+			$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			$stmt = $this->_db->prepare($sql);
+			$stmt->bindParam(":id", $id, PDO::PARAM_INT);
+			$stmt->execute();
+			$stmt->closeCursor();
+			
+			$this->CalculatestockMaterial($material);
+			echo '<br><strong>SUCCESS!</strong> The balance was successfully disabled from the database.<br>';
+			return true;
+		} 
+		catch (PDOException $e) {
+		  echo '<strong>ERROR</strong> Could not delete the balance from the database.<br>'. $e->getMessage();
+			return false;
+		} 
+		
+
+    }
 	/**
      * Loads the report of raw material transfers
      *
@@ -4144,6 +4455,898 @@ ORDER BY report.datereport;";
 		
 		}
 	}
+	
+	public function Calculatestock()
+    {
+		for($x = 1; $x<5; ++$x) 
+		{ 
+		if($x == 1)
+		{
+        	$sql = "SELECT `materials`.`material_id`
+                FROM `materials`
+				WHERE material = 1
+                ORDER BY `materials`.`material_name`;";
+		}
+		else if($x == 2)
+		{
+        	$sql = "SELECT `materials`.`material_id`
+                FROM `materials`
+				WHERE master_batch = 1
+                ORDER BY `materials`.`material_name`;";
+		}
+		else if($x == 3)
+		{
+        	$sql = "SELECT `materials`.`material_id`
+                FROM `materials`
+				WHERE color = 1
+                ORDER BY `materials`.`material_name`;";
+		}
+		else if($x == 4)
+		{
+        	$sql = "SELECT `materials`.`material_id`
+                FROM `materials`
+				WHERE consumables = 1 AND semifinished = 0
+                ORDER BY `materials`.`material_name`;";
+		}
+		
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $material = $row['material_id'];
+				$query = "SELECT 
+						`raw_materials_imports`.date_cleared AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1
+							AND `stock_balance`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `raw_materials_imports`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							AND `raw_materials_imports`.raw_materials_imports_id <> cleared_2.raw_materials_imports_id
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+					WHERE
+						`raw_materials_imports`.`material_id` = ".$material."
+					UNION ALL SELECT 
+						`local_purchases`.date_arrived AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						SUM(local_purchases.qty) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN  (SELECT SUM(bags_issued) as bags_issued, machine_from, material_id, date_required 
+                            FROM `stock_materials_transfers`
+                            GROUP BY machine_from, material_id, date_required)
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1
+							AND `stock_balance`.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `local_purchases`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` = ".$material." 
+					group by `local_purchases`.date_arrived, `local_purchases`.`material_id`
+					UNION ALL SELECT 
+						`rm_loans`.date_arrived AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + SUM(rm_loans.qty) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN (SELECT SUM(bags_issued) as bags_issued, machine_from, material_id, date_required 
+                            FROM `stock_materials_transfers`
+                            GROUP BY machine_from, material_id, date_required)
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `rm_loans`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` = ".$material." 
+					group by datereport, `rm_loans`.`material_id` 
+					UNION ALL SELECT 
+						DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `stock_materials_transfers`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` = ".$material."
+							AND `stock_materials_transfers`.machine_from = 1 
+							group by datereport
+					UNION ALL SELECT 
+						DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`stock_balance` ON `stock_balance`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `stock_balance`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` = ".$material." AND `stock_balance`.machine_id = 1 
+					UNION ALL SELECT 
+						DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`raw_materials_imports` cleared_2 ON cleared_2.material_id = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` IS NULL
+							AND cleared_2.material_id = ".$material."
+							AND cleared_2.date_cleared2 IS NOT NULL 
+					UNION ALL SELECT 
+						DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`stock_materials_transfers` trans ON trans.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON cleared_2.material_id = trans.`material_id`
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` IS NULL
+							AND cleared_2.material_id IS NULL
+							AND trans.machine_to = 1
+							AND trans.material_id = ".$material."
+					UNION ALL SELECT 
+						dateTable.selected_date,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						(SELECT 
+							ADDDATE('2018-01-01', t4.i * 10000 + t3.i * 1000 + t2.i * 100 + t1.i * 10 + t0.i) selected_date
+						FROM
+							(SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t0, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t1, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t2, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t3, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t4) dateTable
+							LEFT JOIN
+						`raw_materials_imports` ON `raw_materials_imports`.`material_id` = ".$material."
+							AND DATE_FORMAT(`raw_materials_imports`.date_cleared,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = ".$material."
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = ".$material."
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = ".$material."
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = ".$material."
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON cleared_2.material_id = ".$material."
+							AND cleared_2.date_cleared2 IS NOT NULL
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = ".$material."
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = dateTable.selected_date";
+				$newDateString = date("Y-m-d");
+        		$newDateString2 = date("Y-m-d");
+				
+					$sql2= "SELECT DATE_FORMAT(`datereport`, '%Y-%m-%d') AS datereport, material_name, material_grade, opening, imported, local, other, issued, difference, closing
+FROM
+	(
+    SELECT 
+			datereport,".$material." as material_id,
+			@a AS opening,imported, local, other, issued, difference,
+			@a:=@a + imported + local + other - issued + difference AS closing
+		FROM
+        (
+			SELECT 
+					datereport, SUM(imported) as imported, SUM(local) as local, SUM(other) as other, SUM(issued) as issued, SUM(difference) as difference
+			FROM
+			(
+					". $query ."
+					WHERE
+						selected_date <= '". $newDateString2 ."'
+							AND `raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` IS NULL
+							AND cleared_2.material_id IS NULL
+							AND trans.material_id IS NULL
+			ORDER BY datereport
+			) movements GROUP BY DATE_FORMAT(datereport, '%Y-%m-%d') ORDER BY datereport ) months, 
+			(SELECT @a:= 0) t) report
+JOIN materials ON materials.material_id = report.material_id
+WHERE datereport BETWEEN '". $newDateString ."' AND '". $newDateString2 ."'
+ORDER BY report.datereport;";
+
+				
+				ini_set('max_execution_time', 300);
+					if($stmt2 = $this->_db->prepare($sql2))
+					{
+						$stmt2->execute();
+						while($row2 = $stmt2->fetch())
+						{
+							
+							$DATE = $row2['datereport'];
+							$MATERIAL = $row2['material_name'];
+							$GRADE = $row2['material_grade'];
+							$OPENING = $row2['opening'];
+							$IMPORT = $row2['imported'];
+							$LOCAL = $row2['local'];
+							$OTHER = $row2['other'];
+							$ISSUED = $row2['issued'];
+							$CLOSING = $row2['closing'];
+							
+							if($DATE == date("Y-m-d"))
+							{
+								$sql3 = "SELECT `stock_materials`.`stock_material_id`,`stock_materials`.`material_id`, `stock_materials`.`machine_id`,`stock_materials`.`bags` 
+								FROM `stock_materials`
+								WHERE material_id = ".$material." AND machine_id = 1;";
+								if($stmt3 = $this->_db->prepare($sql3))
+								{
+									$stmt3->execute();
+									while($row3 = $stmt3->fetch())
+									{
+										if($row3['bags'] != $CLOSING)
+										{
+											$sql4 = "UPDATE `stock_materials` SET`bags` = :bags
+											WHERE `stock_material_id` = :id;";
+											try
+											{   
+												$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+												$stmt4 = $this->_db->prepare($sql4);
+												$stmt4->bindParam(":id", $row3['stock_material_id'], PDO::PARAM_INT);
+												$stmt4->bindParam(":bags", $CLOSING, PDO::PARAM_INT);
+												$stmt4->execute();
+												$stmt4->closeCursor();
+											} catch (PDOException $e) {
+												echo '<strong>ERROR</strong> There is an error recalculating the stock, please try to execute it again.<br>'. $e->getMessage();
+												
+												return false;
+											} 
+										}
+									}
+								}
+							}
+
+							
+							
+							
+						}
+						
+						$stmt2->closeCursor();
+					}
+				
+            }
+            $stmt->closeCursor();
+        }
+		
+		echo '<strong>SUCCESS</strong> The stock was succesfully recalculated';
+		return true;
+                  
+		}
+    }
+	
+	/**
+     * Loads the report of raw material opening and closing
+     *
+     * This function outputs <li> tags with materials
+     */
+    public function CalculatestockMaterial($materialid)
+    {
+		$material = $materialid;
+				$query = "SELECT 
+						`raw_materials_imports`.date_cleared AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1
+							AND `stock_balance`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `raw_materials_imports`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							AND `raw_materials_imports`.raw_materials_imports_id <> cleared_2.raw_materials_imports_id
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+					WHERE
+						`raw_materials_imports`.`material_id` = ".$material."
+					UNION ALL SELECT 
+						`local_purchases`.date_arrived AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						SUM(local_purchases.qty) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN  (SELECT SUM(bags_issued) as bags_issued, machine_from, material_id, date_required 
+                            FROM `stock_materials_transfers`
+                            GROUP BY machine_from, material_id, date_required)
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1
+							AND `stock_balance`.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `local_purchases`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `local_purchases`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` = ".$material." 
+					group by `local_purchases`.date_arrived, `local_purchases`.`material_id`
+					UNION ALL SELECT 
+						`rm_loans`.date_arrived AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + SUM(rm_loans.qty) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN (SELECT SUM(bags_issued) as bags_issued, machine_from, material_id, date_required 
+                            FROM `stock_materials_transfers`
+                            GROUP BY machine_from, material_id, date_required)
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `rm_loans`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `rm_loans`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` = ".$material." 
+					group by datereport, `rm_loans`.`material_id` 
+					UNION ALL SELECT 
+						DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `stock_materials_transfers`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `stock_materials_transfers`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` = ".$material."
+							AND `stock_materials_transfers`.machine_from = 1 
+							group by datereport
+					UNION ALL SELECT 
+						DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`stock_balance` ON `stock_balance`.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON `stock_balance`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = `stock_balance`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` = ".$material." AND `stock_balance`.machine_id = 1 
+					UNION ALL SELECT 
+						DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`raw_materials_imports` cleared_2 ON cleared_2.material_id = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = cleared_2.material_id
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` IS NULL
+							AND cleared_2.material_id = ".$material."
+							AND cleared_2.date_cleared2 IS NOT NULL 
+					UNION ALL SELECT 
+						DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') AS datereport,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						`raw_materials_imports`
+							RIGHT JOIN
+						`stock_materials_transfers` trans ON trans.`material_id` = `raw_materials_imports`.`material_id`
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = trans.`material_id`
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON cleared_2.material_id = trans.`material_id`
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(trans.`date_required`, '%Y-%m-%d')
+					WHERE
+						`raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` IS NULL
+							AND cleared_2.material_id IS NULL
+							AND trans.machine_to = 1
+							AND trans.material_id = ".$material."
+					UNION ALL SELECT 
+						dateTable.selected_date,
+						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						COALESCE(trans.bags_receipt, 0) AS other,
+						COALESCE(stock_balance.difference, 0) AS difference
+					FROM
+						(SELECT 
+							ADDDATE('2018-01-01', t4.i * 10000 + t3.i * 1000 + t2.i * 100 + t1.i * 10 + t0.i) selected_date
+						FROM
+							(SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t0, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t1, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t2, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t3, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t4) dateTable
+							LEFT JOIN
+						`raw_materials_imports` ON `raw_materials_imports`.`material_id` = ".$material."
+							AND DATE_FORMAT(`raw_materials_imports`.date_cleared,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`local_purchases` ON `local_purchases`.`material_id` = ".$material."
+							AND DATE_FORMAT(`local_purchases`.date_arrived,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`rm_loans` ON `rm_loans`.`material_id` = ".$material."
+							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+							AND `stock_materials_transfers`.`material_id` = ".$material."
+							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`stock_balance` ON `stock_balance`.machine_id = 1  AND `stock_balance`.`material_id` = ".$material."
+							AND DATE_FORMAT(`stock_balance`.`date_balance`,
+								'%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`raw_materials_imports` cleared_2 ON cleared_2.material_id = ".$material."
+							AND cleared_2.date_cleared2 IS NOT NULL
+							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = dateTable.selected_date
+							LEFT JOIN
+						`stock_materials_transfers` trans ON trans.machine_to = 1
+							AND trans.`material_id` = ".$material."
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = dateTable.selected_date";
+				$newDateString = date("Y-m-d");
+        		$newDateString2 = date("Y-m-d");
+				
+					$sql2= "SELECT DATE_FORMAT(`datereport`, '%Y-%m-%d') AS datereport, material_name, material_grade, opening, imported, local, other, issued, difference, closing
+FROM
+	(
+    SELECT 
+			datereport,".$material." as material_id,
+			@a AS opening,imported, local, other, issued, difference,
+			@a:=@a + imported + local + other - issued + difference AS closing
+		FROM
+        (
+			SELECT 
+					datereport, SUM(imported) as imported, SUM(local) as local, SUM(other) as other, SUM(issued) as issued, SUM(difference) as difference
+			FROM
+			(
+					". $query ."
+					WHERE
+						selected_date <= '". $newDateString2 ."'
+							AND `raw_materials_imports`.`material_id` IS NULL
+							AND `local_purchases`.`material_id` IS NULL
+							AND `rm_loans`.`material_id` IS NULL
+							AND `stock_materials_transfers`.`material_id` IS NULL
+							AND `stock_balance`.`material_id` IS NULL
+							AND cleared_2.material_id IS NULL
+							AND trans.material_id IS NULL
+			ORDER BY datereport
+			) movements GROUP BY DATE_FORMAT(datereport, '%Y-%m-%d') ORDER BY datereport ) months, 
+			(SELECT @a:= 0) t) report
+JOIN materials ON materials.material_id = report.material_id
+WHERE datereport BETWEEN '". $newDateString ."' AND '". $newDateString2 ."'
+ORDER BY report.datereport;";
+
+				
+				ini_set('max_execution_time', 300);
+					if($stmt2 = $this->_db->prepare($sql2))
+					{
+						$stmt2->execute();
+						while($row2 = $stmt2->fetch())
+						{
+							
+							$DATE = $row2['datereport'];
+							$MATERIAL = $row2['material_name'];
+							$GRADE = $row2['material_grade'];
+							$OPENING = $row2['opening'];
+							$IMPORT = $row2['imported'];
+							$LOCAL = $row2['local'];
+							$OTHER = $row2['other'];
+							$ISSUED = $row2['issued'];
+							$CLOSING = $row2['closing'];
+							
+							if($DATE == date("Y-m-d"))
+							{
+								$sql3 = "SELECT `stock_materials`.`stock_material_id`,`stock_materials`.`material_id`, `stock_materials`.`machine_id`,`stock_materials`.`bags` 
+								FROM `stock_materials`
+								WHERE material_id = ".$material." AND machine_id = 1;";
+								if($stmt3 = $this->_db->prepare($sql3))
+								{
+									$stmt3->execute();
+									while($row3 = $stmt3->fetch())
+									{
+										if($row3['bags'] != $CLOSING)
+										{
+											$sql4 = "UPDATE `stock_materials` SET`bags` = :bags
+											WHERE `stock_material_id` = :id;";
+											try
+											{   
+												$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+												$stmt4 = $this->_db->prepare($sql4);
+												$stmt4->bindParam(":id", $row3['stock_material_id'], PDO::PARAM_INT);
+												$stmt4->bindParam(":bags", $CLOSING, PDO::PARAM_INT);
+												$stmt4->execute();
+												$stmt4->closeCursor();
+											} catch (PDOException $e) {
+												echo '<strong>ERROR</strong> There is an error recalculating the stock, please try to execute it again.<br>'. $e->getMessage();
+												
+												return false;
+											} 
+										}
+									}
+								}
+							}
+							
+						}
+						$stmt2->closeCursor();
+					}
+		echo '<strong>SUCCESS</strong> The stock was succesfully recalculated';
+		return true;
+    }
 		 
 		
 	/**

@@ -198,11 +198,11 @@ if(!$users->access('settings'))
 			if(checkbox.checked==true){
 				document.getElementById("Purchases").checked = true;
 				document.getElementById("Approve").checked = true;
-				document.getElementById("Issue").checked = true;.
+				document.getElementById("Issue").checked = true;
 				document.getElementById("Stock").checked = true;
 				document.getElementById("Reports").checked = true;
 			}
-			else(checkbox.checked==true){
+			else{
 				document.getElementById("Purchases").checked = false;
 				document.getElementById("Approve").checked = false;
 				document.getElementById("Issue").checked = false;

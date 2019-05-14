@@ -1,0 +1,34 @@
+Waste printing
+Reports for all the company: production, waste, 
+
+
+Stock Transfers 
+C - done
+R - done
+U - 
+D - 
+
+//RAM
+Edit option request, approve, issue
+Edit option all the production 
+Add cones on Macchi
+Finish goods.
+Macchi-Multilayer-Packing
+Printing - Slitting
+Match opening stock April
+
+//Prasad
+Waste add in same time as packing bags.
+
+//VINOTH
+--Injection not able to do entries.16-feb
+Type: transparent and mix color. Caps colors, other mix color
+Shortfalls on production.
+Enter all the production in one page: sacks packed, weighting packs.
+
+//ALAM!
+Balance rolls with Alam.
+Do all the entries in one page. 
+Input rolls do all entries in one page.
+Slitting rolls wrong gross weight
+Maximun 20, min 13

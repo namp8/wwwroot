@@ -48,8 +48,7 @@
     {
         echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
         if(!$stock->approveAll()){
-
-            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
+            echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
         }
         else
         {
@@ -62,7 +61,7 @@
  		<input type="submit" id="approveAll" name="approveAll" class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" value="Approve All">
      </form>
         <div class="panel panel-info">
-            <div class="panel-heading"> Historic Approvals of the month</div>
+            <div class="panel-heading"> Historic Approvals of the year</div>
             <div class="panel-body">
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">

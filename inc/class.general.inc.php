@@ -577,7 +577,7 @@ VALUES (NULL,:name,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:sli
             $stmt->bindParam(":slitting", $slitting, PDO::PARAM_INT);
             $stmt->execute();
             $stmt->closeCursor();
-            echo '<strong>SUCCESS!</strong> The operator was successfully updated the database.';
+            echo '<strong>SUCCESS!</strong> The operator was successfully updated in  the database.';
             return TRUE;
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
@@ -589,7 +589,33 @@ VALUES (NULL,:name,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:sli
         } 
 
     }
-	
+	public function deleteOperator()
+    {
+        $id = "";
+		
+		$id = trim($_POST["id_operator"]);
+        $id = stripslashes($id);
+        $id = htmlspecialchars($id);
+        
+        $sql = "UPDATE `employees`
+				SET `disable` = 1
+				WHERE `employee_id` = :id;";
+		try
+		{   
+			$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			$stmt = $this->_db->prepare($sql);
+			$stmt->bindParam(":id", $id, PDO::PARAM_INT);
+			$stmt->execute();
+			$stmt->closeCursor();
+			echo '<strong>SUCCESS!</strong> The operator was successfully disabled from the database.<br>';
+			return true;
+		} 
+		catch (PDOException $e) {
+		  echo '<strong>ERROR</strong> Could not delete the operator from the database.<br>'. $e->getMessage();
+			return false;
+		} 
+
+    }
 	//USERS
 	public function giveUsers()
 	{

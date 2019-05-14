@@ -139,6 +139,11 @@
                         <button class="btn btn-default" onclick="cone('430cone')" data-toggle="modal" data-target="#modal1">Edit 430 cone</button>
 					</div>
 				<div class="col-lg-2 form-group">
+                        <label for="date">435 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="435cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('435cone')" data-toggle="modal" data-target="#modal1">Edit 435 cone</button>
+					</div>
+				<div class="col-lg-2 form-group">
                         <label for="date">440 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="440cone" disabled/><br />
                         <button class="btn btn-default" onclick="cone('440cone')" data-toggle="modal" data-target="#modal1">Edit 440 cone</button>
@@ -159,7 +164,11 @@
                         <input type='text'  class="form-control text-center" id="500cone" disabled/><br />
                         <button class="btn btn-default" onclick="cone('500cone')" data-toggle="modal" data-target="#modal1">Edit 500 cone</button>
 					</div>
-				
+				<div class="col-lg-2 form-group">
+                        <label for="date">505 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="505cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('505cone')" data-toggle="modal" data-target="#modal1">Edit 505 cone</button>
+					</div>
                     <div class="col-lg-2 form-group">
                         <label for="date">532 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="532cone" disabled/><br />

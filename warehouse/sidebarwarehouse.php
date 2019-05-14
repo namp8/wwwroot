@@ -23,6 +23,8 @@
 		<li>
 			<a href="loans.php"><i class="fa fa-share" aria-hidden="true"></i><span>Loans & Returns</span></a>
 		</li>
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>
 		<li role="separator" class="divider"></li>';
 	}
 	
@@ -49,6 +51,16 @@
 
 		<li role="separator" class="divider"></li>
 		';
+		echo '<li>
+			<a href="balance.php">
+									<i class="fa fa-balance-scale" aria-hidden="true"></i>
+									<span>Balance</span>
+							</a>
+		</li>
+
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>';
 	}		
 	if($stock->access(2))
 	{
@@ -80,8 +92,16 @@
 		</li>
 		<li role="separator" class="divider"></li>
 		<li>
+			<a href="movements.php"><i class="fa fa-share" aria-hidden="true"></i><span>Stock Movements</span></a>
+		</li>
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>
+		<li>
 			<a href="pvc.php"><i class="fa fa-scissors" aria-hidden="true"></i><span>PVC Pipes</span></a>
 		</li>
+		<li role="separator" class="divider"></li>
+		<li role="separator" class="divider"></li>
 		<li role="separator" class="divider"></li>
 		';
 	}

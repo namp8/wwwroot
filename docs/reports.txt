@@ -1,0 +1,14 @@
+Minutes meeting:
+- Waste printing
+- One consolidated report: production, waste.
+- Print labels: roll #, company United, customer name, customer location, 
+gross - net weight, machine, order#, date produced, 
+- Palet label (2): number of rolls, company United, customer name, customer location, 
+gross - net weight, machine, order#, date produced
+- Packing list: pale# with all its rools and weight     
+
+Ink 2.5g (1-2%) 
+
+
+- Process Order # 
+
