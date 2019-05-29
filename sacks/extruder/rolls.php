@@ -452,6 +452,40 @@
 				</div>
 			</div>
 		</div>
+		
+		<div class="modal fade" id="modal2" role="dialog" tabindex="-1">
+      <div class="modal-dialog modal-m">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button class="close" type="button" data-dismiss="modal">x</button>
+            <h4 class="modal-title" id="panelTitle">Edit Entry</h4>
+          </div>
+            <form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                
+          <div class="modal-body">
+                <input type="hidden" class="form-control" id="action" name="action" required>
+                <input type="hidden" class="form-control" id="id_entry" name="id_entry" required>
+               
+			  	<div class="form-group">
+                    <label for="form">Machine</label>
+                    <input type="text" class="form-control" id="machine" name="machine">
+                </div>
+			  
+                <div class="form-group">
+                    <label for="form">Roll Wt.</label>
+                    <input type="text" class="form-control" id="value" name="value">
+                </div>
+                
+			  	<p id="textDelete" class="text-danger"><b>This entry will be deleted from the system, Are you sure you want to delete it?</b></p>
+                </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+            <button type="submit" id="buttonModal" class="btn btn-info">Edit</button>
+          </div>  
+            </form>
+          </div>
+      </div>
+    </div>
 
 		<?php
   if(!empty($_POST['dateSearch']) )
@@ -522,6 +556,34 @@
 					document.getElementById("btn_color").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("color").value = id;
 				}
+				
+				
+        function edit(id,value) {
+            document.getElementById("action").value = 2;
+            document.getElementById("buttonModal").innerHTML = "Update";
+            document.getElementById("buttonModal").setAttribute("class","btn btn-info");  
+            document.getElementById("panelTitle").innerHTML = "Edit Entry";
+            document.getElementById("textDelete").style.display = "none";
+			
+			document.getElementById("id_entry").value = id;
+            document.getElementById("value").value = value;
+			
+			$(modal2).modal();
+        }
+
+        function deleteEntry(id,value) {
+            document.getElementById("action").value = 3;
+            document.getElementById("buttonModal").innerHTML = "Delete";
+            document.getElementById("buttonModal").setAttribute("class","btn btn-danger");  
+            document.getElementById("panelTitle").innerHTML = "Delete Entry";
+            document.getElementById("textDelete").style.display = "";
+			
+			document.getElementById("id_entry").value = id;
+            document.getElementById("value").value = value;
+            document.getElementById("value").readOnly = true;
+			
+			$(modal2).modal();
+        }
 			</script>
 			<script>
 				$(function() {

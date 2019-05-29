@@ -128,6 +128,11 @@
                         <input type='text'  class="form-control text-center" id="400cone" disabled/><br />
                         <button class="btn btn-default" onclick="cone('400cone')" data-toggle="modal" data-target="#modal1">Edit 400 cone</button>
 					</div>
+				<div class="col-lg-2 form-group">
+                        <label for="date">410 mm - Cone wt:</label>
+                        <input type='text'  class="form-control text-center" id="410cone" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('410cone')" data-toggle="modal" data-target="#modal1">Edit 410 cone</button>
+					</div>
 					<div class="col-lg-2 form-group">
                         <label for="date">420 mm - Cone wt:</label>
                         <input type='text'  class="form-control text-center" id="420cone" disabled/><br />

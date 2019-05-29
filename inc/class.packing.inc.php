@@ -343,9 +343,19 @@ WHERE `actual` = 1 AND `packing_bag_formulas`.color = ". $color .";";
 		
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
+		
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+        
         
         $sql = "INSERT INTO `packing_bag_formulas`(`packing_bag_formula`,`material_id`, `kg`,`from`,`to`,`actual`,
-		`remarks`) VALUES(NULL,:material, :kg, CURRENT_DATE(),NULL,1, :remarks);";
+		`remarks`) VALUES(NULL,:material, :kg,'". $date."',NULL,1, :remarks);";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -391,11 +401,20 @@ WHERE `actual` = 1 AND `packing_bag_formulas`.color = ". $color .";";
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
 		
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+		
         $sql = "UPDATE  `packing_bag_formulas`
-                SET `to` = CURRENT_DATE, `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+                SET `to` = '". $date."', `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
                 WHERE `material_id` = '".$material ."' AND `actual` = 1;
 				INSERT INTO `packing_bag_formulas`(`packing_bag_formula`,`material_id`, `kg`,`from`,`to`,`actual`,
-				`remarks`) VALUES(NULL,:material, :kg, CURRENT_DATE(),NULL,1, :remarks);;";
+				`remarks`) VALUES(NULL,:material, :kg, '". $date."',NULL,1, :remarks);";
         try
         {   
             $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -440,12 +459,21 @@ WHERE `actual` = 1 AND `packing_bag_formulas`.color = ". $color .";";
 
 				$remarks = stripslashes($_POST["remarks"]);
 				$remarks = htmlspecialchars($remarks);
+				
+				//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
 
 				$sql = "UPDATE  `packing_bag_formulas`
-						SET `to` = CURRENT_DATE, `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+						SET `to` = '". $date."', `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
 						WHERE `material_id` = '".$material ."' AND `actual` = 1;
 						INSERT INTO `packing_bag_formulas`(`packing_bag_formula`,`material_id`, `kg`,`from`,`to`,`actual`,
-						`remarks`, `color`) VALUES(NULL,:material, :kg, CURRENT_DATE(),NULL,1, :remarks, 1);";
+						`remarks`, `color`) VALUES(NULL,:material, :kg, '". $date."',NULL,1, :remarks, 1);";
 				try
 				{   
 					$this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -489,9 +517,18 @@ WHERE `actual` = 1 AND `packing_bag_formulas`.color = ". $color .";";
 		
         $remarks = stripslashes($_POST["remarks"]);
         $remarks = htmlspecialchars($remarks);
+		
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
         
         $sql = "UPDATE  `packing_bag_formulas`
-                SET `to` = CURRENT_DATE, `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+                SET `to` = '". $date."', `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
                 WHERE `material_id` = '".$material ."' AND `actual` = 1;";
         try
         {   

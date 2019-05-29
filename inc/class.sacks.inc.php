@@ -37,6 +37,33 @@ class Sacks
 		}
 	}
     
+	public function admin()
+	{
+		$sql = "SELECT admin
+				FROM `users`
+				WHERE user_id = ". $_SESSION['Userid'];
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                if($row['admin'] == 1)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            return false;  
+        }
+	}
+	
      /**
      * Loads the dropdown of all the materials
      *
@@ -494,9 +521,15 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 			$count = $i + 1;
 			$string = '<tr class="text-center">
 				<th class="text-center">'. $count .'</th>';
+			
 			if(sizeof($machine1)> $i)
 			{
-				$string = $string. '<td>'. $machine1[$i] .'</td>';
+				$options = "";
+				if($this->admin())
+				{
+					$options = '&nbsp&nbsp&nbsp<button class="btn btn-xs btn-warning" type="button" onclick="edit()"><i class="fa fa-pencil" aria-hidden="true"></i></button>&nbsp<button class="btn btn-xs btn-danger" type="button" onclick="deleteEntry()">X</button>';
+				}
+				$string = $string. '<td>'. $machine1[$i]. $options .'</td>';
 				$entro = true;
 			}
 			else
@@ -505,7 +538,12 @@ WHERE machine_id = ". $machine ."  AND ". $date ." AND shift = ". $shift ." ORDE
 			}
 			if(sizeof($machine2)> $i)
 			{
-				$string = $string. '<td>'. $machine2[$i] .'</td>';
+				$options = "";
+				if($this->admin())
+				{
+					$options = '<button class="btn btn-xs btn-warning" type="button" onclick="edit()"><i class="fa fa-pencil" aria-hidden="true"></i></button>&nbsp<button class="btn btn-xs btn-danger" type="button" onclick="deleteEntry()">X</button>&nbsp&nbsp';
+				}
+				$string = $string. '<td>'. $machine2[$i]. $options .'</td>';
 				$entro = true;
 			}
 			else
@@ -972,7 +1010,12 @@ ORDER BY cutting_sacks_id";
 				<th class="text-center">'. $count .'</th>';
 			if(sizeof($machine1)> $i)
 			{
-				$string = $string. '<td>'. $machine1[$i] .'</td>';
+				$options = "";
+				if($this->admin())
+				{
+					$options = '<button class="btn btn-xs btn-warning" type="button" onclick="edit()"><i class="fa fa-pencil" aria-hidden="true"></i></button>&nbsp<button class="btn btn-xs btn-danger" type="button" onclick="deleteEntry()">X</button>&nbsp&nbsp';
+				}
+				$string = $string. '<td>'. $machine1[$i]. $options .'</td>';
 				$entro = true;
 			}
 			else
@@ -981,7 +1024,12 @@ ORDER BY cutting_sacks_id";
 			}
 			if(sizeof($machine2)> $i)
 			{
-				$string = $string. '<td>'. $machine2[$i] .'</td>';
+				$options = "";
+				if($this->admin())
+				{
+					$options = ' <button class="btn btn-xs btn-warning" type="button" onclick="edit()"><i class="fa fa-pencil" aria-hidden="true"></i></button>&nbsp<button class="btn btn-xs btn-danger" type="button" onclick="deleteEntry()">X</button>&nbsp&nbsp';
+				}
+				$string = $string. '<td>'. $machine2[$i]. $options .'</td>';
 				$entro = true;
 			}
 			else
