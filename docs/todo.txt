@@ -1,3 +1,10 @@
+
+- PHP Fatal error:  Uncaught Error: Call to undefined method Injection::updateSackSetting() in C:\inetpub\wwwroot\injection\settings.php:82
+  Stack trace:
+  #0 {main}
+  thrown in C:\inetpub\wwwroot\injection\settings.php on line 82
+- Slitting report 
+
 Waste printing
 Reports for all the company: production, waste, 
 

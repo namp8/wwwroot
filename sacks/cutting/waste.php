@@ -59,22 +59,6 @@
 ?>
 	</div>
 
-	<div class="pull-right text-right">
-		<div class="dropdown" style="margin-top:5px;margin-right:30px;">
-			<button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Submit waste &nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
-			<ul class="dropdown-menu dropdown-menu-right">
-				<li><a onclick="selectMachine(21,'Cutting 1')" data-toggle="modal" data-target="#modal1">Cutting 1</a></li>
-				<li><a onclick="selectMachine(22,'Cutting 2')" data-toggle="modal" data-target="#modal1">Cutting 2</a></li>
-				<li><a onclick="selectMachine(23,'Cutting 3')" data-toggle="modal" data-target="#modal1">Cutting 3</a></li>
-				<li><a onclick="selectMachine(24,'Cutting 4')" data-toggle="modal" data-target="#modal1">Cutting 4</a></li>
-				<li><a onclick="selectMachine(25,'Cutting 5')" data-toggle="modal" data-target="#modal1">Cutting 5</a></li>
-				<li><a onclick="selectMachine(26,'Cutting 6')" data-toggle="modal" data-target="#modal1">Cutting 6</a></li>
-				<li><a onclick="selectMachine(27,'Cutting 7')" data-toggle="modal" data-target="#modal1">Cutting 7</a></li>
-				<li><a onclick="selectMachine(28,'Cutting 8')" data-toggle="modal" data-target="#modal1">Cutting 8</a></li>
-				<li><a onclick="selectMachine(29,'Cutting 9')" data-toggle="modal" data-target="#modal1">Cutting 9</a></li>
-			</ul>
-		</div>
-	</div>
 
         <div class="panel panel-info">
             <div class="panel-heading">

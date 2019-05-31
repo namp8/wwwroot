@@ -643,19 +643,19 @@
 						format: 'DD/MM/YYYY',
 						defaultDate: moment()
 					});
-<?php 
-						   if(!$users->admin())
-						   {	
-							   echo "if(moment().weekday()==1)
-								{
-									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-4, 'days').millisecond(0).second(0).minute(0).hour(0));
-								}
-								else
-								{
-									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-3, 'days').millisecond(0).second(0).minute(0).hour(0));
-								}";
-						   }
-					?>	
+//<?php 
+//						   if(!$users->admin())
+//						   {	
+//							   echo "if(moment().weekday()==1)
+//								{
+//									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-4, 'days').millisecond(0).second(0).minute(0).hour(0));
+//								}
+//								else
+//								{
+//									$('#datetimepicker2').data('DateTimePicker').minDate(moment().add(-3, 'days').millisecond(0).second(0).minute(0).hour(0));
+//								}";
+//						   }
+//					?>	
 					$('#datetimepicker2').data("DateTimePicker").maxDate(new Date());
 
 					var d = new Date();

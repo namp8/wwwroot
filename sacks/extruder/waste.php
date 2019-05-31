@@ -59,21 +59,6 @@
 ?>
 	</div>
 
-	<div class="pull-right text-right">
-		<div class="dropdown" style="margin-top:5px;margin-right:30px;">
-			<button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Submit waste &nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
-			<ul class="dropdown-menu dropdown-menu-right">
-				<li><a onclick="selectMachine(13,'Extruder 1')" data-toggle="modal" data-target="#modal1">Extruder 1</a></li>
-				<li><a onclick="selectMachine(14,'Extruder 2')" data-toggle="modal" data-target="#modal1">Extruder 2</a></li>
-				<li><a onclick="selectMachine(15,'Extruder 3')" data-toggle="modal" data-target="#modal1">Extruder 3</a></li>
-				<li><a onclick="selectMachine(16,'Extruder 4')" data-toggle="modal" data-target="#modal1">Extruder 4</a></li>
-				<li><a onclick="selectMachine(17,'Extruder 5')" data-toggle="modal" data-target="#modal1">Extruder 5</a></li>
-				<li><a onclick="selectMachine(18,'Extruder 6')" data-toggle="modal" data-target="#modal1">Extruder 6</a></li>
-				<li><a onclick="selectMachine(19,'Extruder 7')" data-toggle="modal" data-target="#modal1">Extruder 7</a></li>
-				<li><a onclick="selectMachine(20,'Extruder 8')" data-toggle="modal" data-target="#modal1">Extruder 8</a></li>
-			</ul>
-		</div>
-	</div>
 
         <div class="panel panel-info">
             <div class="panel-heading">
