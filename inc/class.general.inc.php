@@ -1515,7 +1515,7 @@ ORDER BY waste.`date_waste`;";
         
         $newDateString = date("Y-m-d");
         $newDateString2 = date("Y-m-d");
-        if($_POST['searchBy']==2)
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {    
             if(!empty($_POST['dateSearch']))
             {
@@ -1531,7 +1531,7 @@ ORDER BY waste.`date_waste`;";
             }
             $format = "%m/%Y";
         }
-        else if($_POST['searchBy']==3)
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
         {    
             if(!empty($_POST['dateSearch']))
             {
@@ -1691,9 +1691,9 @@ ORDER BY date_report;";
             var chart = new CanvasJS.Chart("chartContainer", {
             theme: "light2",
             title: { 
-                text: "Waste "
+                text: "Production "
             },
-            exportFileName: "Waste",
+            exportFileName: "Production",
             exportEnabled: true,
             animationEnabled: true,
             axisY: {includeZero: false, title: "Total Process Waste (kgs)"},
@@ -1702,11 +1702,11 @@ ORDER BY date_report;";
             },legend:{
                 itemclick : toggleDataSeries
             },';
-        if($_POST['searchBy']==2)
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'axisX:{ valueFormatString: "MMM YYYY"},';
         }
-        else if($_POST['searchBy']==3)
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
         {   
             echo 'axisX:{ valueFormatString: "YYYY"},';
         }
@@ -1719,11 +1719,11 @@ ORDER BY date_report;";
                 type: "column",
 		showInLegend: true,
 		name: "Waste",';
-        if($_POST['searchBy']==2)
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             echo 'xValueFormatString: "MMM YYYY",';
         }
-        else if($_POST['searchBy']==3)
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
         {   
             
             echo 'xValueFormatString: "YYYY",';
@@ -1734,14 +1734,14 @@ ORDER BY date_report;";
         }
         echo ' yValueFormatString: "#,###.00 Kgs",
                 dataPoints: [ ';
-        if($_POST['searchBy']==2)
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
         {  
             foreach($a as $value) {
                 $var = (int) explode("/", $value[0])[0]-1;
                 echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
             }; 
         }
-        else if($_POST['searchBy']==3)
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
         {   
             foreach($a as $value) {
                 echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';

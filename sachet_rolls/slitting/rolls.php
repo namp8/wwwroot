@@ -714,7 +714,7 @@
 						total += Number(document.getElementById("wt_" + i).value);
 					}
 				}
-				document.getElementById("total").value = total.toLocaleString();
+				document.getElementById("total").value = total;
 			}
 
 			function selectCustomer1(id, name) {
