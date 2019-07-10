@@ -126,6 +126,59 @@ class Macchi
         }
     }
 	
+	 public function addRollSize()
+    {
+        $size = $weight = "";
+		
+        $size = trim($_POST["size"]);
+        $size = stripslashes($size);
+        $size = htmlspecialchars($size);
+		$size = $size . "cone";
+		 
+		$weight = trim($_POST["weight"]);
+        $weight = stripslashes($weight);
+        $weight = htmlspecialchars($weight); 
+		
+		$sql = "SELECT `settings`.`setting_id`
+				FROM `settings`
+                WHERE machine_id = 5 AND `name_setting` = '". $size ."' AND `actual` = 1;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+              	echo '<strong>ERROR</strong> There is roll in the system with the same size. Try updating it<br>';
+            	return FALSE;
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>'; 
+            return FALSE; 
+        }
+		 
+        $sql = 'INSERT INTO `ups_db`.`settings`(`setting_id`,`machine_id`,`name_setting`,`value_setting`,`from`,`to`,`actual`)VALUES(NULL,5,"'.$size.'","'.$weight.'",CURRENT_DATE(),NULL,1);';
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong> The new roll was successfully added to the database.';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> There is roll in the system with the same size. Try updating it<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not insert the roll into the database. Please try again.<br>'. $e->getMessage();
+            }
+            return FALSE;
+        } 
+
+    }
+	
+	
 	/**
      * Loads the table of all the formulas depending the layer
      * Parameter= ID of the layer OUTER=1 MIDDLE=2 INNER=3
@@ -933,7 +986,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
         $CONESMALL = 0;
         $sql = "SELECT `settings`.`value_setting`
                 FROM  `settings` 
-                WHERE machine_id=5 AND name_setting='680cone';";
+                WHERE machine_id=5 AND name_setting='680pouch';";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();
@@ -946,7 +999,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
         $CONEBIG = 0;
         $sql = "SELECT `settings`.`value_setting`
                 FROM  `settings` 
-                WHERE machine_id=5 AND name_setting='1010cone';";
+                WHERE machine_id=5 AND name_setting='1010pouch';";
         if($stmt = $this->_db->prepare($sql))
         {
             $stmt->execute();
@@ -3089,6 +3142,42 @@ ORDER BY date, actual_shrink;";
     }
 	
 	 /**
+     * Checks gives the settings
+     *
+     */
+    public function giveSettingsShrinkRolls()
+    {
+        $sql = "SELECT `settings`.`name_setting`, `settings`.`value_setting`
+FROM  `settings` 
+WHERE machine_id=5 and actual = 1 and name_setting LIKE '%cone' order by name_setting;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $NAME = $row['name_setting'];
+				$SIZE = str_replace("cone","",$NAME);
+                $VALUE = $row['value_setting'];
+                echo '<div class="col-lg-2 form-group">
+                        <label for="date">'.$SIZE.' mm - Cone wt:</label>
+                        <input type="text"  class="form-control text-center" id="'. $NAME.'" disabled/><br />
+                        <button class="btn btn-default" onclick="cone(';
+				echo "'";
+				echo $NAME;
+				echo "'";
+				echo ')" data-toggle="modal" data-target="#modal1">Edit '.$SIZE.' cone</button>
+                    </div>';
+            }
+            $stmt->closeCursor();
+            
+        }  
+        else
+        {
+            echo "Something went wrong. $db->errorInfo";
+        }
+    }
+	
+	/**
      * Checks gives the settings
      *
      */

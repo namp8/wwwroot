@@ -229,7 +229,7 @@
         </div>
 
         <div class="modal fade" id="modal1" role="dialog" tabindex="-1">
-            <div class="modal-dialog" style="width: 700px;">
+            <div class="modal-dialog" style="width: 1000px;">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button class="close" type="button" data-dismiss="modal">x</button>
@@ -298,7 +298,7 @@
                                     Input Rolls Details
                                 </div>
                                 <div class="panel-body">
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
                                         <label for="rollno">Roll No.</label><br />
                                         <input type="hidden" class="form-control" id="rollid" name="rollid">
                                         <input type="hidden" class="form-control" id="rollno" name="rollno">
@@ -341,20 +341,24 @@
                                         <label>Net Wt.</label>
                                         <input type="number" class="form-control" step="0.1" min="1" id="inputNetWt" value="0" disabled>
                                     </div>
+									<div class="col-lg-2 form-group">
+                                        <label>Gross Wt used.</label>
+                                        <input type="number" class="form-control" step="0.1" min="0" id="grossRollWt" name="grossRollWt" value="0" onkeyup="getBalance()">
+                                    </div>
                                     <div class="col-lg-2 form-group">
                                         <label>Waste</label>
                                         <input type="number" class="form-control" step="0.01" min="0" id="inputWaste" name="inputWaste" value="0">
                                     </div>
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
                                         <label>Test</label>
                                         <div class="checkbox" style="font-size: 16px;">
                                             <label><input type="checkbox" value="1" name="dyne" checked>Dyne test</label>
                                         </div>
                                     </div>
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
                                         <label for="rollno2">Roll No.</label><br />
                                         <input type="hidden" class="form-control" id="rollid2" name="rollid2" value="null">
-                                        <input type="hidden" class="form-control" id="rollno2" name="rollno">
+                                        <input type="hidden" class="form-control" id="rollno2" name="rollno2">
                                         <div class="dropdown">
                                             <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_roll2">&nbsp&nbsp<span class="caret"></span></button>
                                             <ul class="dropdown-menu" id="dropdown_roll2">
@@ -388,11 +392,15 @@
                                         <label>Net Wt.</label>
                                         <input type="number" class="form-control" step="0.1" min="1" id="inputNetWt2" value="0" disabled>
                                     </div>
+									<div class="col-lg-2 form-group">
+                                        <label>Gross Wt used.</label>
+                                        <input type="number" class="form-control" step="0.1" min="0" id="grossRollWt2" name="grossRollWt2" value="0" onkeyup="getBalance()">
+                                    </div>
                                     <div class="col-lg-2 form-group">
                                         <label>Waste</label>
                                         <input type="number" class="form-control" step="0.01" min="0" id="inputWaste2" name="inputWaste2" value="0">
                                     </div>
-                                    <div class="col-lg-3 form-group">
+                                    <div class="col-lg-2 form-group">
                                         <label>Test</label>
                                         <div class="checkbox" style="font-size: 16px;">
                                             <label><input type="checkbox" value="1" name="dyne2" checked>Dyne test</label>
@@ -426,6 +434,17 @@
                                         <div class="checkbox" style="font-size: 16px;">
                                             <label><input type="checkbox" value="1" name="tape" checked>Tape test</label>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+							<div class="panel panel-info">
+                                <div class="panel-heading">
+                                    Balance Roll
+                                </div>
+                                <div class="panel-body">
+                                    <div class="col-lg-2 form-group">
+                                        <label>Gross Wt.</label>
+                                        <input type="number" class="form-control" step="0.1" min="1" id="balanceWt" name="balanceWt" value="0" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -472,6 +491,28 @@
 
                 }
 				
+				function getBalance() {
+					
+					var initial = 0;
+					var actual = 0; 
+					var initial2 = 0;
+					var actual2 = 0; 
+					if(!document.getElementById("rollno").value.includes("Balance"))
+					{
+						initial = document.getElementById("inputRollWt").value;
+						actual = document.getElementById("grossRollWt").value;
+					}
+					
+                   	if(!document.getElementById("rollno2").value.includes("Balance"))
+					{
+						initial2 = document.getElementById("inputRollWt2").value;
+						actual2 = document.getElementById("grossRollWt2").value;
+					}
+					
+					var balance = (initial - actual) + (initial2 - actual2);
+					document.getElementById("balanceWt").value = balance;
+
+                }
 				function filterCustomers() {
 					var input, filter, ul, li, a, i;
 					input = document.getElementById("searchCustomer");
@@ -494,7 +535,13 @@
 						document.getElementById("rollid").value = id;
 						document.getElementById("rollno").value = no;
 						document.getElementById("inputRollWt").value = gross;
+						document.getElementById("grossRollWt").value = gross;
 						document.getElementById("inputNetWt").value = net;
+						if(no.includes("Balance"))
+						{
+							document.getElementById("inputRollWt").value = "-";
+							document.getElementById("inputNetWt").value = "-";
+						}
 					}
 					else
 					{
@@ -502,9 +549,17 @@
 						document.getElementById("rollid2").value = id;
 						document.getElementById("rollno2").value = no;
 						document.getElementById("inputRollWt2").value = gross;
+						document.getElementById("grossRollWt2").value = gross;
 						document.getElementById("inputNetWt2").value = net;
+						if(no.includes("Balance"))
+						{
+							document.getElementById("inputRollWt2").value = "-";
+							document.getElementById("inputNetWt2").value = "-";
+						}
 					}
                     document.getElementById("outputRoll").value = document.getElementById("date").value.split("/")[0] + "-" + document.getElementById("date").value.split("/")[1] + "-";
+					
+					getBalance();
                 }
 
                 function selectCustomer(id, name) {
