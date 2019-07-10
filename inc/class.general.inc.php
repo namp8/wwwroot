@@ -1203,6 +1203,569 @@ ORDER BY date_fall, `shortfalls`.machine_id;";
         }
     }
     
+    	/**
+     * Loads the Waste Report 
+     * This function outputs <tr> tags with the report
+     */
+    public function reportWaste()
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Sacks - Extruder</th>';
+        echo '<th>Sacks - Cutting</th>';
+        echo '<th>Sacks - Packing</th>';
+        echo '<th>Injection</th>';
+        echo '<th>Packing Bags</th>';
+        echo '<th>Multilayer</th>';
+        echo '<th>Macchi</th>';
+        echo '<th>Printing</th>';
+        echo '<th>Slitting</th>';
+        echo '<th>Total Waste</th>';
+        echo '</tr></thead><tfoot><tr  class="active">
+			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th></tr></tfoot><tbody>';   
+        
+        $a=array();
+        
+        $newDateString = date("Y-m-d");
+        $newDateString2 = date("Y-m-d");
+        if($_POST['searchBy']==2)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of this month');
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of this month');
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            $format = "%m/%Y";
+        }
+        else if($_POST['searchBy']==3)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of January ' . $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of December ' . $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            $format = "%Y";
+        }
+        else
+        {
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            $format = "%d/%m/%Y";
+        }
+        
+         $sql = " SELECT DATE_FORMAT(waste.`date_waste`, '". $format ."') AS date, DATE_FORMAT(waste.`date_waste`, '%b/%Y') AS date2, extruder.waste as extruder, cutting.waste as cutting, packing.waste as packing,
+ injection.waste as injection, packing_bag.waste as packing_bag, multilayer.waste as multilayer, macchi.waste as macchi, printing.waste as printing,
+ slitting.waste as slitting, SUM(`waste`.`waste`) AS total
+ FROM  `waste`
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 7 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) extruder ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = extruder.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 10 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) cutting ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = cutting.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 11 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) packing ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = packing.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 6 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) injection ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = injection.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 8 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) packing_bag ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = packing_bag.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 2 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) multilayer ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = multilayer.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 5 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) macchi ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = macchi.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 3 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) printing ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = printing.date_waste
+ LEFT JOIN (
+ SELECT DATE_FORMAT(`date_waste`, '". $format ."') AS `date_waste`, SUM(`waste`.`waste`) AS waste
+ FROM  `waste`
+ JOIN machines m ON waste.machine_id = m.machine_id
+ WHERE location_id = 4 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+ GROUP BY DATE_FORMAT(`date_waste`, '". $format ."')) slitting ON DATE_FORMAT(waste.`date_waste`, '". $format ."') = slitting.date_waste
+WHERE `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(waste.`date_waste`, '". $format ."')
+ORDER BY waste.`date_waste`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                if($_POST['searchBy']==2)
+                {
+                     echo '<tr>
+                        <td class="text-right">'. $row['date2'] .'</td>
+                        <td class="text-right">'. number_format($row['extruder'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['cutting'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['injection'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing_bag'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['multilayer'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['macchi'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['printing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['slitting'],2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($row['total'],2,'.',',') .'</th>
+                    </tr>';
+                }
+                else
+                {
+                    
+                echo '<tr>
+                        <td class="text-right">'. $row['date'] .'</td>
+                        <td class="text-right">'. number_format($row['extruder'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['cutting'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['injection'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing_bag'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['multilayer'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['macchi'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['printing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['slitting'],2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($row['total'],2,'.',',') .'</th>
+                    </tr>';
+                }
+                $entrie = array( $row['date'], $row['total']);
+                array_push($a,$entrie);
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                </tr>";
+        }
+        echo '</tbody>';
+        echo '<script>document.getElementById("divChart1").setAttribute("class","col-md-12");</script>';
+        echo '<script>document.getElementById("chartContainer").style= "height:200px;width:100%";</script>';
+         echo '<script> 
+            var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: { 
+                text: "Waste "
+            },
+            exportFileName: "Waste",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Total Process Waste (kgs)"},
+            toolTip: {
+                shared: true
+            },legend:{
+                itemclick : toggleDataSeries
+            },';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Waste",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo'] }]});
+        chart.render(); 
+        function toggleDataSeries(e) {
+            if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            chart.render();
+        } 
+        </script>'; 
+    }
+    
+    
+     	/**
+     * Loads the Waste Report 
+     * This function outputs <tr> tags with the report
+     */
+    public function reportProduction()
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Sacks - Extruder</th>';
+        echo '<th>Sacks - Cutting</th>';
+        echo '<th>Sacks - Packing</th>';
+        echo '<th>Injection</th>';
+        echo '<th>Packing Bags</th>';
+        echo '<th>Multilayer</th>';
+        echo '<th>Macchi</th>';
+        echo '<th>Printing</th>';
+        echo '<th>Slitting</th>';
+        echo '<th>Total Production</th>';
+        echo '</tr></thead><tfoot><tr  class="active">
+			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th></tr></tfoot><tbody>';   
+        
+        $a=array();
+        
+        $newDateString = date("Y-m-d");
+        $newDateString2 = date("Y-m-d");
+        if($_POST['searchBy']==2)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of this month');
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of this month');
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            $format = "%m/%Y";
+        }
+        else if($_POST['searchBy']==3)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of January ' . $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of December ' . $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            $format = "%Y";
+        }
+        else
+        {
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            $format = "%d/%m/%Y";
+        }
+         $sql = "SELECT DATE_FORMAT(date_report, '". $format ."') as date, DATE_FORMAT(date_report, '%b/%Y') AS date2, extruder.actual as extruder, cutting.actual as cutting, 
+packing.actual as packing, injection.actual as injection, packing_bag.actual as packing_bag, multilayer.actual as multilayer, 
+COALESCE(macchi_rolls.actual,0) + COALESCE(macchi_shrink.actual,0) as macchi, printing.actual as printing, slitting.actual as slitting
+FROM ( 
+SELECT ADDDATE('2018-01-01', t4.i * 10000 + t3.i * 1000 + t2.i * 100 + t1.i * 10 + t0.i) date_report
+  FROM (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t0, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t1, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t2, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t3, (SELECT 0 i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) t4) 
+  dateTable
+  
+LEFT JOIN (
+	SELECT DATE_FORMAT(`date_roll`, '". $format ."') as date, SUM(net_weight) as actual  
+	FROM sacks_rolls
+	WHERE `sacks_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_roll`, '". $format ."')) extruder ON extruder.date = DATE_FORMAT(date_report, '". $format ."')
+
+LEFT JOIN (
+	SELECT DATE_FORMAT(`date_sacks`, '". $format ."') as date, SUM(net_weight) as actual  
+	FROM cutting_sacks
+	WHERE `date_sacks` BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_sacks`, '". $format ."')) cutting ON cutting.date = DATE_FORMAT(date_report, '". $format ."')
+
+LEFT JOIN (
+	SELECT DATE_FORMAT(`date_sacks`, '". $format ."') as date, SUM(weight) as actual
+	FROM packing_sacks
+	WHERE `date_sacks` BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_sacks`, '". $format ."')) packing  ON packing.date = DATE_FORMAT(date_report, '". $format ."')
+    
+LEFT JOIN (
+	SELECT DATE_FORMAT(`injection_production`.`date_production`, '". $format ."') as date, SUM(`injection_production`.`net_weight`) as actual
+	FROM `ups_db`.`injection_production`
+	WHERE date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_production`, '". $format ."')) injection  ON injection.date = DATE_FORMAT(date_report, '". $format ."')
+    
+ LEFT JOIN (
+	SELECT DATE_FORMAT(`date_roll`, '". $format ."') as date, SUM(net_weight) as actual 
+	FROM packing_rolls
+	WHERE `packing_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_roll`, '". $format ."')) packing_bag  ON packing_bag.date = DATE_FORMAT(date_report, '". $format ."')
+    
+ LEFT JOIN (
+	SELECT DATE_FORMAT(`date_roll`, '". $format ."') as date, SUM(net_weight) as actual 
+	FROM multilayer_rolls
+	WHERE `multilayer_rolls`.date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_roll`, '". $format ."')) multilayer  ON multilayer.date = DATE_FORMAT(date_report, '". $format ."')
+     
+  LEFT JOIN (
+	SELECT DATE_FORMAT(`date_roll`, '". $format ."') AS date, SUM(net_weight) AS actual
+	FROM macchi_rolls
+	WHERE date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_roll`, '". $format ."')) macchi_rolls  ON macchi_rolls.date = DATE_FORMAT(date_report, '". $format ."')
+       
+  LEFT JOIN (
+	SELECT DATE_FORMAT(`date_shrink`, '". $format ."') AS date, SUM(net_weight) AS actual
+	FROM `macchi_shrink`
+	WHERE date_shrink BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_shrink`, '". $format ."')) macchi_shrink  ON macchi_shrink.date = DATE_FORMAT(date_report, '". $format ."')
+    
+  LEFT JOIN (
+	SELECT DATE_FORMAT(`date_roll`, '". $format ."') AS date, SUM(`net_weight`) AS actual
+	FROM `printing_rolls`
+	WHERE date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_roll`, '". $format ."')) printing  ON printing.date = DATE_FORMAT(date_report, '". $format ."')
+    
+  LEFT JOIN (
+	SELECT DATE_FORMAT(`date_roll`, '". $format ."') AS date, SUM(`net_weight`) AS actual
+	FROM `slitting_rolls`
+	WHERE date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_roll`, '". $format ."')) slitting  ON slitting.date = DATE_FORMAT(date_report, '". $format ."')
+     
+WHERE date_report BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+GROUP BY DATE_FORMAT(date_report, '". $format ."')
+ORDER BY date_report;";
+        
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $TOTAL  = $row['extruder'] + $row['cutting'] + $row['packing'] + $row['injection'] + $row['packing_bag'] + $row['multilayer'] + $row['macchi'] + $row['printing'] + $row['slitting'];
+                if($_POST['searchBy']==2)
+                {
+                     echo '<tr>
+                        <td class="text-right">'. $row['date2'] .'</td>
+                        <td class="text-right">'. number_format($row['extruder'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['cutting'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['injection'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing_bag'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['multilayer'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['macchi'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['printing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['slitting'],2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($TOTAL,2,'.',',') .'</th>
+                    </tr>';
+                }
+                else
+                {
+                    
+                echo '<tr>
+                        <td class="text-right">'. $row['date'] .'</td>
+                        <td class="text-right">'. number_format($row['extruder'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['cutting'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['injection'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['packing_bag'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['multilayer'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['macchi'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['printing'],2,'.',',') .'</td>
+                        <td class="text-right">'. number_format($row['slitting'],2,'.',',') .'</td>
+                        <th class="text-right">'. number_format($TOTAL,2,'.',',') .'</th>
+                    </tr>';
+                }
+                $entrie = array( $row['date'], $TOTAL);
+                array_push($a,$entrie);
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                </tr>";
+        }
+        echo '</tbody>';
+        echo '<script>document.getElementById("divChart1").setAttribute("class","col-md-12");</script>';
+        echo '<script>document.getElementById("chartContainer").style= "height:200px;width:100%";</script>';
+         echo '<script> 
+            var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: { 
+                text: "Waste "
+            },
+            exportFileName: "Waste",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Total Process Waste (kgs)"},
+            toolTip: {
+                shared: true
+            },legend:{
+                itemclick : toggleDataSeries
+            },';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Waste",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo'] }]});
+        chart.render(); 
+        function toggleDataSeries(e) {
+            if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            chart.render();
+        } 
+        </script>'; 
+    }
     
 }
 

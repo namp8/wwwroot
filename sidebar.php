@@ -56,6 +56,9 @@
 		echo '<li><a href="/settings/home.php"><i class="fa fa-gears" aria-hidden="true"></i><span>Settings</span></a></li>
 		<li role="separator" class="divider"></li>
 		';
+        echo '<li><a href="reports.php"><i class="fa fa-bar-chart" aria-hidden="true"></i><span>Reports</span></a></li>
+		<li role="separator" class="divider"></li>
+		';
 	}
 ?>	
 		

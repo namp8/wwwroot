@@ -1,3 +1,6 @@
+<?php
+    include_once "base.php";
+?>
 <!DOCTYPE html>
     <html lang="en">
 
@@ -51,7 +54,6 @@
        
                 
 <?php
-    include_once "base.php";
     if(!empty($_POST['username']) && !empty($_POST['password'])):
         include_once 'inc/class.users.inc.php';
         $users = new Users($db);
