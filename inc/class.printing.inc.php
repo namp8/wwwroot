@@ -296,7 +296,6 @@ FROM  `packing_rolls`
                 $ROLLNO = $row['rollno'];
                 $GROSS = $row['gross_weight'];
                 $NET = $row['net_weight'];
-                echo  '<li><a id="'. $GROSS .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $GROSS .'</a></li>'; 
 				if($ROLLNO == "Balance")
 				{
 					echo  '<li><a id="'. $ROLLNO .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $ROLLNO .'</a></li>';
@@ -425,7 +424,6 @@ FROM  `packing_rolls`
     public function createRoll()
     {
          
-        $inputWaste = $outputWaste = $date = $rollno  = $shift = $size = $gross = $cone = $net = $user = $machine = $customer = $rollid = "";
         $inputWaste = $outputWaste = $date = $rollno  = $shift = $size = $gross = $cone = $net = $user = $machine = $customer = $rollid = $balance = "";
 		
 		$CONESMALL = 0;
@@ -513,6 +511,10 @@ FROM  `packing_rolls`
             $tape = stripslashes($tape);
             $tape = htmlspecialchars($tape);
         }
+        $grossRollWt = trim($_POST["grossRollWt"]);
+        $grossRollWt = stripslashes($grossRollWt);
+        $grossRollWt = htmlspecialchars($grossRollWt);
+		
         $inputWaste = trim($_POST["inputWaste"]);
         $inputWaste = stripslashes($inputWaste);
         $inputWaste = htmlspecialchars($inputWaste);
