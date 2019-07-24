@@ -297,6 +297,15 @@ FROM  `packing_rolls`
                 $GROSS = $row['gross_weight'];
                 $NET = $row['net_weight'];
                 echo  '<li><a id="'. $GROSS .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $GROSS .'</a></li>'; 
+				if($ROLLNO == "Balance")
+				{
+					echo  '<li><a id="'. $ROLLNO .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $ROLLNO .'</a></li>';
+				}
+				else
+				{
+                	echo  '<li><a id="'. $GROSS .'" onclick="selectRoll(\''. $i .'\',\''. $ID .'\',\''. $ROLLNO .'\',\''. $GROSS .'\',\''. $NET .'\')">'. $GROSS .'</a></li>'; 
+				}
+				
             }
             
            
@@ -417,6 +426,7 @@ FROM  `packing_rolls`
     {
          
         $inputWaste = $outputWaste = $date = $rollno  = $shift = $size = $gross = $cone = $net = $user = $machine = $customer = $rollid = "";
+        $inputWaste = $outputWaste = $date = $rollno  = $shift = $size = $gross = $cone = $net = $user = $machine = $customer = $rollid = $balance = "";
 		
 		$CONESMALL = 0;
         $sql = "SELECT `settings`.`value_setting`
@@ -503,14 +513,30 @@ FROM  `packing_rolls`
             $tape = stripslashes($tape);
             $tape = htmlspecialchars($tape);
         }
-        
         $inputWaste = trim($_POST["inputWaste"]);
         $inputWaste = stripslashes($inputWaste);
         $inputWaste = htmlspecialchars($inputWaste);
 		
+		$balanceRoll = false;
+		if(strpos($_POST["rollno"],"Balance") !== false)
+		{
+			$balanceRoll = true;
+		}
+		
+        $grossRollWt2 = trim($_POST["grossRollWt2"]);
+        $grossRollWt2 = stripslashes($grossRollWt2);
+        $grossRollWt2 = htmlspecialchars($grossRollWt2);
+		
         $inputWaste2 = trim($_POST["inputWaste2"]);
         $inputWaste2 = stripslashes($inputWaste2);
         $inputWaste2 = htmlspecialchars($inputWaste2);
+		
+		$balanceRoll2 = false;
+		if(strpos($_POST["rollno2"],"Balance")!== false)
+		{
+			$balanceRoll2 = true;
+		}
+		
         
         $inputWaste3 = trim($_POST["inputWaste3"]);
         $inputWaste3 = stripslashes($inputWaste3);
@@ -561,6 +587,11 @@ FROM  `packing_rolls`
         $rollid6 = stripslashes($rollid6);
         $rollid6 = htmlspecialchars($rollid6);
         
+		if(is_null($rollid2))
+		{
+			$grossRollWt2 = null;
+		}
+        
         $shift = trim($_POST["shift"]);
         $shift = stripslashes($shift);
         $shift = htmlspecialchars($shift);
@@ -609,6 +640,10 @@ FROM  `packing_rolls`
         $from = trim($_POST["from"]);
         $from = stripslashes($from);
         $from = htmlspecialchars($from);
+		
+		$balance = trim($_POST["balanceWt"]);
+        $balance = stripslashes($balance);
+        $balance = htmlspecialchars($balance);
 		
         $a=array();
         //REVISA LA FORMULA PARA LA MAQUINA
@@ -701,22 +736,56 @@ FROM  `packing_rolls`
 				
 			if($from == 1)
 			{
-				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`roll_id3`,`roll_id4`,`roll_id5`,`roll_id6`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`)
-				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .",". $rollid3 .",". $rollid4 .",". $rollid5 .",". $rollid6 .", ". $tape.",". $outputWaste .", 0, 1,0);
-				UPDATE `multilayer_rolls`
-				SET `dyne_test` = ". $dyne .",
-				`status_roll` = 1,
-				`waste_printing` = ". $inputWaste ."
-				WHERE `multilayer_rolls_id` = ". $rollid ."; ";
+				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`roll_id3`,`roll_id4`,`roll_id5`,`roll_id6`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`,`gross_roll_id`,`gross_roll_id2`)
+				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .",". $rollid3 .",". $rollid4 .",". $rollid5 .",". $rollid6 .", ". $tape.",". $outputWaste .", 0, 1,0, ".$grossRollWt .", ".$grossRollWt2 .");";	
 				
-				if(!is_null($rollid2))
+				if($balanceRoll)
+				{
+					$sql = $sql. "UPDATE `multilayer_rolls`
+					SET `dyne_test` = ". $dyne .",
+					`gross_weight` = `gross_weight` - ". $grossRollWt.",
+					`net_weight` = `net_weight` - ". $grossRollWt.",
+					`status_roll` = 0,
+					`waste_printing` = ". $inputWaste ."
+					WHERE `multilayer_rolls_id` = ". $rollid ."; ";
+				}
+				else
+				{
+					$sql = $sql. "UPDATE `multilayer_rolls`
+					SET `dyne_test` = ". $dyne .",
+					`status_roll` = 1,
+					`waste_printing` = ". $inputWaste ."
+					WHERE `multilayer_rolls_id` = ". $rollid ."; ";
+				}
+				
+				if(!is_null($rollid2)and !$balanceRoll2)
 				{
 					$sql = $sql . " UPDATE `multilayer_rolls`
-				SET `dyne_test` = ". $dyne2 .",
-				`status_roll` = 1,
-				`waste_printing` = ". $inputWaste2 ."
-				WHERE `multilayer_rolls_id` = ". $rollid2 .";";
+					SET `dyne_test` = ". $dyne2 .",
+					`status_roll` = 1,
+					`waste_printing` = ". $inputWaste2 ."
+					WHERE `multilayer_rolls_id` = ". $rollid2 .";";
 				}
+				if(!is_null($rollid2) and $balanceRoll2)
+				{
+					$sql = $sql. "UPDATE `multilayer_rolls`
+					SET `dyne_test` = ". $dyne2 .",
+					`gross_weight` = `gross_weight` - ". $grossRollWt2.",
+					`net_weight` = `net_weight` - ". $grossRollWt2.",
+					`status_roll` = 0,
+					`waste_printing` = ". $inputWaste2 ."
+					WHERE `multilayer_rolls_id` = ". $rollid2 ."; ";
+				}
+				
+				if($balance > 0)
+				{
+					$sql = $sql. 'UPDATE `multilayer_rolls`
+					SET 
+					`gross_weight` = `gross_weight` + '. $balance.',
+					`net_weight` = `net_weight` + '. $balance.'
+					WHERE `multilayer_rolls_id`>0  AND rollno LIKE "Balance%" AND size = '.$size.';';
+				}
+                
                 if(!is_null($rollid3))
 				{
 					$sql = $sql . " UPDATE `multilayer_rolls`
@@ -752,15 +821,30 @@ FROM  `packing_rolls`
 			}
 			else if($from == 2)
 			{
-				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`roll_id3`,`roll_id4`,`roll_id5`,`roll_id6`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`)
-				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .",". $rollid3 .",". $rollid4 .",". $rollid5 .",". $rollid6 .", ". $tape.",". $outputWaste .", 1, 0,0);
-				UPDATE `macchi_rolls`
+				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`roll_id3`,`roll_id4`,`roll_id5`,`roll_id6`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`,`gross_roll_id`,`gross_roll_id2`)
+				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .",". $rollid3 .",". $rollid4 .",". $rollid5 .",". $rollid6 .", ". $tape.",". $outputWaste .", 1, 0,0, ".$grossRollWt .", ".$grossRollWt2 .");";
+				
+				
+			    if($balanceRoll)
+				{
+					$sql = $sql . "UPDATE `macchi_rolls`
+				SET `dyne_test` = ". $dyne .",
+				`gross_weight` = `gross_weight` - ". $grossRollWt.",
+				`net_weight` = `net_weight` - ". $grossRollWt.",
+				`status_roll` = 0,
+				`waste_printing` = ". $inputWaste ."
+				WHERE `macchi_rolls_id` = ". $rollid .";";
+				}
+				else
+				{
+					$sql = $sql . "UPDATE `macchi_rolls`
 				SET `dyne_test` = ". $dyne .",
 				`status_roll` = 1,
 				`waste_printing` = ". $inputWaste ."
-				WHERE `macchi_rolls_id` = ". $rollid ."; ";
+				WHERE `macchi_rolls_id` = ". $rollid .";";
+				}
 				
-				if(!is_null($rollid2))
+				if(!is_null($rollid2)and !$balanceRoll2)
 				{
 					$sql = $sql . " UPDATE `macchi_rolls`
 				SET `dyne_test` = ". $dyne2 .",
@@ -803,23 +887,68 @@ FROM  `packing_rolls`
 			}
 			else if($from == 3)
 			{
-				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`roll_id3`,`roll_id4`,`roll_id5`,`roll_id6`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`)
-				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .",". $rollid3 .",". $rollid4 .",". $rollid5 .",". $rollid6 .", ". $tape.",". $outputWaste .", 0, 0,1);
-				UPDATE `packing_rolls`
+				$sql = "INSERT INTO `printing_rolls`(`printing_rolls_id`,`date_roll`,`rollno`,`shift`,`size`,`gross_weight`,`net_weight`,`user_id`,`status_roll`,`machine_id`,`customer_id`,`roll_id`,`roll_id2`,`roll_id3`,`roll_id4`,`roll_id5`,`roll_id6`,`tape_test`,`waste_printing`,`macchi`,`multilayer`,`packing_bags`,`gross_roll_id`,`gross_roll_id2`)
+				VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $net.",".$_SESSION['Userid'].",0,". $machine.",".$customer.",". $rollid .",". $rollid2 .",". $rollid3 .",". $rollid4 .",". $rollid5 .",". $rollid6 .", ". $tape.",". $outputWaste .", 0, 0,1, ".$grossRollWt .", ".$grossRollWt2 .");";
+				}
+				
+				
+				if($balance > 0)
+				{
+					$sql = $sql. 'UPDATE `macchi_rolls`
+					SET 
+					`gross_weight` = `gross_weight` + '. $balance.',
+					`net_weight` = `net_weight` + '. $balance.'
+					WHERE `macchi_rolls_id`>0  AND rollno LIKE "Balance%" AND size = '.$size.';';
+				}
+				
+				if($balanceRoll)
+				{
+					$sql = $sql. "UPDATE `packing_rolls`
+					SET `dyne_test` = ". $dyne .",
+					`gross_weight` = `gross_weight` - ". $grossRollWt.",
+					`net_weight` = `net_weight` - ". $grossRollWt.",
+					`status_roll` = 0,
+					`waste_printing` = ". $inputWaste ."
+					WHERE `packing_rolls_id` = ". $rollid ."; ";
+				}
+				else
+				{
+					$sql = $sql. "UPDATE `packing_rolls`
 				SET `dyne_test` = ". $dyne .",
 				`status_roll` = 1,
                 `used_weight` = `net_weight`,
 				`waste_printing` = ". $inputWaste ."
 				WHERE `packing_rolls_id` = ". $rollid ."; ";
+				}
 				
-				if(!is_null($rollid2))
+				if(!is_null($rollid2)and !$balanceRoll2)
 				{
 					$sql = $sql . " UPDATE `packing_rolls`
-				SET `dyne_test` = ". $dyne2 .",
-				`status_roll` = 1,
-                `used_weight` = `net_weight`,
-				`waste_printing` = ". $inputWaste2 ."
-				WHERE `packing_rolls_id` = ". $rollid2 ."; ;";
+					SET `dyne_test` = ". $dyne2 .",
+					`status_roll` = 1,
+					`used_weight` = `net_weight`,
+					`waste_printing` = ". $inputWaste2 ."
+					WHERE `packing_rolls_id` = ". $rollid2 .";";
+				}
+				if(!is_null($rollid2) and $balanceRoll2)
+				{
+					$sql = $sql. "UPDATE `packing_rolls`
+					SET `dyne_test` = ". $dyne2 .",
+					`gross_weight` = `gross_weight` - ". $grossRollWt2.",
+					`net_weight` = `net_weight` - ". $grossRollWt2.",
+					`status_roll` = 0,
+					`waste_printing` = ". $inputWaste2 ."
+					WHERE `packing_rolls_id` = ". $rollid2 ."; ";
+				}
+				
+				
+				if($balance > 0)
+				{
+					$sql = $sql. 'UPDATE `packing_rolls`
+					SET 
+					`gross_weight` = `gross_weight` + '. $balance.',
+					`net_weight` = `net_weight` + '. $balance.'
+					WHERE `packing_rolls_id`>0  AND rollno LIKE "Balance%";';
 				}
                 if(!is_null($rollid3))
 				{
@@ -858,6 +987,7 @@ FROM  `packing_rolls`
 				WHERE `packing_rolls_id` = ". $rollid6 ."; ;";
 				}
 				
+				$sql = $sql. $update;
 			}
             
             try

@@ -40,8 +40,22 @@
                 echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
             }
         }
+		if(!empty($_POST['size']))
+        {
+            echo '<script>document.getElementById("alertMessage").removeAttribute("class");</script>';
+            if($macchi->addRollSize()){
+
+                echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-success show");</script>';
+            }
+            else
+            {
+                echo '<script>document.getElementById("alertMessage").setAttribute("class","alert alert-dismissible alert-danger show");</script>';
+            }
+        }
     ?>
     </div>
+
+	<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" data-toggle="modal" data-target="#modal2">Add shrink film roll</button>
 
     <div class="panel panel-info">
         <div class="panel-heading"> Settings </div>
@@ -51,7 +65,7 @@
                     <div class="col-lg-4 form-group">
                         <label for="date">Water Pouch Capacity:</label>
                         <input type='text'  class="form-control text-center" id="targetRolls" disabled /><br />
-                        <button  class="btn btn-default" onclick="targetRolls('targetRolls')" data-toggle="modal" data-target="#modal1">Water Pouch Capacity</button>
+                        <button  class="btn btn-default" onclick="targetRolls('targetRolls')" data-toggle="modal" data-target="#modal1">Edit Water Pouch Capacity</button>
                     </div>
                     
                     <div class="col-lg-4 form-group">
@@ -62,159 +76,23 @@
 					<div class="col-lg-4 form-group">
                         <label for="date">Target Waste:</label>
                         <input type='text'  class="form-control text-center" id="waste" disabled/><br />
-                        <button class="btn btn-default" onclick="targetWaste('waste')" data-toggle="modal" data-target="#modal1">Edit TShrink Film Capacity</button>
+                        <button class="btn btn-default" onclick="targetWaste('waste')" data-toggle="modal" data-target="#modal1">Edit Target Waste</button>
                     </div>
 				<h2>Water Pouch</h2>
 					<div class="col-lg-6 form-group">
                         <label for="date">680 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="680cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('680cone')" data-toggle="modal" data-target="#modal1">Edit 680 cone</button>
+                        <input type='text'  class="form-control text-center" id="680pouch" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('680pouch')" data-toggle="modal" data-target="#modal1">Edit 680 cone</button>
                     </div>
                     <div class="col-lg-6 form-group">
                         <label for="date">1010 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="1010cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('1010cone')" data-toggle="modal" data-target="#modal1">Edit 1010 cone</button>
+                        <input type='text'  class="form-control text-center" id="1010pouch" disabled/><br />
+                        <button class="btn btn-default" onclick="cone('1010pouch')" data-toggle="modal" data-target="#modal1">Edit 1010 cone</button>
 					</div>				
-				<h2>Shrink Film</h2>
-					<div class="col-lg-2 form-group">
-                        <label for="date">300 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="300cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('300cone')" data-toggle="modal" data-target="#modal1">Edit 300 cone</button>
-                    </div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">330 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="330cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('330cone')" data-toggle="modal" data-target="#modal1">Edit 330 cone</button>
-                    </div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">340 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="340cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('340cone')" data-toggle="modal" data-target="#modal1">Edit 340 cone</button>
-                    </div>
-                    <div class="col-lg-2 form-group">
-                        <label for="date">350 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="350cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('350cone')" data-toggle="modal" data-target="#modal1">Edit 350 cone</button>
-					</div>
-				
-                    <div class="col-lg-2 form-group">
-                        <label for="date">355 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="355cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('355cone')" data-toggle="modal" data-target="#modal1">Edit 355 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">360 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="360cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('360cone')" data-toggle="modal" data-target="#modal1">Edit 360 cone</button>
-                    </div>
-                    <div class="col-lg-2 form-group">
-                        <label for="date">370 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="370cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('370cone')" data-toggle="modal" data-target="#modal1">Edit 370 cone</button>
-					</div>
-				
-                    <div class="col-lg-2 form-group">
-                        <label for="date">380 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="380cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('380cone')" data-toggle="modal" data-target="#modal1">Edit 380 cone</button>
-					</div>
-                    <div class="col-lg-2 form-group">
-                        <label for="date">390 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="390cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('390cone')" data-toggle="modal" data-target="#modal1">Edit 390 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">400 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="400cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('400cone')" data-toggle="modal" data-target="#modal1">Edit 400 cone</button>
-					</div>
-				<div class="col-lg-2 form-group">
-                        <label for="date">410 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="410cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('410cone')" data-toggle="modal" data-target="#modal1">Edit 410 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">420 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="420cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('420cone')" data-toggle="modal" data-target="#modal1">Edit 420 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">430 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="430cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('430cone')" data-toggle="modal" data-target="#modal1">Edit 430 cone</button>
-					</div>
-				<div class="col-lg-2 form-group">
-                        <label for="date">435 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="435cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('435cone')" data-toggle="modal" data-target="#modal1">Edit 435 cone</button>
-					</div>
-				<div class="col-lg-2 form-group">
-                        <label for="date">440 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="440cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('440cone')" data-toggle="modal" data-target="#modal1">Edit 440 cone</button>
-                    </div>
-				<div class="col-lg-2 form-group">
-                        <label for="date">445 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="445cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('445cone')" data-toggle="modal" data-target="#modal1">Edit 445 cone</button>
-                    </div>
-				
-				<div class="col-lg-2 form-group">
-                        <label for="date">450 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="450cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('450cone')" data-toggle="modal" data-target="#modal1">Edit 450 cone</button>
-                    </div>
-                    <div class="col-lg-2 form-group">
-                        <label for="date">500 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="500cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('500cone')" data-toggle="modal" data-target="#modal1">Edit 500 cone</button>
-					</div>
-				<div class="col-lg-2 form-group">
-                        <label for="date">505 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="505cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('505cone')" data-toggle="modal" data-target="#modal1">Edit 505 cone</button>
-					</div>
-                    <div class="col-lg-2 form-group">
-                        <label for="date">532 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="532cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('532cone')" data-toggle="modal" data-target="#modal1">Edit 532 cone</button>
-					</div>
-				
-					<div class="col-lg-2 form-group">
-                        <label for="date">600 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="600cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('600cone')" data-toggle="modal" data-target="#modal1">Edit 600 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">665 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="665cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('665cone')" data-toggle="modal" data-target="#modal1">Edit 665 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">680 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="680cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('680cone')" data-toggle="modal" data-target="#modal1">Edit 680 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">730 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="730cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('730cone')" data-toggle="modal" data-target="#modal1">Edit 730 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">770 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="770cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('770cone')" data-toggle="modal" data-target="#modal1">Edit 770 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">870 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="870cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('870cone')" data-toggle="modal" data-target="#modal1">Edit 870 cone</button>
-					</div>
-					<div class="col-lg-2 form-group">
-                        <label for="date">1680 mm - Cone wt:</label>
-                        <input type='text'  class="form-control text-center" id="1680cone" disabled/><br />
-                        <button class="btn btn-default" onclick="cone('1680cone')" data-toggle="modal" data-target="#modal1">Edit 1680 cone</button>
-					</div>
+				<h2>Shrink Film</h2>		
+ <?php
+    $macchi->giveSettingsShrinkRolls();
+?>
             </div>
         </div>
     </div>
@@ -233,7 +111,35 @@
                     <div class="modal-body">
                          <div class="form-group">
                             <label id="labelModal"></label><span class="text-danger">*</span>
-                            <input type="text" class="form-control" id="input" name="input" required>
+                            <input type="number" class="form-control" id="input" name="input" step="0.001" min="0.001" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                        <button type="submit" id="buttonForm" class="btn btn-info">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+	<div class="modal fade" id="modal2" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close" type="button" data-dismiss="modal">x</button>
+                    <h4 class="modal-title">Add shrink film roll</h4>
+                </div>
+                <form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+                    <div class="modal-body">
+                         <div class="form-group">
+                            <label>Roll size (mm)<span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="size" name="size" step="1" min="1" required>
+                        </div>
+						
+                         <div class="form-group">
+                            <label>Cone Weight<span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="weight" name="weight" value="0" step="0.001" min="0.001" required>
                         </div>
                     </div>
                     <div class="modal-footer">

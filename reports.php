@@ -91,13 +91,13 @@
                             
                             
  <?php
-    if( empty($_POST['report']) or $_POST['report'] == 2 )
+    if(empty($_POST['report']) or $_POST['report'] == 2 )
     {
         echo '<table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0"  >';
 		$general->reportProduction();
         echo '</table>';
     }  
-    else if( empty($_POST['report']) or $_POST['report'] == 3 )
+    else if( !empty($_POST['report']) and $_POST['report'] == 3 )
     {
         echo '<table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0"  >';
         $general->reportWaste();
