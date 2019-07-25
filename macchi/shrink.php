@@ -75,27 +75,27 @@
 					Daily rolls by size
 				</div>
 				<div class="panel-body">
-						<div class="table-responsive">
-							<table class="table table-bordered table-hover" width="100%" cellspacing="0">
-								<thead>
-									<tr class="active">
-										<th>Job Name</th>
-										<th>Roll No. From</th>
-										<th>Roll No. To</th>
-										<th># Rolls</th>
-										<th>Gross weight</th>
-										<th>Net weight</th>
-										<th>Size</th>
-										<th>Thickness</th>
-									</tr>
-								</thead>
-								<tbody>
-									<?php
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+							<thead>
+								<tr class="active">
+									<th>Job Name</th>
+									<th>Roll No. From</th>
+									<th>Roll No. To</th>
+									<th># Rolls</th>
+									<th>Gross weight</th>
+									<th>Net weight</th>
+									<th>Size</th>
+									<th>Thickness</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
      $macchi->giveShrink(0);
 ?>
-								</tbody>
-							</table>
-						</div>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 
@@ -123,27 +123,27 @@
 					Daily rolls by size
 				</div>
 				<div class="panel-body">
-						<div class="table-responsive">
-							<table class="table table-bordered table-hover" width="100%" cellspacing="0">
-								<thead>
-									<tr class="active">
-										<th>Job Name</th>
-										<th>Roll No. From</th>
-										<th>Roll No. To</th>
-										<th># Rolls</th>
-										<th>Gross weight</th>
-										<th>Net weight</th>
-										<th>Size</th>
-										<th>Thickness</th>
-									</tr>
-								</thead>
-								<tbody>
-									<?php
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+							<thead>
+								<tr class="active">
+									<th>Job Name</th>
+									<th>Roll No. From</th>
+									<th>Roll No. To</th>
+									<th># Rolls</th>
+									<th>Gross weight</th>
+									<th>Net weight</th>
+									<th>Size</th>
+									<th>Thickness</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
      $macchi->giveShrink(1);
 ?>
-								</tbody>
-							</table>
-						</div>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 
@@ -171,27 +171,27 @@
 					Daily rolls by size
 				</div>
 				<div class="panel-body">
-						<div class="table-responsive">
-							<table class="table table-bordered table-hover" width="100%" cellspacing="0">
-								<thead>
-									<tr class="active">
-										<th>Job Name</th>
-										<th>Roll No. From</th>
-										<th>Roll No. To</th>
-										<th># Rolls</th>
-										<th>Gross weight</th>
-										<th>Net weight</th>
-										<th>Size</th>
-										<th>Thickness</th>
-									</tr>
-								</thead>
-								<tbody>
-									<?php
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+							<thead>
+								<tr class="active">
+									<th>Job Name</th>
+									<th>Roll No. From</th>
+									<th>Roll No. To</th>
+									<th># Rolls</th>
+									<th>Gross weight</th>
+									<th>Net weight</th>
+									<th>Size</th>
+									<th>Thickness</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php
      $macchi->giveShrink(2);
 ?>
-								</tbody>
-							</table>
-						</div>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 
@@ -256,24 +256,24 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-md-6 form-group">
-                                    <label for="customer">Customer</label><br />
-                                    <input type="hidden" class="form-control" id="customer" name="customer">
-                                    <div class="dropdown">
-                                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_customer">&nbsp&nbsp<span class="caret"></span></button>
-                                        <ul class="dropdown-menu" id="dropdown_customer">
-                                            <li><input type="text" placeholder="Search customer.." class="searchDropdown" id="searchCustomer" onkeyup="filterCustomers()" width="100%"></li>
-                                            <?php
+								<div class="col-md-4 form-group">
+									<label for="customer">Customer</label><br />
+									<input type="hidden" class="form-control" id="customer" name="customer">
+									<div class="dropdown">
+										<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" id="btn_customer">&nbsp&nbsp<span class="caret"></span></button>
+										<ul class="dropdown-menu" id="dropdown_customer">
+											<li><input type="text" placeholder="Search customer.." class="searchDropdown" id="searchCustomer" onkeyup="filterCustomers()" width="100%"></li>
+											<?php
     $macchi->customersDropdown();
  ?>
-                                        </ul>
-                                    </div>
-                                </div>
-								<div class="col-md-3 form-group">
+										</ul>
+									</div>
+								</div>
+								<div class="col-md-4 form-group">
 									<label for="size">Thickness (µ)<span class="text-danger">*</span></label><br />
 									<input type="number" class="form-control" step="1" min="1" id="thickness" name="thickness" value="45" required>
 								</div>
-								<div class="col-md-3 form-group">
+								<div class="col-md-4 form-group">
 									<label for="size">Size (mm)<span class="text-danger">*</span></label><br />
 									<input type="number" class="form-control" step="1" min="1" id="size" name="size" value="445" required>
 								</div>
@@ -283,7 +283,7 @@
 									Rolls
 								</div>
 								<div class="panel-body">
-									<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+									<table class="table table-bordered table-hover table-condensed" width="100%" cellspacing="0">
 										<thead>
 											<tr class="active">
 												<th class="text-center">Time</th>
@@ -297,7 +297,7 @@
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker' required>
-														<input type='text' class="form-control" id="time" name="time"  value="00:00" required/>
+														<input type='text' class="form-control" id="time" name="time" value="00:00" required/>
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -305,13 +305,13 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_1" id="from_1" value="1" required onkeyup="calculate(1)"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_1" id="to_1" value="40" required onkeyup="calculate(1)"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_1" id="rolls_1" readonly  value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_1" required></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_1" id="rolls_1" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_1"  id="wt_1" onkeyup="calculateTotal()"  required></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker2' required>
-														<input type='text' class="form-control" id="time2" name="time2"  value="00:00" />
+														<input type='text' class="form-control" id="time2" name="time2" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -319,27 +319,27 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_2" id="from_2" onkeyup="calculate(2)" value="41"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_2" id="to_2" onkeyup="calculate(2)" value="80"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_2" id="rolls_2" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_2"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_2" id="rolls_2" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_2"  id="wt_2" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker3' required>
-														<input type='text' class="form-control" id="time3" name="time3"  value="00:00"/>
+														<input type='text' class="form-control" id="time3" name="time3" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
 													</div>
 												</td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_3" id="from_3"onkeyup="calculate(3)" value="81"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_3" id="to_3"onkeyup="calculate(3)" value="120"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_3" id="rolls_3"readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_3"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_3" id="from_3" onkeyup="calculate(3)" value="81"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_3" id="to_3" onkeyup="calculate(3)" value="120"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_3" id="rolls_3" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_3"  id="wt_3" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker4' required>
-														<input type='text' class="form-control" id="time4" name="time4"  value="00:00"/>
+														<input type='text' class="form-control" id="time4" name="time4" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -347,13 +347,13 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_4" id="from_4" onkeyup="calculate(4)" value="121"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_4" id="to_4" onkeyup="calculate(4)" value="160"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_4" id="rolls_4" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_4"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_4" id="rolls_4" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_4"  id="wt_4" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker5' required>
-														<input type='text' class="form-control" id="time5" name="time5" value="00:00"/>
+														<input type='text' class="form-control" id="time5" name="time5" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -361,13 +361,13 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_5" id="from_5" onkeyup="calculate(5)" value="161"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_5" id="to_5" onkeyup="calculate(5)" value="200"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_5" id="rolls_5" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_5"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_5" id="rolls_5" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_5"  id="wt_5" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker6' required>
-														<input type='text' class="form-control" id="time6" name="time6"  value="00:00"/>
+														<input type='text' class="form-control" id="time6" name="time6" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -375,13 +375,13 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_6" id="from_6" onkeyup="calculate(6)" value="201"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_6" id="to_6" onkeyup="calculate(6)" value="240"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_6" id="rolls_6" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_6"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_6" id="rolls_6" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_6"  id="wt_6" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker7' required>
-														<input type='text' class="form-control" id="time7" name="time7" value="00:00"/>
+														<input type='text' class="form-control" id="time7" name="time7" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -389,13 +389,13 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_7" id="from_7" onkeyup="calculate(7)" value="241"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_7" id="to_7" onkeyup="calculate(7)" value="280"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_7" id="rolls_7" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_7"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_7" id="rolls_7" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_7"  id="wt_7" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker8' required>
-														<input type='text' class="form-control" id="time8" name="time8" value="00:00"/>
+														<input type='text' class="form-control" id="time8" name="time8" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -403,13 +403,13 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_8" id="from_8" onkeyup="calculate(8)" value="281"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_8" id="to_8" onkeyup="calculate(8)" value="320"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_8" id="rolls_8" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_8"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_8" id="rolls_8" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_8"  id="wt_8" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker9' required>
-														<input type='text' class="form-control" id="time9" name="time9" value="00:00"/>
+														<input type='text' class="form-control" id="time9" name="time9" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -417,13 +417,13 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_9" id="from_9" onkeyup="calculate(9)" value="321"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_9" id="to_9" onkeyup="calculate(9)" value="360"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_9" id="rolls_9" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_9"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_9" id="rolls_9" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_9"  id="wt_9" onkeyup="calculateTotal()" ></td>
 											</tr>
 											<tr>
 												<td>
 													<div class='input-group date' id='timepicker10' required>
-														<input type='text' class="form-control" id="time10" name="time10" value="00:00"/>
+														<input type='text' class="form-control" id="time10" name="time10" value="00:00" />
 														<span class="input-group-addon">
 													<span class="fa fa-clock-o"></span>
 														</span>
@@ -431,11 +431,86 @@
 												</td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_10" id="from_10" onkeyup="calculate(10)" value="361"></td>
 												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_10" id="to_10" onkeyup="calculate(10)" value="400"></td>
-												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_10" id="rolls_10" readonly value="40" ></td>
-												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_10"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_10" id="rolls_10" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_10" id="wt_10" onkeyup="calculateTotal()" ></td>
+											</tr>
+											<tr>
+												<td>
+													<div class='input-group date' id='timepicker11' required>
+														<input type='text' class="form-control" id="time11" name="time11" value="00:00" />
+														<span class="input-group-addon">
+													<span class="fa fa-clock-o"></span>
+														</span>
+													</div>
+												</td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_11" id="from_11" onkeyup="calculate(11)" value="361"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_11" id="to_11" onkeyup="calculate(11)" value="400"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_11" id="rolls_11" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_11" id="wt_11" onkeyup="calculateTotal()" ></td>
+											</tr>
+											<tr>
+												<td>
+													<div class='input-group date' id='timepicker12' required>
+														<input type='text' class="form-control" id="time12" name="time12" value="00:00" />
+														<span class="input-group-addon">
+													<span class="fa fa-clock-o"></span>
+														</span>
+													</div>
+												</td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_12" id="from_12" onkeyup="calculate(12)" value="401"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_12" id="to_12" onkeyup="calculate(12)" value="440"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_12" id="rolls_12" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_12" id="wt_12" onkeyup="calculateTotal()" ></td>
+											</tr>
+											<tr>
+												<td>
+													<div class='input-group date' id='timepicker13' required>
+														<input type='text' class="form-control" id="time13" name="time13" value="00:00" />
+														<span class="input-group-addon">
+													<span class="fa fa-clock-o"></span>
+														</span>
+													</div>
+												</td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_13" id="from_13" onkeyup="calculate(13)" value="441"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_13" id="to_13" onkeyup="calculate(13)" value="480"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_13" id="rolls_13" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_13" id="wt_13" onkeyup="calculateTotal()" ></td>
+											</tr>
+											<tr>
+												<td>
+													<div class='input-group date' id='timepicker14' required>
+														<input type='text' class="form-control" id="time14" name="time14" value="00:00" />
+														<span class="input-group-addon">
+													<span class="fa fa-clock-o"></span>
+														</span>
+													</div>
+												</td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_14" id="from_14" onkeyup="calculate(14)" value="481"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_14" id="to_14" onkeyup="calculate(14)" value="520"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_14" id="rolls_14" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_14" id="wt_14" onkeyup="calculateTotal()" ></td>
+											</tr>
+											<tr>
+												<td>
+													<div class='input-group date' id='timepicker15' required>
+														<input type='text' class="form-control" id="time15" name="time15" value="00:00" />
+														<span class="input-group-addon">
+													<span class="fa fa-clock-o"></span>
+														</span>
+													</div>
+												</td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="from_15" id="from_15" onkeyup="calculate(15)" value="521"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="to_15" id="to_15" onkeyup="calculate(15)" value="560"></td>
+												<td><input type="number" class="form-control input-sm" step="1" min="1" name="rolls_15" id="rolls_15" readonly value="40"></td>
+												<td><input type="number" class="form-control input-sm" step="0.01" min="0" name="wt_15" id="wt_15" onkeyup="calculateTotal()" ></td>
 											</tr>
 										</tbody>
 									</table>
+
+									<div class="col-md-4 form-group pull-right">
+										<label for="size">Total gross weight</label><br />
+										<td><input type="number" class="form-control input-sm" step="0.01" min="1" id="total" readonly></td>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -466,31 +541,41 @@
     
 ?>
 			<script>
+				
+			function calculateTotal() {
+				var total = +0;
+				for (i = 1; i < 16; i++) {
+					if (document.getElementById("wt_" + i).value !== null && document.getElementById("wt_" + i).value !== '') {
+						total += Number(document.getElementById("wt_" + i).value);
+					}
+				}
+				document.getElementById("total").value = total;
+			}
+				
 				function selectShift(id, name) {
 					document.getElementById("btn_shift").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("shift").value = id;
 				}
-				
+
 				function selectCustomer(id, name) {
 					document.getElementById("btn_customer").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("customer").value = id;
 				}
-				
-				
+
+
 				function selectSample(id, name) {
 					document.getElementById("btn_sample").innerHTML = name + " &nbsp&nbsp<span class='caret'></span> ";
 					document.getElementById("sample").value = id;
 
 				}
-				
+
 				function calculate(id) {
 					var from, to, rolls;
-					from = document.getElementById("from_"+id).value;
-					to = document.getElementById("to_"+id).value;
-					rolls = to - from +1;
-					if(rolls>0)
-					{
-						document.getElementById("rolls_"+id).value = rolls;
+					from = document.getElementById("from_" + id).value;
+					to = document.getElementById("to_" + id).value;
+					rolls = to - from + 1;
+					if (rolls > 0) {
+						document.getElementById("rolls_" + id).value = rolls;
 					}
 				}
 			</script>
@@ -508,7 +593,7 @@
 					});
 
 					$('#datetimepicker2').data("DateTimePicker").maxDate(new Date());
-					
+
 					$('#timepicker').datetimepicker({
 						format: 'HH:mm'
 					});

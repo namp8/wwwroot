@@ -557,11 +557,11 @@
 
 									</tbody>
 								</table>
-							</div>
 							<div class="col-md-6 form-group">
 									<label for="size">Total gross weight</label><br />
 									<td><input type="number" class="form-control input-sm" step="0.01" min="13"  id="total"  readonly></td>
 									</div>
+							</div>
 						</div>
 					</div>
 					<div class="modal-footer">

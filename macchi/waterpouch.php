@@ -341,7 +341,7 @@
 									Rolls
 								</div>
 								<div class="panel-body">
-									<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+									<table class="table table-bordered table-hover " width="100%" cellspacing="0">
 										<thead>
 											<tr class="active">
 												<th class="text-center">Time</th>
