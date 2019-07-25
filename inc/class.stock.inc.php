@@ -5395,7 +5395,7 @@ ORDER BY report.datereport;";
 						`raw_materials_imports`.date_cleared AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
 						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+						SUM(stock_materials_transfers.bags_issued) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
 					FROM
@@ -5427,6 +5427,7 @@ ORDER BY report.datereport;";
 							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
 					WHERE
 						`raw_materials_imports`.`material_id` = ".$material."
+					group by `raw_materials_imports`.date_cleared, `raw_materials_imports`.`material_id`
 					UNION ALL SELECT 
 						`local_purchases`.date_arrived AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
