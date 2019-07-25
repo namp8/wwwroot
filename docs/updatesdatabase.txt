@@ -1,0 +1,5 @@
+ALTER TABLE `ups_db`.`printing_rolls` 
+ADD COLUMN `roll_id3` INT(11) NULL DEFAULT NULL AFTER `roll_id2`,
+ADD COLUMN `roll_id4` INT(11) NULL DEFAULT NULL AFTER `roll_id3`,
+ADD COLUMN `roll_id5` INT(11) NULL DEFAULT NULL AFTER `roll_id4`,
+ADD COLUMN `roll_id6` INT(11) NULL DEFAULT NULL AFTER `roll_id5`;
