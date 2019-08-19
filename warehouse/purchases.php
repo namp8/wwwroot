@@ -57,11 +57,11 @@ if(!$stock->access(1))
 
 
 	<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" data-toggle="modal" data-target="#modal1">Add Local Purchase</button>
-			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF()">Export to PDF</button>
     <div class="panel panel-info">
         <div class="panel-heading"> Local Purchases this month </div>
         <div class="panel-body">
-            <div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF()">PDF</button>
+                        <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr class="active">
@@ -231,6 +231,10 @@ $materials->materialsKgDropdown();
 				defaultDate : moment()
 			});
 			$("#dataTable").DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
 				"order": [],
 				"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
 				"footerCallback": function(row, data, start, end, display) {

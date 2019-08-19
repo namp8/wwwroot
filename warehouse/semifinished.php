@@ -57,7 +57,6 @@ if(!$stock->access(4))
 	</div>
 
 
-    <button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF()">Export to PDF</button>
 <?php
 	if($stock->administrators())
 	{
@@ -67,7 +66,8 @@ if(!$stock->access(4))
     <div class="panel panel-info">
         <div class="panel-heading"> List of Semi finished Goods in Warehouse stock </div>
         <div class="panel-body">
-            <div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF()">PDF</button>
+                        <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr class="active">
@@ -195,6 +195,10 @@ $materials->semifinishedStockDropdown(1);
 				defaultDate : moment()
 			});
 			$("#dataTable").DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
 				"order": [],
 				"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]],
 				"footerCallback": function(row, data, start, end, display) {

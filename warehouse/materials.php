@@ -73,7 +73,6 @@ if(!$stock->access(4))
 	<form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
  		<input type="submit" id="refresh" name="refresh" class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" value="Recalculate">
      </form>
-    <button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF()">Export to PDF</button>
 <?php
 	if($stock->administrators())
 	{
@@ -83,7 +82,8 @@ if(!$stock->access(4))
     <div class="panel panel-info">
         <div class="panel-heading"> List of Materials </div>
         <div class="panel-body">
-            <div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF()">PDF</button>
+                        <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr class="active">
@@ -211,6 +211,10 @@ $materials->materialsStockDropdown(1);
 				defaultDate : moment()
 			});
 			$("#dataTable").DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
 				"order": [],
 				"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]],
 				"footerCallback": function(row, data, start, end, display) {

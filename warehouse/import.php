@@ -100,14 +100,13 @@
 	<h4 id="titleReport" style="display:none;">Raw Material Import Orders</h4>
 	<div class="tab-content">
 		<div id="Ordered" class="tab-pane fade in active">
-
-			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF('dataTable')">Export to PDF</button>
 			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:15px;" data-toggle="modal" data-target="#modal1">Open File</button>
 
 			<div class="panel panel-info">
 				<div class="panel-heading">Raw Material Import Ordered</div>
 				<div class="panel-body">
-					<div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF('dataTable')">PDF</button>
+                        <div class="table-responsive">
 						<table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
 							<thead>
 								<tr class="active">
@@ -150,13 +149,13 @@
 			</div>
 		</div>
 		<div id="Shipped" class="tab-pane fade ">
-			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF('dataTable2')">Export to PDF</button>
 			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:15px;" data-toggle="modal" data-target="#modal2">Add shipment information</button>
 
 			<div class="panel panel-info">
 				<div class="panel-heading">Raw Material Import Shipped</div>
 				<div class="panel-body">
-					<div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF('dataTable2')">PDF</button>
+                        <div class="table-responsive">
 						<table class="table table-bordered table-hover" id="dataTable2" width="100%" cellspacing="0">
 							<thead>
 								<tr class="active">
@@ -205,13 +204,13 @@
 			</div>
 		</div>
 		<div id="Paid" class="tab-pane fade ">
-			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF('dataTable4')">Export to PDF</button>
 			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:15px;" data-toggle="modal" data-target="#modal4">Add payment information</button>
 
 			<div class="panel panel-info">
 				<div class="panel-heading">Raw Material Import Paid this month</div>
 				<div class="panel-body">
-					<div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF('dataTable4')">PDF</button>
+                        <div class="table-responsive">
 						<table class="table table-bordered table-hover" id="dataTable4" width="100%" cellspacing="0">
 							<thead>
 								<tr class="active">
@@ -252,13 +251,13 @@
 			</div>
 		</div>
 		<div id="Cleared" class="tab-pane fade ">
-			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF('dataTable3')">Export to PDF</button>
 			<button class="btn btn-info pull-right" style="margin-top:5px;margin-right:15px;" data-toggle="modal" data-target="#modal3">Add clearing information</button>
 
 			<div class="panel panel-info">
 				<div class="panel-heading">Raw Material Import Cleared to Spintex Factory</div>
 				<div class="panel-body">
-					<div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF('dataTable3')">PDF</button>
+                        <div class="table-responsive">
 						<table class="table table-bordered table-hover" id="dataTable3" width="100%" cellspacing="0">
 							<thead>
 								<tr class="active">
@@ -931,6 +930,10 @@
 
 
 			$('#dataTable').DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
 				"order": [],
 				"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
 				"footerCallback": function(row, data, start, end, display) {
@@ -977,6 +980,10 @@
 				}
 			});
 			$('#dataTable2').DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
 				"order": [],
 				"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
 				"footerCallback": function(row, data, start, end, display) {
@@ -1023,6 +1030,10 @@
 				}
 			});
 			$('#dataTable3').DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
 				"order": [],
 				"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
 				"footerCallback": function(row, data, start, end, display) {
@@ -1147,6 +1158,10 @@
 			});
 
 			$('#dataTable4').DataTable({
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
 				"order": [],
 				"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
 				"footerCallback": function(row, data, start, end, display) {
