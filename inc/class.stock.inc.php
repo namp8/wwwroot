@@ -5395,7 +5395,7 @@ ORDER BY report.datereport;";
 						`raw_materials_imports`.date_cleared AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
 						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						SUM(stock_materials_transfers.bags_issued) AS issued,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
 					FROM
@@ -5859,7 +5859,6 @@ WHERE datereport BETWEEN '". $newDateString ."' AND '". $newDateString2 ."'
 ORDER BY report.datereport;";
 
 				}
-				
 				ini_set('max_execution_time', 300);
 					if($stmt2 = $this->_db->prepare($sql2))
 					{
@@ -5900,7 +5899,8 @@ ORDER BY report.datereport;";
 												$stmt4->execute();
 												$stmt4->closeCursor();
 											} catch (PDOException $e) {
-												echo '<strong>ERROR</strong> There is an error running the report, please try to execute it again.<br>'. $e->getMessage();
+												echo '<strong>ERROR</strong> There is an error running the report, please try to execute it again.<br>'.
+													$e->getMessage();
 											} 
 										}
 									}
