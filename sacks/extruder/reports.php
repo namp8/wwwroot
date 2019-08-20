@@ -77,7 +77,6 @@
     </div>
 
     <div class="row " style="padding-top:30px;" id="panelReport">
-         <button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF()">Export Table to PDF</button>
             <div class="panel panel-info">
                 <div class="panel-heading" id="titleReport"> </div>
                 <div class="panel-body">
@@ -93,6 +92,8 @@
 
                         </div>
                     </div>  
+                    <hr>
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF()">PDF</button>
                         <div class="table-responsive">
                         
                             
@@ -283,7 +284,13 @@
                 });
                 $('#datetimepicker').data("DateTimePicker").maxDate(new Date());
                 $('#datetimepicker2').data("DateTimePicker").maxDate(new Date());
+                 
                 $('#dataTable').DataTable( {
+                
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
                 "order": [],
 				"lengthMenu": [[-1, 10, 25, 50, 100], ["All", 10, 25, 50, 100]]
 <?php

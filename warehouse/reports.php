@@ -85,12 +85,11 @@ if(!$stock->access(5))
     </div>
 
 
-    <button class="btn btn-info pull-right" style="margin-top:5px;margin-right:30px;" onclick="exportToPDF()">Export to PDF</button>
-
     <div class="panel panel-info">
         <div class="panel-heading" id="titleReport">Report</div>
         <div class="panel-body">
-            <div class="table-responsive">
+         <button class="btn btn-info" style="margin-top:5px;margin-left:15px;" onclick="exportToPDF()">PDF</button>
+                        <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
                        
                     <?php
@@ -700,6 +699,11 @@ if(!$stock->access(5))
   echo 'document.getElementById("titleReport").innerHTML = document.getElementById("btn_report").innerHTML.split("<")[0] + " From:" + document.getElementById("dateSearch").value + " To " + document.getElementById("dateSearch2").value;';
 ?>		
                 $('#dataTable').DataTable( {
+                
+        dom: 'Blfrtip',
+        buttons: [
+            'excel'
+        ],
                 "order": [],
 				"lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]]
 <?php

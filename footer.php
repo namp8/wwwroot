@@ -55,6 +55,9 @@
     <!-- Data tables-->
     <script src="/assets/datatables/jquery.dataTables.js"></script>
     <script src="/assets/datatables/dataTables.bootstrap4.js"></script>
+    <script src="/assets/datatables/dataTables.buttons.min.js"></script>
+    <script src="/assets/datatables/jszip.min.js"></script>
+    <script src="/assets/datatables/buttons.html5.min.js"></script>
     <script src="/assets/js/bootstrap-datetimepicker.min.js"></script>
   </body>
 </html>
