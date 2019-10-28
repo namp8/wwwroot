@@ -1,6 +1,6 @@
  <?php
-    $pageTitle = "Printed Rolls Process";
     include_once "../base.php";
+    $pageTitle = "Printed Rolls Process";
     include_once "../header.php";
     include_once "sidebar.php";
     include_once "../content.php";

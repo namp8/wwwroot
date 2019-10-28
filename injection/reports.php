@@ -67,7 +67,6 @@
                         <li><a onclick="selectReport(4)">Injection - Raw Material Consumption Report</a></li>
                         <li><a onclick="selectReport(5)">Injection - Short Fall and Downtime Report</a></li>
                         <li><a onclick="selectReport(6)">Injection - Raw Material Stock Details</a></li>
-                        <li><a onclick="selectReport(7)">Injection - Rolls on Floor Details</a></li>
                     </ul>
                 </div>
             </div>
@@ -131,12 +130,6 @@
     {
         echo '<table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0"  >';
         $injection->reportRawMaterial();
-		echo '</table>';
-    }
-	else if( empty($_POST['report']) or $_POST['report'] == 7 )
-    {
-        echo '<table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0"  >';
-        $injection->reportRollsInjection();
 		echo '</table>';
     }
 ?>

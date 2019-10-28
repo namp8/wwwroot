@@ -1,6 +1,6 @@
 <?php
-    $pageTitle = "Multilayer Process";
     include_once "../../base.php";
+    $pageTitle = "Multilayer Process";
     include_once "../../header.php";
     include_once "../sidebar1.php";
     include_once "../../content.php";

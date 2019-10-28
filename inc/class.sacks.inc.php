@@ -5742,7 +5742,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 					`shortfalls`
 				LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id 
 				WHERE
-					location_id=7 AND  `shortfalls`.`date_fall` BETWEEN '2018-01-01 00:00:00' AND '2018-01-31 23:59:59') AS total_time,
+					location_id=7 AND  `shortfalls`.`date_fall`  BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59') AS total_time,
 				GROUP_CONCAT(`shortfalls`.`reason`
 					SEPARATOR '<br />') AS reason,
 				GROUP_CONCAT(`shortfalls`.`action_plan`
@@ -5782,7 +5782,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 					`shortfalls`
 				LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id 
 				WHERE
-					location_id=7 AND  `shortfalls`.`date_fall` BETWEEN '2018-01-01 00:00:00' AND '2018-01-31 23:59:59') AS total_time,
+					location_id=7 AND  `shortfalls`.`date_fall` BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59') AS total_time,
 				GROUP_CONCAT(`shortfalls`.`reason`
 					SEPARATOR '<br />') AS reason,
 				GROUP_CONCAT(`shortfalls`.`action_plan`
@@ -5820,7 +5820,7 @@ ORDER BY `date_roll`, sacks_rolls.machine_id ;";
 					`shortfalls`
 				LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id 
 				WHERE
-					location_id=7 AND  `shortfalls`.`date_fall` BETWEEN '2018-01-01 00:00:00' AND '2018-01-31 23:59:59') AS total_time,
+					location_id=7 AND  `shortfalls`.`date_fall`  BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59') AS total_time,
 				GROUP_CONCAT(`shortfalls`.`reason`
 					SEPARATOR '<br />') AS reason,
 				GROUP_CONCAT(`shortfalls`.`action_plan`

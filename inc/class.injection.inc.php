@@ -1890,57 +1890,42 @@ ORDER BY injection_sacks_weight_id";
             }
             
 			
-            $sql = "SELECT 
-    DATE_FORMAT(`date_roll`, '%b/%Y') AS date, DATE_FORMAT(`date_roll`, '%m/%Y') as date2, machine_name, sacks_rolls.machine_id,
-    ROUND(SUM(net_weight), 2) AS actual,
-    waste.wastekgs,
-    COUNT(DISTINCT (DATE_FORMAT(`date_roll`, '%d/%m/%Y'))) AS days,
-    target, target_waste, capacity
-FROM
-    sacks_rolls
-LEFT JOIN machines ON sacks_rolls.machine_id = machines.machine_id
+            $sql = "SELECT  DATE_FORMAT(`injection_production`.`date_production`, '%b/%Y') AS date, machine_name,
+    materials.material_name, materials.material_grade, types.material_name as type, 
+   `injection_production`.`cavities`,waste_target.target_waste,
+    SUM(`injection_production`.`produced_pcs`) as produced_pcs,
+    SUM(`injection_production`.`good_pcs`) as good_pcs,
+    SUM(`injection_production`.`net_weight`) as net_weight, waste.wastekgs,`injection_production`.`machine_id`,target.target
+FROM `injection_production`
+JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
+JOIN materials ON materials.material_id = `injection_production`.`material_id`
+LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
 LEFT JOIN
     (SELECT 
-        DATE_FORMAT(`date_waste`, '%m/%Y') AS date,
-            SUM(waste) AS wastekgs, machine_id
+        DATE_FORMAT(`date_waste`, '%b/%Y') AS date, SUM(waste) AS wastekgs, waste.machine_id
     FROM
         `waste`
-	NATURAL JOIN machines
-    WHERE location_id = 7 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-    GROUP BY DATE_FORMAT(`date_waste`, '%m/%Y'), machine_id
-    ORDER BY `date_waste`) waste ON waste.date = DATE_FORMAT(`date_roll`, '%m/%Y') AND waste.machine_id = sacks_rolls.machine_id
-	LEFT JOIN
-    (SELECT 
-        DATE_FORMAT(`target_orders`.`date`, '%m/%Y') AS date,
-            SUM(target_order) AS target, machine_id
-    FROM
-        `target_orders`
-   	NATURAL JOIN machines
-    WHERE location_id = 7 
-        AND date BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-    GROUP BY DATE_FORMAT(`target_orders`.`date`, '%m/%Y'), machine_id
-    ORDER BY `target_orders`.`date`) targets ON targets.date = DATE_FORMAT(`date_roll`, '%m/%Y') AND targets.machine_id = sacks_rolls.machine_id
+	JOIN machines ON machines.machine_id = waste.`machine_id`
+    WHERE location_id = 6 AND date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+    GROUP BY DATE_FORMAT(`date_waste`, '%b/%Y'), machine_id) waste ON waste.date = DATE_FORMAT(`injection_production`.`date_production`, '%b/%Y') AND waste.machine_id = `injection_production`.`machine_id`
+LEFT JOIN
+	(
+		SELECT AVG(`injection_sacks_formulas`.`target`), DATE_FORMAT(`to`, '%b/%Y') AS `to` , DATE_FORMAT(`from`, '%b/%Y') AS `from` `injection_sacks_formulas`.`material_id`
+        FROM `injection_sacks_formulas`
+		GROUP BY DATE_FORMAT(from, '%m/%Y')
+    )
+     target ON  target.material_id = `injection_production`.`material_id` AND target.`from` <= DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d') AND (target.`to` IS NULL OR target.`to` > DATE_FORMAT(`injection_production`.`date_production`, '%Y-%m-%d'))
 	LEFT JOIN
 	(
-		SELECT AVG(`settings`.value_setting) AS target_waste, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`
+		SELECT `settings`.value_setting AS target_waste, `settings`.to, `settings`.from
         FROM `settings`
-        WHERE `settings`.machine_id = 7 AND `settings`.name_setting = 'waste'
-		GROUP BY DATE_FORMAT(`settings`.from, '%m/%Y')
+        WHERE `settings`.machine_id = 6 AND `settings`.name_setting = 'waste'
     )
-    waste_target ON waste_target.`from` <= DATE_FORMAT(`date_roll`, '%m/%Y') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`date_roll`, '%m/%Y'))
-	LEFT JOIN
-	(
-		SELECT AVG(`settings`.value_setting) AS capacity, DATE_FORMAT(`settings`.`to`, '%m/%Y') AS `to` , DATE_FORMAT(`settings`.`from`, '%m/%Y') AS `from`, `settings`.machine_id
-        FROM `settings`
-		NATURAL JOIN machines
-    	WHERE location_id = 7 
-		GROUP BY DATE_FORMAT(`settings`.from, '%m/%Y'), `settings`.machine_id
-    )
-    capacity ON  capacity.machine_id = sacks_rolls.machine_id AND capacity.`from` <= DATE_FORMAT(`date_roll`, '%m/%Y') AND (capacity.`to` IS NULL OR capacity.`to` > DATE_FORMAT(`date_roll`, '%m/%Y'))
-WHERE
-    date_roll BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
-GROUP BY DATE_FORMAT(`date_roll`, '%b/%Y'), sacks_rolls.machine_id 
-ORDER BY `date_roll`, sacks_rolls.machine_id  ;";
+    waste_target ON waste_target.`from` <= DATE_FORMAT(`injection_production`.`date_production`, '%b/%Y') AND (waste_target.`to` IS NULL OR waste_target.`to` > DATE_FORMAT(`injection_production`.`date_production`, '%b/%Y'))
+
+	WHERE date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_production`, '%b/%Y'), `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
+    ORDER BY `injection_production`.`date_production`;";
             
             
         }
@@ -3337,6 +3322,1942 @@ LEFT JOIN
         </script>'; 
     }
     
+    
+     public function reportProduction()
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Machine</th>';
+        echo '<th>Job</th>';
+        echo '<th>Actual Production</th>';
+        echo '</tr></thead>
+			<tfoot><tr  class="active">
+			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th>
+			</tr></tfoot><tbody>'; 
+        
+       
+        $b1=array();
+        $b2=array();
+        $b3=array();
+        $b4=array();
+        $b5=array();
+        $b6=array();
+        $b7=array();
+        $b8=array();
+        $b9=array();
+        $b10=array();
+		
+		        
+        $newDateString = date("Y-m-d");
+        $newDateString2 = date("Y-m-d");
+        if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of this month');
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of this month');
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+			
+            $sql = "SELECT  DATE_FORMAT(`injection_production`.`date_production`, '%b/%Y') AS date, machine_name,
+    materials.material_name, materials.material_grade, types.material_name as type, `injection_production`.`machine_id`,
+    SUM(`injection_production`.`good_pcs`) as good_pcs
+FROM `injection_production`
+JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
+JOIN materials ON materials.material_id = `injection_production`.`material_id`
+LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
+	WHERE date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_production`, '%b/%Y'), `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
+    ORDER BY `injection_production`.`date_production` ";
+            
+            
+        }
+        else if(!empty($_POST['searchBy']) and $_POST['searchBy']==3)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of January ' . $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of December ' . $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+              $sql = "SELECT  DATE_FORMAT(`injection_production`.`date_production`, '%Y') AS date, machine_name,
+    materials.material_name, materials.material_grade, types.material_name as type, `injection_production`.`machine_id`,
+    SUM(`injection_production`.`good_pcs`) as good_pcs
+FROM `injection_production`
+JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
+JOIN materials ON materials.material_id = `injection_production`.`material_id`
+LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
+	WHERE date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY DATE_FORMAT(`date_production`, '%Y'), `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
+    ORDER BY `injection_production`.`date_production` ";
+            
+        }
+        else
+        {
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = "SELECT  DATE_FORMAT(`injection_production`.`date_production`, '%d/%m/%Y') AS date, machine_name,
+    materials.material_name, materials.material_grade, types.material_name as type, `injection_production`.`machine_id`,
+    SUM(`injection_production`.`good_pcs`) as good_pcs
+FROM `injection_production`
+JOIN machines ON machines.machine_id = `injection_production`.`machine_id`
+JOIN materials ON materials.material_id = `injection_production`.`material_id`
+LEFT JOIN materials types ON types.material_id = `injection_production`.`type_id`  
+	WHERE date_production BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+	GROUP BY `injection_production`.`date_production`, `injection_production`.`machine_id`, `injection_production`.`material_id`, `injection_production`.`type_id`  
+    ORDER BY `injection_production`.`date_production` ";
+            
+        }
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+               
+                echo '<tr>
+                        <td class="text-right">'. $row['date'] .'</td>
+                        <td class="text-right">'. $row['machine_name'] .'</td>
+                        <td class="text-right">'. $row['material_name'] .' - '.  $row['material_grade'] .'</td>
+                        <td class="text-right">'. number_format($row['good_pcs'],0,'.',',') .'</td>
+                    </tr>';
+                $entrie1 = array( $row['date'], $row['good_pcs']);
+                if(!empty($_POST['searchBy']) and $_POST['searchBy']==2)
+                {
+                    $entrie1 = array( $row['date2'],$row['good_pcs']);
+                }
+				if($row['machine_id'] == 35)
+				{
+                	array_push($b1,$entrie1);
+				}
+				else if($row['machine_id'] == 36)
+				{
+                	array_push($b2,$entrie1);
+				}
+				else if($row['machine_id'] == 37)
+				{
+                	array_push($b3,$entrie1);
+				}
+				else if($row['machine_id'] == 38)
+				{
+                	array_push($b4,$entrie1);
+				}
+				else if($row['machine_id'] == 39)
+				{
+                	array_push($b5,$entrie1);
+				}
+				else if($row['machine_id'] == 40)
+				{
+                	array_push($b6,$entrie1);
+				}
+				else if($row['machine_id'] == 41)
+				{
+                	array_push($b7,$entrie1);
+				}
+				else if($row['machine_id'] == 42)
+				{
+                	array_push($b8,$entrie1);
+				}
+				else if($row['machine_id'] == 43)
+				{
+                	array_push($b9,$entrie1);
+				}
+				else if($row['machine_id'] == 44)
+				{
+                	array_push($b10,$entrie1);
+				}
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>";
+        }
+         echo '</tbody>';
+         
+        echo '<script>document.getElementById("divChart1").setAttribute("class","col-md-12");</script>';
+        echo '<script>document.getElementById("chartContainer").style= "height:200px;width:100%";</script>';
+         echo '<script> 
+            var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: { 
+                text: "Production "
+            },
+            exportFileName: "Production",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Total Good production (pcs)"},
+            toolTip: {
+                shared: true
+            },legend:{
+                itemclick : toggleDataSeries
+            },';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 1",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b1 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b1 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b1 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 2",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b2 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b2 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b2 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 3",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b3 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b3 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b3 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 4",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b4 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b4 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b4 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 5",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b5 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b5 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b5 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 6",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b6 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b6 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b6 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 7",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b7 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b7 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b7 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 8",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b8 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b8 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b8 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+         
+         echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 9",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b9 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b9 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b9 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+         
+         echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 10",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,### pcs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($b10 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($b10 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($b10 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo'] }]});
+        chart.render(); 
+        function toggleDataSeries(e) {
+            if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            chart.render();
+        } 
+        </script>'; 
+    }
+    
+    
+     public function reportWaste()
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Machine</th>';
+        echo '<th>Total Waste</th>';
+        echo '</tr></thead><tfoot><tr  class="active">
+			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right"></th></tr></tfoot><tbody>';   
+        
+        $a1=array();
+        $a2=array();
+        $a3=array();
+        $a4=array();
+        $a5=array();
+        $a6=array();
+        $a7=array();
+        $a8=array();
+        $a9=array();
+        $a10=array();
+		
+        $newDateString = date("Y-m-d");
+        $newDateString2 = date("Y-m-d");
+        if($_POST['searchBy']==2)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of this month');
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of this month');
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = " SELECT DATE_FORMAT(`date_waste`, '%b/%Y') as date, DATE_FORMAT(`date_waste`, '%m/%Y') as date2, SUM(`waste`.`waste`) AS total, machine_name, waste.machine_id
+             FROM  `waste`
+             LEFT JOIN machines ON waste.machine_id = machines.machine_id
+             WHERE location_id=6 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+             GROUP BY DATE_FORMAT(`date_waste`, '%b/%Y'), waste.machine_id  
+             ORDER BY `date_waste`;";
+            
+        }
+        else if($_POST['searchBy']==3)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of January ' . $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of December ' . $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = " SELECT DATE_FORMAT(`date_waste`, '%Y') as date, SUM(`waste`.`waste`) AS total, machine_name, waste.machine_id
+             FROM  `waste`
+             LEFT JOIN machines ON waste.machine_id = machines.machine_id
+             WHERE location_id=6 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+             GROUP BY DATE_FORMAT(`date_waste`, '%Y'), waste.machine_id
+             ORDER BY `date_waste`;";
+        }
+        else
+        {
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = " SELECT DATE_FORMAT(`date_waste`, '%d/%m/%Y') AS date, SUM(`waste`.`waste`) AS total, machine_name, waste.machine_id
+             FROM  `waste`
+             LEFT JOIN machines ON waste.machine_id = machines.machine_id  
+             WHERE location_id=6 AND `waste`.date_waste BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+             GROUP BY DATE_FORMAT(`date_waste`, '%d/%m/%Y'), waste.machine_id 
+             ORDER BY `date_waste`;";
+            
+        }
+        
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                echo '<tr>
+                        <td class="text-right">'. $row['date'] .'</td>
+                        <td class="text-right">'. $row['machine_name'] .'</td>
+                        <td class="text-right">'. number_format($row['total'],2,'.',',') .'</td>
+                    </tr>';
+                $entrie = array( $row['date'], $row['total']);
+                if($_POST['searchBy']==2)
+                {
+                    $entrie = array( $row['date2'], $row['total']);
+                }
+                if($row['machine_id'] == 35)
+				{
+                	array_push($a1,$entrie);
+				}
+				else if($row['machine_id'] == 36)
+				{
+                	array_push($a2,$entrie);
+				}
+				else if($row['machine_id'] == 37)
+				{
+                	array_push($a3,$entrie);
+				}
+				else if($row['machine_id'] == 38)
+				{
+                	array_push($a4,$entrie);
+				}
+				else if($row['machine_id'] == 39)
+				{
+                	array_push($a5,$entrie);
+				}
+				else if($row['machine_id'] == 40)
+				{
+                	array_push($a6,$entrie);
+				}
+				else if($row['machine_id'] == 41)
+				{
+                	array_push($a7,$entrie);
+				}
+				else if($row['machine_id'] == 42)
+				{
+                	array_push($a8,$entrie);
+				}
+				else if($row['machine_id'] == 43)
+				{
+                	array_push($a9,$entrie);
+				}
+				else if($row['machine_id'] == 44)
+				{
+                	array_push($a10,$entrie);
+				}
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                </tr>";
+        }
+        echo '</tbody>';
+        echo '<script>document.getElementById("divChart1").setAttribute("class","col-md-12");</script>';
+        echo '<script>document.getElementById("chartContainer").style= "height:200px;width:100%";</script>';
+         echo '<script> 
+            var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: { 
+                text: "Waste "
+            },
+            exportFileName: "Waste",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Total Process Waste (kgs)"},
+            toolTip: {
+                shared: true
+            },legend:{
+                itemclick : toggleDataSeries
+            },';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 1",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a1 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a1 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a1 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 2",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a2 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a2 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a2 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 3",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a3 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a3 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a3 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 4",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a4 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a4 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a4 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 5",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a5 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a5 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a5 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 6",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a6 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a6 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a6 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 7",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a7 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a7 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a7 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		
+		echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 8",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a8 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a8 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a8 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+         
+         echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 9",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a9 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a9 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a9 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+         
+         echo ']},
+            {
+                type: "column",
+		      showInLegend: true,
+		      name: "Injection - 10",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.00 Kgs",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a10 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a10 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a10 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo'] }]});
+        chart.render(); 
+        function toggleDataSeries(e) {
+            if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            chart.render();
+        } 
+        </script>'; 
+    }
+    
+    
+    public function reportReason()
+    {
+        echo '<thead><tr  class="active">';
+        echo '<th>Date</th>';
+        echo '<th>Machine</th>';
+        echo '<th>Downtime</th>';
+        echo '<th>Reason for Short Fall</th>';
+        echo '<th>Action Plan</th>';
+        echo '</tr></thead><tbody>';   
+        
+        $a1=array();
+        $a2=array();
+        $a3=array();
+        $a4=array();
+        $a5=array();
+        $a6=array();
+        $a7=array();
+        $a8=array();
+        $a9=array();
+        $a10=array();
+		
+        
+        $newDateString = date("Y-m-d");
+        $newDateString2 = date("Y-m-d");
+        if($_POST['searchBy']==2)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of this month');
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('M/Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of this month');
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = "
+			SELECT 
+				DATE_FORMAT(`date_fall`, '%b/%Y') AS date, DATE_FORMAT(`date_fall`, '%m/%Y') as date2,
+				SEC_TO_TIME(SUM(TIME_TO_SEC(`shortfalls`.`downtime`))) AS total,
+				SUM(HOUR(`shortfalls`.`downtime`)) AS hours,
+				SUM(MINUTE(`shortfalls`.`downtime`)) AS minutes, (SELECT 
+					SEC_TO_TIME(SUM(TIME_TO_SEC(`shortfalls`.`downtime`))) AS total_time
+				FROM
+					`shortfalls`
+				LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id 
+				WHERE
+					location_id=6 AND  `shortfalls`.`date_fall`  BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59') AS total_time,
+				GROUP_CONCAT(`shortfalls`.`reason`
+					SEPARATOR '<br />') AS reason,
+				GROUP_CONCAT(`shortfalls`.`action_plan`
+					SEPARATOR '<br />') AS action, machine_name, shortfalls.machine_id
+			FROM
+				`shortfalls`			
+             LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id
+			 WHERE
+				location_id=6 AND `shortfalls`.`date_fall` BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+			GROUP BY DATE_FORMAT(`date_fall`, '%b/%Y'), shortfalls.machine_id
+			ORDER BY `date_fall`;";
+            
+        }
+        else if($_POST['searchBy']==3)
+        {    
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch']);
+               $myDateTime->modify('first day of January ' . $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('Y', $_POST['dateSearch2']);
+               $myDateTime->modify('last day of December ' . $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = "
+			SELECT 
+				DATE_FORMAT(`date_fall`, '%Y') AS date,
+				SEC_TO_TIME(SUM(TIME_TO_SEC(`shortfalls`.`downtime`))) AS total,
+				SUM(HOUR(`shortfalls`.`downtime`)) AS hours,
+				SUM(MINUTE(`shortfalls`.`downtime`)) AS minutes, (SELECT 
+					SEC_TO_TIME(SUM(TIME_TO_SEC(`shortfalls`.`downtime`))) AS total_time
+				FROM
+					`shortfalls`
+				LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id 
+				WHERE
+					location_id=6 AND  `shortfalls`.`date_fall`  BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59') AS total_time,
+				GROUP_CONCAT(`shortfalls`.`reason`
+					SEPARATOR '<br />') AS reason,
+				GROUP_CONCAT(`shortfalls`.`action_plan`
+					SEPARATOR '<br />') AS action, machine_name, shortfalls.machine_id
+			FROM
+				`shortfalls`
+					
+             LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id
+			 WHERE
+				location_id=6 AND `shortfalls`.`date_fall` BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+			GROUP BY DATE_FORMAT(`date_fall`, '%Y'), shortfalls.machine_id
+			ORDER BY `date_fall`;";
+        }
+        else
+        {
+            if(!empty($_POST['dateSearch']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch']);
+               $newDateString = $myDateTime->format('Y-m-d');
+            }
+            if(!empty($_POST['dateSearch2']))
+            {
+               $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['dateSearch2']);
+               $newDateString2 = $myDateTime->format('Y-m-d');
+            }
+            
+            $sql = "
+			SELECT 
+				DATE_FORMAT(`date_fall`, '%d/%m/%Y') AS date,
+				SEC_TO_TIME(SUM(TIME_TO_SEC(`shortfalls`.`downtime`))) AS total,
+				SUM(HOUR(`shortfalls`.`downtime`)) AS hours,
+				SUM(MINUTE(`shortfalls`.`downtime`)) AS minutes, (SELECT 
+					SEC_TO_TIME(SUM(TIME_TO_SEC(`shortfalls`.`downtime`))) AS total_time
+				FROM
+					`shortfalls`
+				LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id 
+				WHERE
+					location_id=6 AND  `shortfalls`.`date_fall`  BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59') AS total_time,
+				GROUP_CONCAT(`shortfalls`.`reason`
+					SEPARATOR '<br />') AS reason,
+				GROUP_CONCAT(`shortfalls`.`action_plan`
+					SEPARATOR '<br />') AS action, machine_name, shortfalls.machine_id 
+			FROM
+				`shortfalls`
+			LEFT JOIN machines ON shortfalls.machine_id = machines.machine_id
+			WHERE
+				location_id=6 AND `shortfalls`.`date_fall` BETWEEN '". $newDateString ." 00:00:00' AND '". $newDateString2 ." 23:59:59'
+			GROUP BY DATE_FORMAT(`date_fall`, '%d/%m/%Y'), shortfalls.machine_id
+			ORDER BY `date_fall`;";
+            
+        }
+		
+        $TOTAL = 0;
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+			   if($_POST['searchBy']==1)
+        		{ 
+					$myDateTime = DateTime::createFromFormat('d/m/Y', $row['date']);
+				   $day = $myDateTime->format('w');
+					if($day == 0)
+					{
+						echo '<tr class="warning">
+							<td class="text-right">'. $row['date'] .'</td>
+							<td class="text-right">'. $row['machine_name'] .'</td>
+							<td class="text-right">'. $row['total'] .'</td>
+							<td>'. $row['reason'] .'</td>
+							<td>'. $row['action'] .'</td>
+						</tr>';
+					}
+				   else
+					{
+						echo '<tr>
+							<td class="text-right">'. $row['date'] .'</td>
+							<td class="text-right">'. $row['machine_name'] .'</td>
+							<td class="text-right">'. $row['total'] .'</td>
+							<td>'. $row['reason'] .'</td>
+							<td>'. $row['action'] .'</td>
+						</tr>';
+					}
+			   }
+				else
+				{
+                	echo '<tr>
+                        <td class="text-right">'. $row['date'] .'</td>
+                        <td class="text-right">'. $row['machine_name'] .'</td>
+                        <td class="text-right">'. $row['total'] .'</td>
+                        <td>'. $row['reason'] .'</td>
+                        <td>'. $row['action'] .'</td>
+                    </tr>';
+				}
+                $hours = $row['hours'] + ($row['minutes'] / 60);
+                $entrie = array( $row['date'], $hours);
+                if($_POST['searchBy']==2)
+                {
+                    $entrie = array( $row['date2'], $hours);
+                }
+				if($row['machine_id'] == 35)
+				{
+                	array_push($a1,$entrie);
+				}
+				else if($row['machine_id'] == 36)
+				{
+                	array_push($a2,$entrie);
+				}
+				else if($row['machine_id'] == 37)
+				{
+                	array_push($a3,$entrie);
+				}
+				else if($row['machine_id'] == 38)
+				{
+                	array_push($a4,$entrie);
+				}
+				else if($row['machine_id'] == 39)
+				{
+                	array_push($a5,$entrie);
+				}
+				else if($row['machine_id'] == 40)
+				{
+                	array_push($a6,$entrie);
+				}
+				else if($row['machine_id'] == 41)
+				{
+                	array_push($a7,$entrie);
+				}
+				else if($row['machine_id'] == 42)
+				{
+                	array_push($a8,$entrie);
+				}
+				else if($row['machine_id'] == 43)
+				{
+                	array_push($a9,$entrie);
+				}
+				else if($row['machine_id'] == 44)
+				{
+                	array_push($a10,$entrie);
+				}
+				
+				$TOTAL = $row['total_time'];
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                </tr>";
+        }
+		
+		
+        echo '</tbody><tfoot><tr  class="active"><th></th>
+			<th style="text-align:right"></th>
+			<th style="text-align:right">Total</th>
+			<th style="text-align:right"></th>
+			<th></th></tr></tfoot>';
+        echo '<script>document.getElementById("divChart1").setAttribute("class","col-md-12");</script>';
+        echo '<script>document.getElementById("chartContainer").style= "height:200px;width:100%";</script>';
+         echo '<script> 
+            var chart = new CanvasJS.Chart("chartContainer", {
+            theme: "light2",
+            title: { 
+                text: "Downtime"
+            },
+            exportFileName: "Downtime",
+            exportEnabled: true,
+            animationEnabled: true,
+            axisY: {includeZero: false, title: "Hours" },
+            toolTip: {
+                shared: true
+            },legend:{
+                itemclick : toggleDataSeries
+            },';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'axisX:{ valueFormatString: "MMM YYYY"},';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            echo 'axisX:{ valueFormatString: "YYYY"},';
+        }
+        else
+        {
+            echo 'axisX:{ valueFormatString: "DD MMM"},';
+        }
+        echo 'data: [
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 1",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a1 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a1 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a1 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 2",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a2 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a2 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a2 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 3",';
+        if($_POST['searchBy']==3)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a3 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a3 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a3 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 4",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a4 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a4 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a4 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 5",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a5 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a5 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a5 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 6",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a6 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a6 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a6 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 7",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a7 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a7 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a7 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 8",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a8 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a8 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a8 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 9",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a9 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a9 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a9 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        
+		echo ']},
+            {
+                type: "column",
+		showInLegend: true,
+		name: "Injection - 10",';
+        if($_POST['searchBy']==2)
+        {  
+            echo 'xValueFormatString: "MMM YYYY",';
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            
+            echo 'xValueFormatString: "YYYY",';
+        }
+        else
+        {
+            echo 'xValueFormatString: "DD MMM",';
+        }
+        echo ' yValueFormatString: "#,###.# Hours",
+                dataPoints: [ ';
+        if($_POST['searchBy']==2)
+        {  
+            foreach($a10 as $value) {
+                $var = (int) explode("/", $value[0])[0]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[1] . ','. $var .',1), y: '. $value[1].'},';
+            }; 
+        }
+        else if($_POST['searchBy']==3)
+        {   
+            foreach($a10 as $value) {
+                echo '{ x: new Date('. $value[0] . ',0), y: '. $value[1].'},';
+            }; 
+        }
+        else
+        {
+            foreach($a10 as $value) {
+                $var = (int) explode("/", $value[0])[1]-1;
+                echo '{ x: new Date('. explode("/", $value[0])[2] . ','. $var .','.explode("/", $value[0])[0] .'), y: '. $value[1].'},';
+            }; 
+        }
+        echo'] }]});
+        chart.render();
+		function toggleDataSeries(e) {
+            if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible ){
+                e.dataSeries.visible = false;
+            } else {
+                e.dataSeries.visible = true;
+            }
+            chart.render();
+        } 
+        </script>'; 
+    }
 }
 
 
