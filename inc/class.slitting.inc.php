@@ -37,6 +37,35 @@ class Slitting
 			$this->_db = new PDO($dsn, DB_USER, DB_PASS);
 		}
 	}
+    
+    /**
+     * Loads the dropdown of all the materials
+     *
+     * This function outputs <li> tags with materials
+     */
+    public function machinesDropdown()
+    {
+        $sql = "SELECT `machines`.`machine_id`,`machines`.`machine_name`
+                FROM  `machines`
+                WHERE location_id = 4 AND machine_id <> 32
+                ORDER BY `machines`.`machine_name`;";
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['machine_id'];
+                $NAME = $row['machine_name'];
+                echo  '<li><a onclick="selectMachine(\''. $ID .'\',\''. $NAME .'\')" data-toggle="modal" data-target="#modal1">'. $NAME .'</a></li>'; 
+            }
+            $stmt->closeCursor();
+        }
+        else
+        {
+            echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+        }
+    }
+    
 	
 	public function operatorsDropdown()
     {

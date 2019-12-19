@@ -76,8 +76,9 @@
 			<div class="dropdown">
 				<button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown">Submit Output Rolls&nbsp&nbsp<i class="fa fa-caret-down" style="display: inline;"></i></button>
 				<ul class="dropdown-menu dropdown-menu-right">
-					<li><a onclick="selectMachine(46,'Slitting 1')" data-toggle="modal" data-target="#modal1">Slitting 1</a></li>
-					<li><a onclick="selectMachine(47,'Slitting 2')" data-toggle="modal" data-target="#modal1">Slitting 2</a></li>
+<?php
+    $slitting->machinesDropdown();
+?>
 				</ul>
 			</div>
 		</div>
