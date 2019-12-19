@@ -1777,7 +1777,7 @@ ORDER BY packing_sacks_id";
 					`stock_materials`.`bags`, kgs_bag, material_name, material_grade
 				FROM `stock_materials`
 				RIGHT JOIN `materials` ON  `materials`.material_id = `stock_materials`.material_id
-				WHERE `machine_id` = 7 AND materials.sacks = 1;";
+				WHERE `machine_id` = 7 AND materials.material_grade = 'TR 144';";
 		
         if($stmt = $this->_db->prepare($sql))
          {
