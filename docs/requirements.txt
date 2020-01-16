@@ -1,0 +1,4 @@
+- Report per operator efficiency
+- Formulas for Sacks
+- Runtime (=total time - downtime)
+- materials consumption (macchi, injection, etc..)

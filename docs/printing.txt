@@ -1,0 +1,12 @@
+PRINTING
+- balance roll used in next job.
+- entry for Macchi different than weight
+- 4 rolls can do a printed roll
+- entries easier (like excel)
+
+MULTILAYER _PACKING 
+- separate stock multilayer and packing bags 
+
+INJECTION
+- updating pieces in sacks for injection : rec 50, round and square100
+- report production injection

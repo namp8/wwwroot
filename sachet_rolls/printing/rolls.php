@@ -145,137 +145,110 @@
     </form>
 </div>
 <ul class="nav nav-tabs nav-justified">
-    <li class="active"><a data-toggle="tab" href="#today" id="dateTitle"></a></li>
-    <li><a data-toggle="tab" href="#day">Shift: Day</a></li>
-    <li><a data-toggle="tab" href="#night">Shift: Night</a></li>
-</ul>
-<div class="tab-content">
-    <div id="today" class="tab-pane fade in active">
-        <h3 id="dateTitle2"></h3>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Roto
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <?php
-     $printing->giveRolls(0,3);
-?>
+		<li class="active"><a data-toggle="tab" href="#today" id="dateTitle"></a></li>
+		<li><a data-toggle="tab" href="#day">Shift: Day</a></li>
+		<li><a data-toggle="tab" href="#night">Shift: Night</a></li>
+	</ul>
+	<div class="tab-content">
+		<div id="today" class="tab-pane fade in active">
+			<h3 id="dateTitle2"></h3>
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					Daily rolls by machine
+				</div>
+				<div class="panel-body">
 
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Flexo 1
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-
-                    <?php
-     $printing->giveRolls(0,4);
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead>
+                                <tr class="active">
+                                    <th>Machine</th>
+                                    <th>Customer</th>
+									<th>Roll No.</th>
+                                    <th>Gross Wt.</th>
+                                    <th>Net Wt.</th>
+                                    <th>Waste</th>
+                                    <th>Tape</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+								<?php
+     $printing->giveRolls(0);
 ?>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Flexo 2
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
+							</tbody>
+						</table>
+					</div>
+				</div>
 
-                    <?php
-     $printing->giveRolls(0,5);
-?>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="day" class="tab-pane fade">
-        <h3>Day</h3>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Roto
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
 
-                    <?php
-     $printing->giveRolls(1,3);
-?>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Flexo 1
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-                    <?php
-     $printing->giveRolls(1,4);
-?>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Flexo 2
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
 
-                    <?php
-     $printing->giveRolls(1,5);
-?>
-                </div>
-            </div>
-        </div>
+			</div>
 
-    </div>
-    <div id="night" class="tab-pane fade">
-        <h3>Night</h3>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Roto
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-
-                    <?php
-     $printing->giveRolls(2,3);
+		</div>
+		<div id="day" class="tab-pane fade">
+			<h3>Day</h3>
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					Daily rolls by machine
+				</div>
+				<div class="panel-body">
+					
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead>
+                                <tr class="active">
+                                    <th>Machine</th>
+                                    <th>Customer</th>
+									<th>Roll No.</th>
+                                    <th>Gross Wt.</th>
+                                    <th>Net Wt.</th>
+                                    <th>Waste</th>
+                                    <th>Tape</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+								<?php
+     $printing->giveRolls(1);
 ?>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Flexo 1
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
-
-                    <?php
-     $printing->giveRolls(2,4);
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="night" class="tab-pane fade">
+			<h3>Night</h3>
+			<div class="panel panel-info">
+				<div class="panel-heading">
+					Daily rolls by machine
+				</div>
+				<div class="panel-body">
+					
+					<div class="table-responsive">
+						<table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                            <thead>
+                                <tr class="active">
+                                    <th>Machine</th>
+                                    <th>Customer</th>
+									<th>Roll No.</th>
+                                    <th>Gross Wt.</th>
+                                    <th>Net Wt.</th>
+                                    <th>Waste</th>
+                                    <th>Tape</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+								<?php
+     $printing->giveRolls(2);
 ?>
-                </div>
-            </div>
-        </div>
-        <div class="panel panel-info">
-            <div class="panel-heading">
-                Flexo 2
-            </div>
-            <div class="panel-body">
-                <div class="table-responsive">
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
 
-                    <?php
-     $printing->giveRolls(2,5);
-?>
-                </div>
-            </div>
-        </div>
-    </div>
+		</div>
+</div>
     <div class="modal fade" id="modal1" role="dialog" tabindex="-1">
         <div class="modal-dialog" style="width: 1000px;">
             <div class="modal-content">

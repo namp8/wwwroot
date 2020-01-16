@@ -874,7 +874,7 @@ VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $n
      * This function outputs <tr> tags with rolls
      * Parameter= ROTO=3 FLEXO1=4 FLEXO2=5                ALL DAY=0 MORNING=1 NIGHT=2
      */
-    public function giveRolls($x, $machine)
+    public function giveRolls($shift)
     {
         $newDateString = date("Y-m-d");
         if(!empty($_POST['dateSearch']))
@@ -883,152 +883,41 @@ VALUES(NULL,'". $date ."','". $rollno ."',".$shift.",".$size.",".$gross .",". $n
            $newDateString = $myDateTime->format('Y-m-d');
         }
         $date = "`printing_rolls`.`date_roll` BETWEEN '". $newDateString ." ' AND '". $newDateString ." '";
-
-        $sql = "SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
-`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id = `macchi_rolls`.macchi_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND macchi = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
-`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id2 = `macchi_rolls`.macchi_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND macchi = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
-`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id = `multilayer_rolls`.multilayer_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND multilayer = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
-`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id2 = `multilayer_rolls`.multilayer_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND multilayer = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
-`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id = `packing_rolls`.packing_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND `printing_rolls`.`packing_bags` = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
-`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packing_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."   AND `printing_rolls`.`packing_bags` = 1
-		ORDER BY CAST(SUBSTRING(rollno,7,2) AS UNSIGNED)";
-
-        if($x != 0)
+		$shiftsql = "";
+		if($shift != 0)
         {
-            $sql = "SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
-`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id = `macchi_rolls`.macchi_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."  AND macchi = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
-`macchi_rolls`.gross_weight as inputgross, `macchi_rolls`.net_weight as inputnet,`macchi_rolls`.waste_printing as inputwaste,`macchi_rolls`.dyne_test,`macchi_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `macchi_rolls` ON `printing_rolls`.roll_id2 = `macchi_rolls`.macchi_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."  AND macchi = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
-`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id = `multilayer_rolls`.multilayer_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."  AND multilayer = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
-`multilayer_rolls`.gross_weight as inputgross, `multilayer_rolls`.net_weight as inputnet,`multilayer_rolls`.waste_printing as inputwaste,`multilayer_rolls`.dyne_test,`multilayer_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `multilayer_rolls` ON `printing_rolls`.roll_id2 = `multilayer_rolls`.multilayer_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ."  AND `printing_rolls`.`shift` = ". $x ."   AND multilayer = 1
-		UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,`printing_rolls`.`gross_weight`,`printing_rolls`.`net_weight`,`printing_rolls`.`waste_printing`,`printing_rolls`.`tape_test`,
-`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id = `packing_rolls`.packing_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ." AND `printing_rolls`.`shift` = ". $x ."  AND `printing_rolls`.`packing_bags` = 1
-UNION 
-SELECT `customers`.`customer_name`,`printing_rolls`.`rollno`,null,null, null,`printing_rolls`.`tape_test`,
-`packing_rolls`.gross_weight as inputgross, `packing_rolls`.net_weight as inputnet,`packing_rolls`.waste_printing as inputwaste,`packing_rolls`.dyne_test,`packing_rolls`.rollno AS inputroll
-FROM `printing_rolls`
-INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
-INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packing_rolls_id
-        WHERE ". $date ."  AND `printing_rolls`.`machine_id` = ". $machine ." AND `printing_rolls`.`shift` = ". $x ."  AND `printing_rolls`.`packing_bags`= 1
-		ORDER BY CAST(SUBSTRING(rollno,7,2) AS UNSIGNED)";
+            $shiftsql = "AND shift = ". $shift ."";
         }
-        
-        $total1 = $total2 = $total3 = $total4 = $total5 = $total6 = 0;
-                
-        if($stmt = $this->_db->prepare($sql))
-        {
+			
+		$sql = "SELECT 
+    `machines`.machine_name,
+    `customers`.customer_name,
+    `printing_rolls`.`rollno`,
+	`printing_rolls`.`gross_weight`,
+    `printing_rolls`.`net_weight`,
+    `printing_rolls`.`tape_test`,
+    `printing_rolls`.`waste_printing`
+FROM `printing_rolls`
+INNER JOIN `machines` ON `machines`.machine_id = `printing_rolls`.`machine_id`
+INNER JOIN `customers` ON `customers`.`customer_id` = `printing_rolls`.`customer_id`
+WHERE ". $date . $shiftsql . " 
+ORDER BY machine_name, `printing_rolls`.`printing_rolls_id`;";
+		
+		if($stmt = $this->_db->prepare($sql))
+       {
             $stmt->execute();
-            echo '<table class="table table-bordered table-hover" width="100%" cellspacing="0">
-                            <thead>
-                                <tr class="active">
-                                    <th></th>'.
-                                    '<th colspan="5" style="text-align:center">INPUT ROLL</th>'.
-                                    '<th colspan="5" style="text-align:center">OUTPUT ROLL </th>
-                                </tr>
-                                <tr class="active">
-                                    <th>Customer</th>'.
-									'
-                                    <th>Roll No.</th>
-                                    <th>Gross Wt.</th>
-                                    <th>Net Wt.</th>
-                                    <th>Waste</th>
-                                    <th>Dyne</th>'.
-				'
-                                    <th>Roll No.</th>
-                                    <th>Gross Wt.</th>
-                                    <th>Net Wt.</th>
-                                    <th>Waste</th>
-                                    <th>Tape</th>
-                                </tr>
-                            </thead>
-                            <tbody>';
            
             while($row = $stmt->fetch())
-            {   
-                $total1 = $total1 + $row['inputgross'];
-                $total2 = $total2 + $row['inputnet'];
-                $total3 = $total3 + $row['inputwaste'];
-                $total4 = $total4 + $row['gross_weight'];
-                $total5 = $total5 + $row['net_weight'];
-                $total6 = $total6 + $row['waste_printing'];
-                
-                $DYNE = $TAPE = "OK";
-                if($row['dyne_test']==0)
-                {
-                    $DYNE = '<p class="text-danger">NO</p>';
-                }
+			{   
+                $TAPE = "OK";      
                 if($row['tape_test']==0)
                 {
                     $TAPE = '<p class="text-danger">NO</p>';
                 }
                 
                 echo '<tr>
+                        <td>'.  $row['machine_name'] .'</td>
                         <td>'.  $row['customer_name'] .'</td>
-                        <td>'.  $row['inputroll'] .'</td>                        
-                        <td class="text-right">'. number_format($row['inputgross'],1,'.',',') .'</td>
-                        <td class="text-right">'. number_format($row['inputnet'],1,'.',',') .'</td>
-                        <td class="text-right">'. number_format($row['inputwaste'],1,'.',',') .'</td>
-                        <td>'.  $DYNE .'</td> 
                         <td>'.  $row['rollno'] .'</td>                        
                         <td class="text-right">'. number_format($row['gross_weight'],1,'.',',') .'</td>
                         <td class="text-right">'. number_format($row['net_weight'],1,'.',',') .'</td>
@@ -1036,23 +925,7 @@ INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packin
                         <td>'.  $TAPE .'</td> 
                        </tr>';
             }
-            echo '
-              <tfoot>
-                <tr class="active">
-                  <th style="text-align:center"></th>
-                  <th style="text-align:center">TOTAL</th>'.
-                  '<th class="text-right">'. number_format($total1,2,'.',',') .'</th>
-                  <th class="text-right">'. number_format($total2,2,'.',',') .'</th>
-                  <th class="text-right">'. number_format($total3,2,'.',',') .'</th>
-                  <th style="text-align:center"></th>
-                  <th style="text-align:center">TOTAL</th>'.
-                  '<th class="text-right">'. number_format($total4,2,'.',',') .'</th>
-                  <th class="text-right">'. number_format($total5,2,'.',',') .'</th>
-                  <th class="text-right">'. number_format($total6,2,'.',',') .'</th>
-                  <th></th>
-                </tr>
-              </tfoot></tbody>
-                        </table>';
+            
             $stmt->closeCursor();
             
         }
@@ -3550,6 +3423,6 @@ INNER JOIN `packing_rolls` ON `printing_rolls`.roll_id2 = `packing_rolls`.packin
             }
             chart.render();
         } 
-        </script>'; 
-s    
+        </script>';
+	 }
 }
