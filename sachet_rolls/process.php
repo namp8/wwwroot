@@ -1,25 +1,22 @@
- <?php
+<?php
     include_once "../base.php";
-    $pageTitle = "Printed Rolls Process";
+    $pageTitle = "Macchi";
     include_once "../header.php";
     include_once "sidebar.php";
     include_once "../content.php";
 
 ?>
-    <ol class="breadcrumb">
+	<ol class="breadcrumb">
         <li class="breadcrumb-item">
             <a href="../index.php">United Production System</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="process.php">Sachet Rolls</a>
+            <a href="process.php">Macchi</a>
         </li>
         <li class="breadcrumb-item active">Process</li>
     </ol>
-
-    <h2>Sachet Rolls - Process</h2>
-
-    
-
+    <h2>Macchi - Process</h2>
+	<script type="text/javascript" src="/assets/js/viewer.min.js"></script>
 
     <?php
     include_once '../footer.php';

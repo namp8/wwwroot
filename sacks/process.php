@@ -1,4 +1,4 @@
- <?php
+<?php
     include_once "../base.php";
     $pageTitle = "Sacks Process";
     include_once "../header.php";

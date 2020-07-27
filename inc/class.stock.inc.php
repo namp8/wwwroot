@@ -5431,7 +5431,7 @@ ORDER BY report.datereport;";
 					UNION ALL SELECT 
 						`local_purchases`.date_arrived AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						SUM(local_purchases.qty) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(local_purchases.qty) + COALESCE(rm_loans.qty, 0) AS local,
 						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
@@ -5475,7 +5475,7 @@ ORDER BY report.datereport;";
 					UNION ALL SELECT 
 						`rm_loans`.date_arrived AS datereport,
 						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + SUM(rm_loans.qty) AS local,
+						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty) AS local,
 						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
 						COALESCE(stock_balance.difference, 0) AS difference
@@ -5859,13 +5859,13 @@ WHERE datereport BETWEEN '". $newDateString ."' AND '". $newDateString2 ."'
 ORDER BY report.datereport;";
 
 				}
-				ini_set('max_execution_time', 300);
-					if($stmt2 = $this->_db->prepare($sql2))
-					{
-						$stmt2->execute();
-						while($row2 = $stmt2->fetch())
-						{
-							
+                ini_set('max_execution_time', 300);
+				if($stmt2 = $this->_db->prepare($sql2))
+                {
+                    $stmt2->execute();
+                    while($row2 = $stmt2->fetch())
+                    {
+                            
 							$DATE = $row2['datereport'];
 							$MATERIAL = $row2['material_name'];
 							$GRADE = $row2['material_grade'];
@@ -5961,7 +5961,7 @@ ORDER BY report.datereport;";
 					}
 					else
 					{
-						echo '<li>Something went wrong.'. $db->errorInfo .'</li>';  
+						echo 'Something went wrong.'. $db->errorInfo .'';  
 					}
 				
             }
