@@ -5864,8 +5864,7 @@ ORDER BY report.datereport;";
                 {
                     $stmt2->execute();
                     while($row2 = $stmt2->fetch())
-                    {
-                            
+                    {       
 							$DATE = $row2['datereport'];
 							$MATERIAL = $row2['material_name'];
 							$GRADE = $row2['material_grade'];
