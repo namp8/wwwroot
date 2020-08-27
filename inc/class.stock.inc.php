@@ -5393,11 +5393,11 @@ ORDER BY report.datereport;";
                 $material = $row['material_id'];
 				$query = "SELECT 
 						`raw_materials_imports`.date_cleared AS datereport,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(SUM(raw_materials_imports.qty_cleared), 0) + COALESCE(SUM(cleared_2.qty_cleared2), 0) AS imported,
+						COALESCE(SUM(local_purchases.qty), 0) + COALESCE(SUM(rm_loans.qty), 0) AS local,
 						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
-						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+						COALESCE(SUM(trans.bags_receipt), 0) AS other,
+						COALESCE(SUM(stock_balance.difference), 0) AS difference
 					FROM
 						`raw_materials_imports`
 							LEFT JOIN
@@ -5430,11 +5430,11 @@ ORDER BY report.datereport;";
 					group by `raw_materials_imports`.date_cleared, `raw_materials_imports`.`material_id`
 					UNION ALL SELECT 
 						`local_purchases`.date_arrived AS datereport,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(SUM(raw_materials_imports.qty_cleared), 0) + COALESCE(SUM(cleared_2.qty_cleared2), 0) AS imported,
+						COALESCE(SUM(local_purchases.qty),0) + COALESCE(SUM(rm_loans.qty), 0) AS local,
 						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
-						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+						COALESCE(SUM(trans.bags_receipt), 0) AS other,
+						COALESCE(SUM(stock_balance.difference), 0) AS difference
 					FROM
 						`raw_materials_imports`
 							RIGHT JOIN
@@ -5447,7 +5447,7 @@ ORDER BY report.datereport;";
 								'%Y-%m-%d')
 							LEFT JOIN  (SELECT SUM(bags_issued) as bags_issued, machine_from, material_id, date_required 
                             FROM `stock_materials_transfers`
-                            GROUP BY machine_from, material_id, date_required)
+                            GROUP BY machine_from, material_id, DATE_FORMAT(`stock_materials_transfers`.`date_required`,'%Y-%m-%d'))
 						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
 							AND `stock_materials_transfers`.`material_id` = `local_purchases`.`material_id`
 							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
@@ -5474,11 +5474,11 @@ ORDER BY report.datereport;";
 					group by `local_purchases`.date_arrived, `local_purchases`.`material_id`
 					UNION ALL SELECT 
 						`rm_loans`.date_arrived AS datereport,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty) AS local,
+						COALESCE(SUM(raw_materials_imports.qty_cleared), 0) + COALESCE(SUM(cleared_2.qty_cleared2), 0) AS imported,
+						COALESCE(SUM(local_purchases.qty), 0) + COALESCE(SUM(rm_loans.qty),0) AS local,
 						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
-						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+						COALESCE(SUM(trans.bags_receipt), 0) AS other,
+						COALESCE(SUM(stock_balance.difference), 0) AS difference
 					FROM
 						`raw_materials_imports`
 							RIGHT JOIN
@@ -5490,7 +5490,7 @@ ORDER BY report.datereport;";
 								'%Y-%m-%d') = DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d')
 							LEFT JOIN (SELECT SUM(bags_issued) as bags_issued, machine_from, material_id, date_required 
                             FROM `stock_materials_transfers`
-                            GROUP BY machine_from, material_id, date_required)
+                            GROUP BY machine_from, material_id, DATE_FORMAT(`stock_materials_transfers`.`date_required`,'%Y-%m-%d'))
 						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
 							AND `stock_materials_transfers`.`material_id` = `rm_loans`.`material_id`
 							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
@@ -5514,11 +5514,11 @@ ORDER BY report.datereport;";
 					UNION ALL SELECT 
 						DATE_FORMAT(`stock_materials_transfers`.`date_required`,
 								'%Y-%m-%d') AS datereport,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+						COALESCE(SUM(raw_materials_imports.qty_cleared), 0) + COALESCE(SUM(cleared_2.qty_cleared2), 0) AS imported,
+						COALESCE(SUM(local_purchases.qty), 0) + COALESCE(SUM(rm_loans.qty), 0) AS local,
 						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
 						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+						COALESCE(SUM(stock_balance.difference), 0) AS difference
 					FROM
 						`raw_materials_imports`
 							RIGHT JOIN
@@ -5543,26 +5543,27 @@ ORDER BY report.datereport;";
 						`raw_materials_imports` cleared_2 ON `stock_materials_transfers`.`material_id` = cleared_2.material_id
 							AND DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
 								'%Y-%m-%d')
-							LEFT JOIN
-						`stock_materials_transfers` trans ON trans.machine_to = 1
+							LEFT JOIN (SELECT SUM(bags_receipt) as bags_receipt, machine_to, material_id, date_required 
+                            FROM `stock_materials_transfers`
+                            GROUP BY machine_to, material_id, DATE_FORMAT(`stock_materials_transfers`.`date_required`,'%Y-%m-%d'))
+						trans ON trans.machine_to = 1
 							AND trans.`material_id` = `stock_materials_transfers`.`material_id`
-							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`,
-								'%Y-%m-%d')
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y-%m-%d')
 					WHERE
 						`raw_materials_imports`.`material_id` IS NULL
 							AND `local_purchases`.`material_id` IS NULL
 							AND `rm_loans`.`material_id` IS NULL
 							AND `stock_materials_transfers`.`material_id` = ".$material."
 							AND `stock_materials_transfers`.machine_from = 1 
-							group by datereport
+							group by datereport, `stock_materials_transfers`.`material_id`
 					UNION ALL SELECT 
 						DATE_FORMAT(`stock_balance`.`date_balance`,
 								'%Y-%m-%d') AS datereport,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
-						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+						COALESCE(SUM(raw_materials_imports.qty_cleared), 0) + COALESCE(SUM(cleared_2.qty_cleared2), 0) AS imported,
+						COALESCE(SUM(local_purchases.qty), 0) + COALESCE(SUM(rm_loans.qty), 0) AS local,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
+						COALESCE(SUM(trans.bags_receipt), 0) AS other,
+						COALESCE(SUM(stock_balance.difference), 0) AS difference
 					FROM
 						`raw_materials_imports`
 							RIGHT JOIN
@@ -5599,13 +5600,14 @@ ORDER BY report.datereport;";
 							AND `rm_loans`.`material_id` IS NULL
 							AND `stock_materials_transfers`.`material_id` IS NULL
 							AND `stock_balance`.`material_id` = ".$material." AND `stock_balance`.machine_id = 1 
+							group by datereport, `stock_balance`.`material_id`
 					UNION ALL SELECT 
 						DATE_FORMAT(cleared_2.date_cleared2, '%Y-%m-%d') AS datereport,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
-						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+						COALESCE(SUM(raw_materials_imports.qty_cleared), 0) + COALESCE(SUM(cleared_2.qty_cleared2), 0) AS imported,
+						COALESCE(SUM(local_purchases.qty), 0) + COALESCE(SUM(rm_loans.qty), 0) AS local,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
+						COALESCE(SUM(trans.bags_receipt), 0) AS other,
+						COALESCE(SUM(stock_balance.difference), 0) AS difference
 					FROM
 						`raw_materials_imports`
 							RIGHT JOIN
@@ -5639,13 +5641,14 @@ ORDER BY report.datereport;";
 							AND `stock_balance`.`material_id` IS NULL
 							AND cleared_2.material_id = ".$material."
 							AND cleared_2.date_cleared2 IS NOT NULL 
+                            GROUP BY datereport, cleared_2.material_id
 					UNION ALL SELECT 
 						DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') AS datereport,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
-						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+						COALESCE(SUM(raw_materials_imports.qty_cleared), 0) + COALESCE(SUM(cleared_2.qty_cleared2), 0) AS imported,
+						COALESCE(SUM(local_purchases.qty), 0) + COALESCE(SUM(rm_loans.qty), 0) AS local,
+						COALESCE(SUM(stock_materials_transfers.bags_issued), 0) AS issued,
+						COALESCE(SUM(trans.bags_receipt), 0) AS other,
+						COALESCE(SUM(stock_balance.difference), 0) AS difference
 					FROM
 						`raw_materials_imports`
 							RIGHT JOIN
@@ -5679,13 +5682,14 @@ ORDER BY report.datereport;";
 							AND cleared_2.material_id IS NULL
 							AND trans.machine_to = 1
 							AND trans.material_id = ".$material."
-					UNION ALL SELECT 
-						dateTable.selected_date,
-						COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
-						COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
-						COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
-						COALESCE(trans.bags_receipt, 0) AS other,
-						COALESCE(stock_balance.difference, 0) AS difference
+                            GROUP BY datereport, trans.material_id
+					UNION ALL SELECT
+                        dateTable.selected_date AS datereport,
+                        COALESCE(raw_materials_imports.qty_cleared, 0) + COALESCE(cleared_2.qty_cleared2, 0) AS imported,
+                        COALESCE(local_purchases.qty, 0) + COALESCE(rm_loans.qty, 0) AS local,
+                        COALESCE(stock_materials_transfers.bags_issued, 0) AS issued,
+                        COALESCE(trans.bags_receipt, 0) AS other,
+                        COALESCE(stock_balance.difference, 0) AS difference
 					FROM
 						(SELECT 
 							ADDDATE('2018-01-01', t4.i * 10000 + t3.i * 1000 + t2.i * 100 + t1.i * 10 + t0.i) selected_date
@@ -5718,7 +5722,7 @@ ORDER BY report.datereport;";
 							LEFT JOIN
 						`stock_materials_transfers` trans ON trans.machine_to = 1
 							AND trans.`material_id` = ".$material."
-							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = dateTable.selected_date";
+							AND DATE_FORMAT(trans.`date_required`, '%Y-%m-%d') = dateTable.selected_date ";
 				$newDateString = date("Y-m-d");
         		$newDateString2 = date("Y-m-d");
 				
@@ -5863,6 +5867,7 @@ ORDER BY report.datereport;";
 				if($stmt2 = $this->_db->prepare($sql2))
                 {
                     $stmt2->execute();
+                    //echo $sql2. " FIN QUERY ";
                     while($row2 = $stmt2->fetch())
                     {       
 							$DATE = $row2['datereport'];
