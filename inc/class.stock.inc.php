@@ -5407,11 +5407,16 @@ ORDER BY report.datereport;";
 							LEFT JOIN
 						`rm_loans` ON `rm_loans`.`material_id` = `raw_materials_imports`.`material_id`
 							AND DATE_FORMAT(`rm_loans`.date_arrived, '%Y-%m-%d') = `raw_materials_imports`.date_cleared
-							LEFT JOIN
-						`stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
-							AND `stock_materials_transfers`.`material_id` = `raw_materials_imports`.`material_id`
-							AND DATE_FORMAT(`stock_materials_transfers`.`date_required`,
-								'%Y-%m-%d') = `raw_materials_imports`.date_cleared
+							LEFT JOIN (SELECT 
+        SUM(bags_issued) AS bags_issued,
+            machine_from,
+            material_id,
+            date_required
+    FROM
+        `stock_materials_transfers`
+    GROUP BY machine_from , material_id , DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y-%m-%d')) `stock_materials_transfers` ON `stock_materials_transfers`.machine_from = 1
+        AND `stock_materials_transfers`.`material_id` = `raw_materials_imports`.`material_id`
+        AND DATE_FORMAT(`stock_materials_transfers`.`date_required`, '%Y-%m-%d') = DATE_FORMAT(`raw_materials_imports`.date_cleared, '%Y-%m-%d')
 							LEFT JOIN
 						`stock_balance` ON `stock_balance`.machine_id = 1
 							AND `stock_balance`.`material_id` = `raw_materials_imports`.`material_id`
