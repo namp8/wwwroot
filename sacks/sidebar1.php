@@ -18,6 +18,7 @@
 						<ul id="submenu" class="sub-menu collapse">
 							<li><a href="extruder/settings.php"><i class="fa fa-cogs" aria-hidden="true"></i><span>&nbsp Settings</span></a></li>
 							<li><a href="extruder/reports.php"><i class="fa fa-bar-chart" aria-hidden="true"></i><span>&nbsp Reports</span></a></li>
+							<li><a class="three" href="extruder/formula.php"><i class="fa fa-eyedropper" aria-hidden="true"></i><span>&nbsp Formula</span></a></li>
                             <li class="divider"></li><center>Raw Material</center>
 							<li><a class="two" href="extruder/request.php"><i class="fa fa-reply " aria-hidden="true" ></i><span>&nbsp Request</span></a></li>
 							<li><a class="two" href="extruder/receive.php"><i class="fa fa-share" aria-hidden="true"></i><span>&nbsp Receive</span></a></li>

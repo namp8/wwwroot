@@ -188,7 +188,7 @@ class Macchi
     {
         $sql = "SELECT material_id, material_name, material_grade, percentage, layer
                 FROM  `macchi_formulas` NATURAL JOIN  `materials`
-                WHERE layer=". $layer ." AND `actual` = 1 AND `product` = ". $product ." ORDER BY material_name;";
+                WHERE layer=". $layer ." AND `actual` = 1 AND `product` = ". $product ." ORDER BY percentage DESC;";
         $a=array();
         if($stmt = $this->_db->prepare($sql))
         {
@@ -1839,26 +1839,15 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
     public function createShrink()
     {
        
-        $shift = $thickness = $size = $customer = $sample = "";
+        $shift = $cone = $thickness = $size = $customer = $sample = "";
 		
 		$size = trim($_POST["size"]);
         $size = stripslashes($size);
         $size = htmlspecialchars($size);
 		
-		$CONE = 0;
-        $sql = "SELECT `settings`.`value_setting`
-                FROM  `settings` 
-                WHERE machine_id=5 AND name_setting='". $size ."cone';";
-        if($stmt = $this->_db->prepare($sql))
-        {
-            $stmt->execute();
-            while($row = $stmt->fetch())
-            {
-                $CONE = $row['value_setting'];
-            }
-        }
-        
-        
+        $cone = trim($_POST["cone"]);
+        $cone = stripslashes($cone);
+        $cone = htmlspecialchars($cone);
 		
         $shift = trim($_POST["shift"]);
         $shift = stripslashes($shift);
@@ -1969,7 +1958,7 @@ WHERE a.material_id IS NULL AND b.material_id IS NULL AND c.material_id IS NULL 
 					$rollno = "M".$newDateString."-".$count;
 					$count = $count + $rolls - 1;
 					$rollno2 = "M".$newDateString."-".$count;
-					$net = $v - ($CONE*$rolls);
+					$net = $v - ($cone*$rolls);
 					$totalnet = $totalnet + $net;
 					$rollsql = $rollsql. " (NULL, '". $datetime."', '".$rollno."', '".$rollno2."', '".$rolls."', ". $shift .", ". $size .",". $thickness .", ". $v .", ". $net .",". $_SESSION['Userid'] .", '".$customer."', 0, '".$sample."') ,";
 				}

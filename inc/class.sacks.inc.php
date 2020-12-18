@@ -119,6 +119,8 @@ class Sacks
         }
     }
 	
+    
+    
 	
 	/**
      * Loads the dropdown of all the materials
@@ -149,6 +151,209 @@ class Sacks
         }
     }
     
+    
+     /**
+     * Checks and inserts a new formula
+     *
+     * @return boolean  true if can insert  false if not
+     */
+    public function createFormula()
+    {
+        $material = $percentage = $remarks= "";
+        
+        $material = trim($_POST["material"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+        
+        $percentage = trim($_POST["percentage"]);
+        $percentage = stripslashes($percentage);
+        $percentage = htmlspecialchars($percentage);
+		
+        $remarks = stripslashes($_POST["remarks"]);
+        $remarks = htmlspecialchars($remarks);
+		
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+        
+        $sql = "INSERT INTO `extruder_formulas`(`extruder_formula_id`,`material_id`,`percentage`,`from`,`to`,`actual`,`remarks`)VALUES(NULL,:material,:percentage, '". $date."',NULL,1, :remarks);";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":material", $material, PDO::PARAM_INT);
+            $stmt->bindParam(":percentage", $percentage, PDO::PARAM_STR);
+            $stmt->bindParam(":remarks", $remarks, PDO::PARAM_STR);
+            $stmt->execute();
+            $stmt->closeCursor();
+            
+            echo '<strong>SUCCESS!</strong> The material was successfully added to the formula</strong>';
+            return TRUE;
+        } catch (PDOException $e) {
+            if ($e->getCode() == 23000) {
+              echo '<strong>ERROR</strong> The material is already in the formula. If you want to change the percentage, please try updating it.<br>';
+            } else {
+              echo '<strong>ERROR</strong> Could not insert the material into the database. Please try again.<br>'. $e->getMessage();
+            }
+            
+            return FALSE;
+        } 
+
+    }
+    
+     /**
+     * Checks and update a formula
+     *
+     * @return boolean  true if can update false if not
+     */
+    public function updateFormula()
+    {
+        $material = $percentage = $remarks= "";
+        
+        $material = trim($_POST["material"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+        
+        $percentage = trim($_POST["percentage"]);
+        $percentage = stripslashes($percentage);
+        $percentage = htmlspecialchars($percentage);
+		
+        $remarks = stripslashes($_POST["remarks"]);
+        $remarks = htmlspecialchars($remarks);
+		
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+        
+        
+        $sql = "UPDATE  `extruder_formulas`
+                SET `to` = '". $date."', `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+                WHERE `material_id` = '".$material ."' AND `actual` = 1;
+				INSERT INTO `extruder_formulas`(`extruder_formula_id`,`material_id`,`percentage`,`from`,`to`,`actual`,`remarks`) VALUES(NULL,:material,:percentage, '". $date."' ,NULL,1, :remarks);";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":material", $material, PDO::PARAM_INT);
+            $stmt->bindParam(":percentage", $percentage, PDO::PARAM_STR);
+            $stmt->bindParam(":remarks", $remarks, PDO::PARAM_STR);
+            $stmt->execute();
+            $stmt->closeCursor();
+            echo '<strong>SUCCESS!</strong>The material was successfully added to the formula with <strong>'. $percentage .'% </strong>';
+            return TRUE;
+        } catch (PDOException $e) {
+            echo '<strong>ERROR</strong> Could not update the material into the database. Please try again.<br>'. $e->getMessage(); 
+            return FALSE;
+        } 
+
+    }
+    
+    /**
+     * Checks and delete a formula
+     *
+     * @return boolean  true if can update false if not
+     */
+    public function deleteFormula()
+    {
+        $material = $remarks= "";
+        
+        $material = trim($_POST["material"]);
+        $material = stripslashes($material);
+        $material = htmlspecialchars($material);
+        
+        $remarks = stripslashes($_POST["remarks"]);
+        $remarks = htmlspecialchars($remarks);
+        
+		//DATE
+        $date = date("Y-m-d");
+        if(!empty($_POST['date']))
+        {
+            $myDateTime = DateTime::createFromFormat('d/m/Y', $_POST['date']);
+            $newDateString = $myDateTime->format('Y-m-d');
+            $date = $newDateString;
+        }
+        
+		
+        $sql = "UPDATE  `extruder_formulas`
+                SET `to` = '". $date."', `actual` = 0, `remarks` = concat(`remarks`,' ". $remarks."') 
+                WHERE `material_id` = '".$material ."' AND `actual` = 1;";
+        try
+        {   
+            $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+            $stmt = $this->_db->prepare($sql);
+            $stmt->bindParam(":material", $material, PDO::PARAM_INT);
+            $stmt->execute();
+            $stmt->closeCursor();
+            
+            echo '<strong>SUCCESS!</strong> The material was successfully deleted from the formula.';
+            return TRUE;
+        } catch (PDOException $e) {
+            echo '<strong>ERROR</strong> Could not delete the material from the database. Please try again.<br>'. $e->getMessage(); 
+            return FALSE;
+        } 
+
+    }
+    
+     public function giveFormulas()
+    {
+        $sql = "SELECT material_id, material_name, material_grade, percentage
+                FROM  `extruder_formulas` NATURAL JOIN  `materials`
+                WHERE `actual` = 1 ORDER BY percentage DESC;";
+        $a=array();
+        if($stmt = $this->_db->prepare($sql))
+        {
+            $stmt->execute();
+            $total = 0;
+            while($row = $stmt->fetch())
+            {
+                $ID = $row['material_id'];
+                $NAME = $row['material_name'];
+                if(!is_null($NAME))
+                {
+                    $GRADE = $row['material_grade'];
+                    $PERCENTAGE = $row['percentage'];
+                    $total = $total + $PERCENTAGE;
+
+                    echo '<tr>
+                        <td><b>'. $NAME .'</b></td>
+                        <td>'. $GRADE .'</td>
+                        <td class="text-right">'. number_format($PERCENTAGE,1,'.',',') .'</td>
+                        <td><button class="btn btn-xs btn-warning" type="button" onclick="update(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-xs btn-danger" type="button" onclick="deleteFormula(\''. $ID .'\',\''. $NAME .'\',\''. $GRADE .'\')">X</button></td>
+                    </tr>';
+                    $materialArray=array($NAME,$GRADE,$PERCENTAGE);
+                    array_push($a,$materialArray);
+                }
+            }
+            
+            echo '<tr class="active">
+                    <td colspan="2" class="text-center"><strong>TOTAL</strong></td>
+                    <td><strong>'. number_format($total,1,'.',',') .'</strong></td>
+                    <td></td>
+                </tr>';
+            $stmt->closeCursor();
+            
+            return $a;
+        }
+        else
+        {
+            echo "<tr>
+                    <td>Something went wrong.</td>
+                    <td>$db->errorInfo</td>
+                    <td></td>
+                </tr>";
+        }
+    }
+	
     
 	/**
      * Loads the table of all the rolls
@@ -1773,11 +1978,11 @@ ORDER BY packing_sacks_id";
 		$update = "";
 		
 		
-		$sql = "SELECT stock_material_id,
-					`stock_materials`.`bags`, kgs_bag, material_name, material_grade
-				FROM `stock_materials`
-				RIGHT JOIN `materials` ON  `materials`.material_id = `stock_materials`.material_id
-				WHERE `machine_id` = 7 AND materials.material_grade = 'TR 144';";
+        $sql = "SELECT stock_material_id, percentage, `stock_materials`.`bags`, kgs_bag, material_name, material_grade
+                FROM `stock_materials`
+                INNER JOIN `extruder_formulas` ON `extruder_formulas`.material_id = `stock_materials`.material_id AND actual=1
+                RIGHT JOIN `materials` ON  `materials`.material_id = `stock_materials`.material_id
+                WHERE `machine_id` = 7;";
 		
         if($stmt = $this->_db->prepare($sql))
          {
@@ -1786,7 +1991,7 @@ ORDER BY packing_sacks_id";
             {
 				if(!is_null($row['stock_material_id']))
 				{
-					$KGSNEEDED = $totalnet/2;
+					$KGSNEEDED = $totalnet*($row['percentage']/100);
 					$BAGSNEEDED = $KGSNEEDED / $row['kgs_bag'];
 					$BAGSNEEDED = number_format($BAGSNEEDED ,4,'.','');
 					//LANZA ERROR SI LAS BOLSAS ACTUALES SON MENORES A LAS QUE SE NECESITAN
@@ -1800,47 +2005,12 @@ ORDER BY packing_sacks_id";
 					{
 						$newbags = $row['bags']-$BAGSNEEDED;
 						$update = $update . "UPDATE  `stock_materials` SET `bags` = ".$newbags." WHERE `stock_material_id` = ". $row['stock_material_id']. "; ";
+                        echo '<strong>'. $row['material_name'] .' - '. $row['material_grade'] .'</strong> kgs= '. $KGSNEEDED;
 					}
 				}
 					else
 				   {
 						echo '<strong>ERROR</strong> The roll was not added to the production. Because there is not enought material <strong>'. $row['material_name'] .' - '. $row['material_grade'] .'</strong> in stock. <br>  Please try again receiving the raw material or updating the formula.';
-						return false;
-				   }
-            }
-		}
-				$sql = "SELECT stock_material_id,
-					`stock_materials`.`bags`, kgs_bag, material_name, material_grade
-				FROM `stock_materials`
-				RIGHT JOIN `materials` ON  `materials`.material_id = `stock_materials`.material_id
-				WHERE `machine_id` = 7 AND materials.material_grade = 'M9255F';";
-		
-        if($stmt = $this->_db->prepare($sql))
-         {
-            $stmt->execute();
-            while($row = $stmt->fetch())
-            {
-				if(!is_null($row['stock_material_id']))
-				{
-					$KGSNEEDED = $totalnet/2;
-					$BAGSNEEDED = $KGSNEEDED / $row['kgs_bag'];
-					$BAGSNEEDED = number_format($BAGSNEEDED ,4,'.','');
-					//LANZA ERROR SI LAS BOLSAS ACTUALES SON MENORES A LAS QUE SE NECESITAN
-					if($row['bags']<$BAGSNEEDED)
-					{
-						echo '<strong>ERROR</strong> The rolls were not added to the production. Because there is not enought  material <strong>'. $row['material_name'] .' - '. $row['material_grade'] .'</strong> in stock. <br> There are <strong>'. $row['bags'] .'</strong> bags in stock, and you need <strong>'. $BAGSNEEDED .'</strong> bags. Please try again receiving the raw material or updating the formula.';
-						return false;
-					}
-					// VA CREANDO EL UPDATE PARA CAMBIAR DESPUES EL NUMERO DE BOLSAS DE STOCK_MATERIALS
-					else
-					{
-						$newbags = $row['bags']-$BAGSNEEDED;
-						$update = $update . "UPDATE  `stock_materials` SET `bags` = ".$newbags." WHERE `stock_material_id` = ". $row['stock_material_id']. "; ";
-					}
-				}
-					else
-				   {
-						echo '<strong>ERROR</strong> The roll was not added to the production. Because there is not enought  material <strong>'. $row['material_name'] .' - '. $row['material_grade'] .'</strong> in stock. <br>  Please try again receiving the raw material or updating the formula.';
 						return false;
 				   }
             }

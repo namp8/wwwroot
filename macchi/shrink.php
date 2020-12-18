@@ -223,7 +223,7 @@
 					<form class="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
 						<div class="modal-body">
 							<div class="row">
-								<div class="col-md-4 form-group">
+								<div class="col-md-3 form-group">
 									<label for="date">Date <span class="text-danger">*</span></label>
 									<div class='input-group date' id='datetimepicker2'>
 										<input type='text' class="form-control" id="date" name="date" required/>
@@ -232,7 +232,7 @@
 										</span>
 									</div>
 								</div>
-								<div class="col-md-4 form-group">
+								<div class="col-md-2 form-group">
 									<label for="shift">Shift <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="shift" name="shift" value="1" required>
 									<div class="dropdown">
@@ -243,7 +243,7 @@
 										</ul>
 									</div>
 								</div>
-								<div class="col-md-4 form-group">
+								<div class="col-md-3 form-group">
 									<label for="size">Production <span class="text-danger">*</span></label><br />
 									<input type="hidden" class="form-control" id="sample" name="sample" value="0" required>
 									<div class="dropdown">
@@ -254,9 +254,7 @@
 										</ul>
 									</div>
 								</div>
-							</div>
-							<div class="row">
-								<div class="col-md-4 form-group">
+                                <div class="col-md-4 form-group">
 									<label for="customer">Customer</label><br />
 									<input type="hidden" class="form-control" id="customer" name="customer">
 									<div class="dropdown">
@@ -269,6 +267,8 @@
 										</ul>
 									</div>
 								</div>
+							</div>
+							<div class="row">
 								<div class="col-md-4 form-group">
 									<label for="size">Thickness (µ)<span class="text-danger">*</span></label><br />
 									<input type="number" class="form-control" step="1" min="1" id="thickness" name="thickness" value="45" required>
@@ -276,6 +276,10 @@
 								<div class="col-md-4 form-group">
 									<label for="size">Size (mm)<span class="text-danger">*</span></label><br />
 									<input type="number" class="form-control" step="1" min="1" id="size" name="size" value="445" required>
+								</div>
+                                <div class="col-md-4 form-group">
+									<label for="size">Cone Weight (kg)<span class="text-danger">*</span></label><br />
+									<input type="number" class="form-control" step="0.001" min="0" id="cone" name="cone" value="0.625" required>
 								</div>
 							</div>
 							<div class="panel panel-info">
