@@ -1786,7 +1786,7 @@ ORDER BY packing_sacks_id";
             {
 				if(!is_null($row['stock_material_id']))
 				{
-					$KGSNEEDED = $totalnet;
+					$KGSNEEDED = $totalnet/2;
 					$BAGSNEEDED = $KGSNEEDED / $row['kgs_bag'];
 					$BAGSNEEDED = number_format($BAGSNEEDED ,4,'.','');
 					//LANZA ERROR SI LAS BOLSAS ACTUALES SON MENORES A LAS QUE SE NECESITAN
@@ -1809,7 +1809,42 @@ ORDER BY packing_sacks_id";
 				   }
             }
 		}
-				
+				$sql = "SELECT stock_material_id,
+					`stock_materials`.`bags`, kgs_bag, material_name, material_grade
+				FROM `stock_materials`
+				RIGHT JOIN `materials` ON  `materials`.material_id = `stock_materials`.material_id
+				WHERE `machine_id` = 7 AND materials.material_grade = 'M9255F';";
+		
+        if($stmt = $this->_db->prepare($sql))
+         {
+            $stmt->execute();
+            while($row = $stmt->fetch())
+            {
+				if(!is_null($row['stock_material_id']))
+				{
+					$KGSNEEDED = $totalnet/2;
+					$BAGSNEEDED = $KGSNEEDED / $row['kgs_bag'];
+					$BAGSNEEDED = number_format($BAGSNEEDED ,4,'.','');
+					//LANZA ERROR SI LAS BOLSAS ACTUALES SON MENORES A LAS QUE SE NECESITAN
+					if($row['bags']<$BAGSNEEDED)
+					{
+						echo '<strong>ERROR</strong> The rolls were not added to the production. Because there is not enought  material <strong>'. $row['material_name'] .' - '. $row['material_grade'] .'</strong> in stock. <br> There are <strong>'. $row['bags'] .'</strong> bags in stock, and you need <strong>'. $BAGSNEEDED .'</strong> bags. Please try again receiving the raw material or updating the formula.';
+						return false;
+					}
+					// VA CREANDO EL UPDATE PARA CAMBIAR DESPUES EL NUMERO DE BOLSAS DE STOCK_MATERIALS
+					else
+					{
+						$newbags = $row['bags']-$BAGSNEEDED;
+						$update = $update . "UPDATE  `stock_materials` SET `bags` = ".$newbags." WHERE `stock_material_id` = ". $row['stock_material_id']. "; ";
+					}
+				}
+					else
+				   {
+						echo '<strong>ERROR</strong> The roll was not added to the production. Because there is not enought  material <strong>'. $row['material_name'] .' - '. $row['material_grade'] .'</strong> in stock. <br>  Please try again receiving the raw material or updating the formula.';
+						return false;
+				   }
+            }
+		}
 			
 			$waste = "";
 			if(!empty($_POST['wt1_1']))
