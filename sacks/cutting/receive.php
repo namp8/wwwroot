@@ -68,7 +68,7 @@
                             <tr class="active">
                                 <th>Receive</th>
                                 <th>Date</th>
-                                <th>To</th>
+                                <th>From</th>
                                 <th>Material</th>
                                 <th>Bags Required</th>
                                 <th>Requested By</th>

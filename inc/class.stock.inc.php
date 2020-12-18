@@ -2662,7 +2662,7 @@ WHERE status_transfer = 2 AND machine_to = ". $machine .";";
                 LEFT JOIN users u_issued ON stock_materials_transfers.user_id_issued = u_issued.user_id
                 INNER JOIN machines from_table ON stock_materials_transfers.machine_from = from_table.machine_id
                 INNER JOIN machines to_table ON stock_materials_transfers.machine_to = to_table.machine_id
-                WHERE machine_from  = ". $from ." AND YEAR(date_required) = YEAR(CURRENT_DATE()) OR status_transfer = 1) 
+                WHERE machine_from  = ". $from ." AND YEAR(date_required) = YEAR(CURRENT_DATE()) OR status_transfer = 1 
 				ORDER BY `date_required` DESC, status_transfer;";
 		
         if($stmt = $this->_db->prepare($sql))

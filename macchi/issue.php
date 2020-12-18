@@ -122,6 +122,7 @@
 						<li><a onclick="selectLocation(1,'Warehouse')">Warehouse</a></li>
 						<li><a onclick="selectLocation(5,'Macchi')">Macchi</a></li>
 						<li><a onclick="selectLocation(12,'Finished goods')">Finished goods</a></li>
+						<li><a onclick="selectLocation(11,'Packing Bags')">Packing Bags</a></li>
 					</ul>
 				</div>
             </div>
