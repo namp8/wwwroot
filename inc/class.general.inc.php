@@ -620,7 +620,7 @@ VALUES (NULL,:name,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:sli
 	public function giveUsers()
 	{
 		$sql = "SELECT `users`.`user_id`,
-				`users`.`username`,
+				`users`.`username`, 
 				`users`.`admin`,
 				`users`.`warehouse_purchases`,
 				`users`.`warehouse_approve`,
@@ -996,10 +996,36 @@ VALUES (NULL,:name,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:sli
 			return FALSE;
 		}
         
+        
+            
+        if (!empty($_POST['password']))
+        {
+            $sql = "UPDATE `users`
+                    SET
+                    `password` = MD5(:password)
+                    WHERE `user_id` = :id;";
+            try
+            {   
+                $this->_db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+                $stmt = $this->_db->prepare($sql);
+                $stmt->bindParam(":id", $id, PDO::PARAM_INT);
+                $stmt->bindParam(":password", $password, PDO::PARAM_STR);
+                $stmt->execute();
+                $stmt->closeCursor();
+                echo '<strong>SUCCESS!</strong> The password for the user: '. $name .' was successfully updated the database.<br>';
+            } catch (PDOException $e) {
+                if ($e->getCode() == 23000) {
+                  echo '<strong>ERROR</strong> Could not update the user into the database. Please try again.<br>';
+                } else {
+                  echo '<strong>ERROR</strong> Could not update the user into the database. Please try again.<br>'. $e->getMessage();
+                }
+                return FALSE;
+            } 
+        }
+        
         $sql = "UPDATE `users`
 				SET
 				`username` = :name,
-				`password` = MD5(:password),
 				`admin` = :admin,
 				`warehouse_purchases` = :purchases,
 				`warehouse_approve` = :approve,
@@ -1022,7 +1048,6 @@ VALUES (NULL,:name,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:sli
             $stmt = $this->_db->prepare($sql);
             $stmt->bindParam(":id", $id, PDO::PARAM_INT);
             $stmt->bindParam(":name", $name, PDO::PARAM_STR);
-            $stmt->bindParam(":password", $password, PDO::PARAM_STR);
             $stmt->bindParam(":admin", $admin, PDO::PARAM_INT);
             $stmt->bindParam(":purchases", $purchases, PDO::PARAM_INT);
             $stmt->bindParam(":approve", $approve, PDO::PARAM_INT);
@@ -1040,16 +1065,18 @@ VALUES (NULL,:name,:sacks,:injection,:macchi,:multilayer,:printing,:packing,:sli
             $stmt->bindParam(":slitting", $slitting, PDO::PARAM_INT);
             $stmt->execute();
             $stmt->closeCursor();
-            echo '<strong>SUCCESS!</strong> The user was successfully updated the database.';
+            echo '<strong>SUCCESS!</strong> The user: '. $name .'  was successfully updated the database.';
             return TRUE;
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
-              echo '<strong>ERROR</strong> There is user in the system with the same username. Try updating it<br>';
+              echo '<strong>ERROR</strong> Could not update the user into the database. Please try again.<br>';
             } else {
               echo '<strong>ERROR</strong> Could not update the user into the database. Please try again.<br>'. $e->getMessage();
             }
             return FALSE;
         } 
+        
+        
 
     }
 	public function deleteUser()

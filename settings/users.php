@@ -220,6 +220,7 @@ if(!$users->access('settings'))
 			
             document.getElementById("id_user").value = null;
             document.getElementById("name").value = "";
+            document.getElementById("password").value = "";
            	document.getElementById("Admin").checked = false;
             document.getElementById("Sacks").checked = false;
             document.getElementById("Multilayer").checked = false;
@@ -239,7 +240,7 @@ if(!$users->access('settings'))
             document.getElementById("name").readOnly = false;
         }
 		
-        function edit(id,name,admin, settings, sacks, multilayer, printing, slitting, injection, macchi, packing, warehouse, purchases, approve, issue, stock, reports) {
+        function edit(id,name, admin, settings, sacks, multilayer, printing, slitting, injection, macchi, packing, warehouse, purchases, approve, issue, stock, reports) {
             document.getElementById("action").value = 2;
             document.getElementById("buttonForm").innerHTML = "Update";
             document.getElementById("buttonForm").setAttribute("class","btn btn-info");  
